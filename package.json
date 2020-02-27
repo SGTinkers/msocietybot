@@ -3,8 +3,14 @@
    "version": "0.0.1",
    "description": "Awesome project developed with TypeORM.",
    "devDependencies": {
-      "ts-node": "3.3.0",
       "@types/node": "^8.0.29",
+      "@typescript-eslint/eslint-plugin": "^2.21.0",
+      "@typescript-eslint/parser": "^2.21.0",
+      "eslint": "^6.8.0",
+      "eslint-config-prettier": "^6.10.0",
+      "eslint-plugin-prettier": "^3.1.2",
+      "prettier": "^1.19.1",
+      "ts-node": "3.3.0",
       "typescript": "3.3.3333"
    },
    "dependencies": {
@@ -13,6 +19,7 @@
       "pg": "^7.3.0"
    },
    "scripts": {
-      "start": "ts-node src/index.ts"
+      "start": "ts-node src/index.ts",
+      "lint": "eslint src --max-warnings 0 --ext js,ts,tsx"
    }
 }
