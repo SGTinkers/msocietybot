@@ -1,16 +1,19 @@
-import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToOne, PrimaryGeneratedColumn, Index } from 'typeorm';
 import { User } from './User';
 
-@Entity()
+@Entity('users_preferences')
+@Index(['user', 'key'], { unique: true })
 export class UserPreference {
+  @PrimaryGeneratedColumn({ type: 'integer' })
+  id: number;
+
   @ManyToOne(
     () => User,
     user => user.preferences,
   )
-  @PrimaryColumn()
   user: User;
 
-  @PrimaryColumn()
+  @Column()
   key: string;
 
   @Column()

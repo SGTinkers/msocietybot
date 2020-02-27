@@ -1,10 +1,10 @@
-import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToOne, PrimaryColumn, OneToOne } from 'typeorm';
+import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToOne, PrimaryColumn, OneToOne, OneToMany } from 'typeorm';
 import { User } from './User';
 import { Chat } from './Chat';
 
-@Entity()
+@Entity('messages')
 export class Message {
-  @PrimaryColumn()
+  @PrimaryColumn('bigint')
   id: number;
 
   @ManyToOne(
@@ -14,7 +14,20 @@ export class Message {
   )
   sender: User | null;
 
-  @Column()
+  @ManyToOne(
+    () => Message,
+    message => message.replies,
+    { nullable: true },
+  )
+  replyToMessage: Message | null;
+
+  @OneToMany(
+    () => Message,
+    message => message.replyToMessage,
+  )
+  replies: Message[];
+
+  @Column('bigint')
   unixtime: number;
 
   @ManyToOne(
@@ -37,13 +50,13 @@ export class Message {
   )
   originalChat: Chat | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'bigint', nullable: true })
   originalUnixtime: number | null;
 
   @Column({ nullable: true })
   lastEdit: Date | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   editHistory: string | null;
 
   @Column({ nullable: true })
@@ -146,7 +159,17 @@ export class Message {
   )
   migrateFromChat: Chat | null;
 
-  @OneToOne(() => Message, { nullable: true })
+  @OneToMany(
+    () => Message,
+    message => message.pinnedMessage,
+  )
+  pinnerMessage: Message[];
+
+  @ManyToOne(
+    () => Message,
+    message => message.pinnerMessage,
+    { nullable: true },
+  )
   pinnedMessage: Message | null;
 
   @Column()

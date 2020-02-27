@@ -2,13 +2,16 @@ import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, One
 import { Permission } from './Permission';
 import { User } from './User';
 
-@Entity()
+@Entity('roles')
 export class Role {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'integer' })
   id: number;
 
-  @Column({ nullable: true })
+  @Column()
   name: string | null;
+
+  @Column({ nullable: true })
+  displayName: string | null;
 
   @Column({ nullable: true })
   description: string | null;

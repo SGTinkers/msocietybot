@@ -1,13 +1,25 @@
-import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  BeforeInsert,
+  BeforeUpdate,
+  ManyToOne,
+  PrimaryColumn,
+  Index,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Chat } from './Chat';
 
-@Entity()
+@Entity('chats_preferences')
+@Index(['chat', 'key'], { unique: true })
 export class ChatPreference {
+  @PrimaryGeneratedColumn({ type: 'integer' })
+  id: number;
+
   @ManyToOne(
     () => Chat,
     chat => chat.preferences,
   )
-  @PrimaryColumn()
   chat: Chat;
 
   @PrimaryColumn()

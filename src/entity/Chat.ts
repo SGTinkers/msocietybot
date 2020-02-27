@@ -3,9 +3,9 @@ import { User } from './User';
 import { ChatPreference } from './ChatPreference';
 import { Message } from './Message';
 
-@Entity()
+@Entity('chats')
 export class Chat {
-  @PrimaryColumn()
+  @PrimaryColumn('bigint')
   id: number;
 
   @Column()

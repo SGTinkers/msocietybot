@@ -1,24 +1,24 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   BeforeInsert,
   BeforeUpdate,
   ManyToMany,
   JoinTable,
   OneToMany,
+  PrimaryColumn,
 } from 'typeorm';
 import { Role } from './Role';
 import { UserPreference } from './UserPreference';
 import { Chat } from './Chat';
 import { Message } from './Message';
 
-@Entity()
+@Entity('user')
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn('bigint')
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   username: string | null;
 
   @Column({ nullable: true })
@@ -31,7 +31,11 @@ export class User {
     () => Role,
     role => role.users,
   )
-  @JoinTable()
+  @JoinTable({
+    name: 'user_roles',
+    joinColumn: { name: 'user_id' },
+    inverseJoinColumn: { name: 'role_id' },
+  })
   roles: Role[];
 
   @OneToMany(

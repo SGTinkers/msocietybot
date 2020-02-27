@@ -15,23 +15,26 @@
       "typescript": "3.3.3333"
    },
    "dependencies": {
-      "typeorm": "0.2.22",
+      "pg": "^7.3.0",
       "reflect-metadata": "^0.1.10",
-      "pg": "^7.3.0"
+      "typeorm": "0.2.22",
+      "typeorm-naming-strategies": "^1.1.0"
    },
    "scripts": {
       "start": "ts-node src/index.ts",
-      "lint": "eslint src --max-warnings 0 --ext js,ts,tsx"
+      "lint": "eslint src --max-warnings 0 --ext js,ts,tsx",
+      "create-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
+      "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run"
    },
    "husky": {
       "hooks": {
-          "pre-commit": "tsc --noEmit && lint-staged"
+         "pre-commit": "tsc --noEmit && lint-staged"
       }
-  },
-  "lint-staged": {
+   },
+   "lint-staged": {
       "*.{js,ts,tsx}": [
-          "eslint --fix",
-          "git add"
+         "eslint --fix",
+         "git add"
       ]
-  }
+   }
 }
