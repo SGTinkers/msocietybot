@@ -24,18 +24,19 @@
    },
    "scripts": {
       "start": "ts-node src/index.ts",
+      "tsc": "tsc --noEmit",
       "lint": "eslint src --max-warnings 0 --ext js,ts,tsx",
       "create-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
       "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run"
    },
    "husky": {
       "hooks": {
-         "pre-commit": "tsc --noEmit && lint-staged"
+         "pre-commit": "lint-staged"
       }
    },
    "lint-staged": {
       "*.{js,ts,tsx}": [
-         "eslint --fix",
+         "eslint --max-warnings 0 --fix",
          "git add"
       ]
    }
