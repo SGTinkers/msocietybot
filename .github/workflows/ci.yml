@@ -15,7 +15,7 @@ jobs:
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: "'${{ github.event_name }}' event triggered for ${{ commit.sha }}."
+        message: "'${{ github.event_name }}' event triggered for ${{ github.sha }}."
     - uses: actions/checkout@v2
     - name: Run a multi-line script
       run: |
@@ -34,4 +34,4 @@ jobs:
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: CI completed for ${{ commit.sha }}.
+        message: CI completed for ${{ github.sha }}.
