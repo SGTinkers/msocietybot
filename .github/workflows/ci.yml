@@ -1,0 +1,37 @@
+name: CI
+env:
+  CI: true
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Notify Push
+      uses: appleboy/telegram-action@0.0.7
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: ${{ github.event_name }} event triggered for ${{ github.commit.sha }}.
+    - uses: actions/checkout@v2
+    - name: Run a multi-line script
+      run: |
+        echo Add other actions to build,
+        echo test, and deploy your project.
+    - name: Setup Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Install Dependencies
+      run: npm install
+    - name: Lint
+      run: npm run lint
+    - name: Notify Completed
+      uses: appleboy/telegram-action@0.0.7
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: ${{ github.event_name }} event completed for ${{ github.commit.sha }}.
