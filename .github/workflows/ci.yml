@@ -16,7 +16,7 @@ jobs:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
         format: markdown 
-        message: "CI event triggered for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by **${{github.actor}}**."
+        message: CI event triggered for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
     - uses: actions/checkout@v2
     - name: Run a multi-line script
       run: |
@@ -36,4 +36,4 @@ jobs:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
         format: markdown  
-        message: CI completed for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by **${{github.actor}}**.
+        message: CI completed for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
