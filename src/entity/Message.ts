@@ -1,4 +1,4 @@
-import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToOne, PrimaryColumn, OneToOne, OneToMany } from 'typeorm';
+import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToOne, PrimaryColumn, OneToMany } from 'typeorm';
 import { User } from './User';
 import { Chat } from './Chat';
 
