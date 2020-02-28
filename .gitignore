@@ -5,3 +5,4 @@ build/
 tmp/
 temp/
 ormconfig.js
+.env

@@ -1,20 +1,14 @@
+import { config as dotenv } from 'dotenv';
+dotenv();
 import 'reflect-metadata';
 import { createConnection } from 'typeorm';
-import { User } from './entity/User';
+import Telegraf from 'telegraf';
 
-createConnection()
-  .then(async connection => {
-    console.log('Inserting a new user into the database...');
-    const user = new User();
-    user.firstName = 'Timber';
-    user.lastName = 'Saw';
-    await connection.manager.save(user);
-    console.log('Saved a new user with id: ' + user.id);
+async function main() {
+  const connection = await createConnection();
 
-    console.log('Loading users from the database...');
-    const users = await connection.manager.find(User);
-    console.log('Loaded users: ', users);
+  const bot = new Telegraf(process.env.BOT_TOKEN);
+  bot.launch();
+}
 
-    console.log('Here you can setup and run express/koa/any other framework.');
-  })
-  .catch(error => console.log(error));
+main().catch(error => console.error(error));
