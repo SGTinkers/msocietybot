@@ -1,13 +1,4 @@
-import {
-  Entity,
-  Column,
-  BeforeInsert,
-  BeforeUpdate,
-  ManyToOne,
-  PrimaryColumn,
-  Index,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToOne, Index, PrimaryGeneratedColumn } from 'typeorm';
 import { Chat } from './Chat';
 
 @Entity('chats_preferences')
@@ -22,7 +13,7 @@ export class ChatPreference {
   )
   chat: Chat;
 
-  @PrimaryColumn()
+  @Column()
   key: string;
 
   @Column()
