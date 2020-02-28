@@ -4,8 +4,8 @@ import 'reflect-metadata';
 import { createConnection } from 'typeorm';
 import Telegraf from 'telegraf';
 
-async function main() {
-  const connection = await createConnection();
+async function main(): Promise<void> {
+  await createConnection();
 
   const bot = new Telegraf(process.env.BOT_TOKEN);
   bot.launch();
