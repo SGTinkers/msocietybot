@@ -9,8 +9,11 @@ Steps to run this project:
 With Docker:
 
 ```
-docker-compose run db
+# First time only:
+docker-compose run database # Shut down after database has been set up
 docker-compose run app npm run migrate
+
+# Every other time:
 docker-compose up
 ```
 
