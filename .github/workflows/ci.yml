@@ -10,19 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Notify Markdown Test
-      uses: appleboy/telegram-action@0.0.7
-      with:
-        to: ${{ secrets.TELEGRAM_TO }}
-        token: ${{ secrets.TELEGRAM_TOKEN }}
-        format: markdown 
-        message: "'This is the SHA: [${{ github.sha }}](https://github.com/${{github.repo}}/commit/${{github.sha}})'"
     - name: Notify Push
       uses: appleboy/telegram-action@0.0.7
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: "'${{ github.event_name }}' event triggered for ${{ github.sha }}."
+        message: "'[${{ github.sha }}](https://github.com${{github.repo}}/commit/${{github.sha}})' event triggered for ${{ github.sha }}."
     - uses: actions/checkout@v2
     - name: Run a multi-line script
       run: |
@@ -41,4 +34,4 @@ jobs:
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: CI completed for ${{ github.sha }}.
+        message: CI completed for [${{ github.sha }}](https://github.com${{github.repo}}/commit/${{github.sha}}).
