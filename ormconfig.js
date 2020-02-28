@@ -3,7 +3,7 @@
 const { SnakeNamingStrategy } = require('typeorm-naming-strategies');
 
 module.exports = {
-  type: process.env.DB_TYPE,
+  type: 'postgres',
   host: process.env.POSTGRES_HOST,
   port: process.env.POSTGRES_PORT,
   username: process.env.POSTGRES_USERNAME,
