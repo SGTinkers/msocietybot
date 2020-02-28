@@ -16,7 +16,7 @@ jobs:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
         format: markdown 
-        message: "'[${{ github.sha }}](https://github.com${{github.repo}}/commit/${{github.sha}})' event triggered for ${{ github.sha }}."
+        message: "CI event triggered for [${{ github.sha }}](https://github.com${{github.repo}}/commit/${{github.sha}})."
     - uses: actions/checkout@v2
     - name: Run a multi-line script
       run: |
