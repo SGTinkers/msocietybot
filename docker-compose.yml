@@ -1,0 +1,28 @@
+version: "3"
+services:
+  app:
+    container_name: 'msocietybot'
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    networks: 
+      - main_net
+    depends_on: 
+      - database
+  database:
+    image: "postgres:11-alpine"
+    container_name: "postgres"
+    ports:
+      - 5432:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks: 
+      - main_net
+    env_file: .env
+    environment:
+      PGDATA: /var/lib/postgresql/data
+
+networks:
+  main_net:
+volumes:
+  pg_data:
