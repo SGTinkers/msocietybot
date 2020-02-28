@@ -15,7 +15,7 @@ jobs:
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        format: markdown 
+        format: markdown
         message: CI event triggered for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
     - uses: actions/checkout@v2
     - name: Run a multi-line script
@@ -30,10 +30,12 @@ jobs:
       run: npm install
     - name: Lint
       run: npm run lint
+    - name: Test
+      run: npm run test
     - name: Notify Completed
       uses: appleboy/telegram-action@0.0.7
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        format: markdown  
+        format: markdown
         message: CI completed with status ${{job.status}} for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
