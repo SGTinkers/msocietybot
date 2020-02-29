@@ -39,6 +39,8 @@ module.exports = {
         'semi': [
             'error',
             'always'
-        ]
+        ],
+        '@typescript-eslint/explicit-function-return-type': 'off',
+        '@typescript-eslint/camelcase': 'off'
     }
 };
