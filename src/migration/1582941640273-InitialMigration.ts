@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InitialMigration1582812183651 implements MigrationInterface {
-  name = 'InitialMigration1582812183651';
+export class InitialMigration1582941640273 implements MigrationInterface {
+  name = 'InitialMigration1582941640273';
 
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(
@@ -30,7 +30,7 @@ export class InitialMigration1582812183651 implements MigrationInterface {
       undefined,
     );
     await queryRunner.query(
-      'CREATE TABLE "chats_preferences" ("id" SERIAL NOT NULL, "key" character varying NOT NULL, "value" character varying NOT NULL, "created_at" TIMESTAMP NOT NULL, "updated_at" TIMESTAMP NOT NULL, "deleted_at" TIMESTAMP, "chat_id" bigint, CONSTRAINT "PK_c76a4c19bb5eca7e0002b970fec" PRIMARY KEY ("id", "key"))',
+      'CREATE TABLE "chats_preferences" ("id" SERIAL NOT NULL, "key" character varying NOT NULL, "value" character varying NOT NULL, "created_at" TIMESTAMP NOT NULL, "updated_at" TIMESTAMP NOT NULL, "deleted_at" TIMESTAMP, "chat_id" bigint, CONSTRAINT "PK_db89e2a3938e6c1dfbfa5bf0664" PRIMARY KEY ("id"))',
       undefined,
     );
     await queryRunner.query(
