@@ -21,4 +21,25 @@ describe('app', () => {
     expect(sendMessage.isDone()).toBe(true);
     expect(sentMessages[0].text).toBe('world');
   });
+
+  it('bot should reply with holla when hi is received', async () => {
+    const { sendMessage, sentMessages } = initializeBotMock({
+      messageForBot: {
+        update_id: 1,
+        message: {
+          message_id: 1,
+          from: 1,
+          chat: 1,
+          date: new Date().toISOString(),
+          text: 'hi',
+          entities: [],
+        },
+      },
+    });
+
+    await act();
+
+    expect(sendMessage.isDone()).toBe(true);
+    expect(sentMessages[0].text).toBe('holla');
+  });
 });

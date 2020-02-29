@@ -53,3 +53,7 @@ export function initializeBotMock({ messageForBot }) {
     deleteWebhook,
   };
 }
+
+export function cleanUp() {
+  nock.cleanAll();
+}
