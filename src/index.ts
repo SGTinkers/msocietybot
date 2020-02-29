@@ -1,6 +1,8 @@
 import { config as dotenv } from 'dotenv';
 dotenv();
 import 'reflect-metadata';
-import { app } from './app';
+import { createApp } from './app';
 
-app().catch(error => console.error(error));
+createApp()
+  .then(app => app.launch())
+  .catch(error => console.error(error));
