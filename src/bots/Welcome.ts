@@ -1,9 +1,24 @@
 import Composer from 'telegraf/composer';
-const PhotoURL = 'https://picsum.photos/200/300/?random';
+import { getRepository } from 'typeorm';
+import { User } from '../entity/User';
 
 const bot = new Composer();
-bot.start(ctx => ctx.reply('Hello there!'));
-bot.help(ctx => ctx.reply('Help message'));
-bot.command('photo', ctx => ctx.replyWithPhoto({ url: PhotoURL }));
+bot.on('new_chat_members', ctx => {
+  const userRepo = getRepository(User);
+
+  ctx.message.new_chat_members.forEach(async member => {
+    const user = userRepo.findOne(member.id);
+    if (user !== undefined && !member.is_bot) {
+      const newUser = userRepo.create({
+        id: member.id,
+        firstName: member.first_name,
+        lastName: member.last_name,
+        username: member.username,
+      });
+      await userRepo.save(newUser);
+      ctx.reply(`Welcome ${member.first_name}!`); // TODO: Set/get welcome message from db?
+    }
+  });
+});
 
 export default bot;
