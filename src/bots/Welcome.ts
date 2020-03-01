@@ -7,8 +7,8 @@ bot.on('new_chat_members', ctx => {
   const userRepo = getRepository(User);
 
   ctx.message.new_chat_members.forEach(async member => {
-    const user = userRepo.findOne(member.id);
-    if (user !== undefined && !member.is_bot) {
+    const user = await userRepo.findOne(member.id);
+    if (user === undefined && !member.is_bot) {
       const newUser = userRepo.create({
         id: member.id,
         firstName: member.first_name,
@@ -17,6 +17,8 @@ bot.on('new_chat_members', ctx => {
       });
       await userRepo.save(newUser);
       ctx.reply(`Welcome ${member.first_name}!`); // TODO: Set/get welcome message from db?
+    } else {
+      ctx.reply(`Welcome back ${member.first_name}!`);
     }
   });
 });
