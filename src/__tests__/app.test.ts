@@ -29,6 +29,17 @@ describe('app', () => {
     expect(messages[3].text).toBe('holla');
   });
 
+  it('bot should reply with world (regex matched) and holla when hello and hi is received', async () => {
+    const messages = await runBot(({ whenBotSends, sendMessage }) => {
+      sendMessage('hello');
+      whenBotSends(/^worl/).thenSendBot('hi');
+    });
+
+    expect(messages.length).toEqual(4);
+    expect(messages[1].text).toBe('world');
+    expect(messages[3].text).toBe('holla');
+  });
+
   it('send message without waiting for bot', async () => {
     const messages = await runBot(({ sendMessage }) => {
       sendMessage('greetings');

@@ -3,6 +3,7 @@
 import nock, { ReplyFnResult } from 'nock';
 import { Update, Message, User, Chat } from 'telegram-typings';
 import { NockResponse } from '../types/testOnly';
+import { isRegExp } from 'util';
 
 type Predicate = (uri: string, requestBody: Record<string, any>) => boolean;
 interface ResponseGenerator {
@@ -41,7 +42,7 @@ export function initTelegramMock() {
   const whensCalled: ResponseGenerator[] = [];
   const whenBuilders: WhenBuilder[] = [];
 
-  const whenBotSends = (message: Message | string) => {
+  const whenBotSends = message => {
     const whenBuilder = new WhenBuilder(message);
     whenBuilders.push(whenBuilder);
     return whenBuilder;
@@ -152,7 +153,7 @@ export function cleanUpTelegramMock() {
 }
 
 class WhenBuilder {
-  private predicateMessage: Message;
+  private predicateMessage: Message | RegExp;
 
   private thenReply?: Message;
 
@@ -160,7 +161,7 @@ class WhenBuilder {
 
   private persistReplies = false;
 
-  constructor(message: Message | string) {
+  constructor(message: Message | string | RegExp) {
     if (typeof message === 'string') {
       this.predicateMessage = createUserMessage(message);
     } else {
@@ -190,6 +191,10 @@ class WhenBuilder {
   };
 
   match: Predicate = (uri, requestBody) => {
+    if (isRegExp(this.predicateMessage)) {
+      return this.predicateMessage.test(requestBody.text);
+    }
+
     return requestBody.text === this.predicateMessage.text;
   };
 
