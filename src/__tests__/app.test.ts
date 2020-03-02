@@ -2,7 +2,6 @@ describe('app', () => {
   it('bot should reply with world when hello is received', async () => {
     const messages = await sendBotMessage('hello');
 
-    console.log(messages);
     expect(messages.length).toEqual(2);
     expect(messages[1].text).toBe('world');
   });
