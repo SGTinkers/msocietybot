@@ -1,5 +1,6 @@
 import { createConnection, getConnectionOptions, ConnectionOptions } from 'typeorm';
 import Telegraf from 'telegraf';
+import Bots from './bots';
 
 export async function createApp(typeOrmConnectionOptions?: ConnectionOptions) {
   let connectionOptions = await getConnectionOptions();
@@ -12,6 +13,9 @@ export async function createApp(typeOrmConnectionOptions?: ConnectionOptions) {
 
   bot.hears('hello', ctx => ctx.reply('world'));
   bot.hears('hi', ctx => ctx.reply('holla'));
+
+  bot.use(Bots.WelcomeExample);
+  bot.use(Bots.SceneExample);
 
   return bot;
 }
