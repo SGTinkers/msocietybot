@@ -17,7 +17,8 @@ export async function createApp(typeOrmConnectionOptions?: ConnectionOptions) {
   bot.hears('hello', ctx => ctx.reply('world'));
   bot.hears('hi', ctx => ctx.reply('holla'));
 
-  bot.use(Bots.Welcome);
-  bot.use(Bots.NewMember);
+  bot.use(Bots.WelcomeExample);
+  bot.use(Bots.SceneExample);
+
   return bot;
 }

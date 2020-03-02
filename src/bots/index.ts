@@ -1,5 +1,7 @@
-import Welcome from './Welcome';
+import WelcomeExample from './WelcomeExample';
+import SceneExample from './SceneExample';
 
 export default {
-  Welcome,
+  WelcomeExample,
+  SceneExample,
 };
