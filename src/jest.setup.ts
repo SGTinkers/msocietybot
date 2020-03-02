@@ -46,6 +46,7 @@ beforeEach(async () => {
 
   global['app'] = app;
   global['runBot'] = runBot;
+  global['dbConnectionName'] = name;
 });
 
 afterEach(async () => {

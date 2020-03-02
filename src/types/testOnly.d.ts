@@ -22,4 +22,5 @@ export type RunBot = (
 
 declare global {
   const runBot: RunBot;
+  const dbConnectionName: string;
 }
