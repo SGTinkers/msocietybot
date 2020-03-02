@@ -3,7 +3,13 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   setupFilesAfterEnv: ['./src/jest.setup.ts'],
-  coveragePathIgnorePatterns: ['/node_modules/', '/src/testUtils/', 'src/migration/'],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/src/testUtils/',
+    '/src/migration/',
+    '/src/bots/SceneExample.ts',
+    '/src/bots/WelcomeExample.ts',
+  ],
   coverageThreshold: {
     global: {
       branches: 60,
