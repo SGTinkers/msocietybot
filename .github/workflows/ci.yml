@@ -30,8 +30,8 @@ jobs:
       run: npm install
     - name: Lint
       run: npm run lint
-    - name: Test
-      run: npm run test
+    - name: Test & Coverage
+      run: npm run test -- --collect-coverage
     - name: Notify Completed
       uses: appleboy/telegram-action@0.0.7
       with:

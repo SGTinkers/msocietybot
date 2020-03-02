@@ -8,10 +8,7 @@ export async function createApp(typeOrmConnectionOptions?: ConnectionOptions) {
   }
   await createConnection(connectionOptions);
 
-  const bot = new Telegraf(
-    process.env.BOT_TOKEN,
-    process.env.BOT_API_ROOT ? { telegram: { apiRoot: process.env.BOT_API_ROOT } } : undefined,
-  );
+  const bot = new Telegraf(process.env.BOT_TOKEN);
 
   bot.hears('hello', ctx => ctx.reply('world'));
   bot.hears('hi', ctx => ctx.reply('holla'));
