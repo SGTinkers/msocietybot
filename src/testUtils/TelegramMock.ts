@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import nock, { ReplyFnResult } from 'nock';
 import { Update, Message, User, Chat } from 'telegram-typings';
 import { NockResponse } from '../types/testOnly';

@@ -41,6 +41,7 @@ module.exports = {
             'always'
         ],
         '@typescript-eslint/explicit-function-return-type': 'off',
-        '@typescript-eslint/camelcase': 'off'
+        '@typescript-eslint/camelcase': 'off',
+        '@typescript-eslint/no-use-before-define': 'off'
     }
 };

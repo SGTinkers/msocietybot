@@ -9,7 +9,7 @@ import { RunBot } from './types/testOnly';
 
 const TESTDB_BASE_DIR = './.testdb';
 
-beforeEach(async () => {
+beforeEach(() => {
   process.env.BOT_TOKEN = undefined;
 
   const name = uuid();
@@ -20,20 +20,21 @@ beforeEach(async () => {
     // eslint-disable-next-line no-empty
   } catch (e) {}
 
-  const app = await createApp({
-    synchronize: true,
-    type: 'sqlite',
-    name: name,
-    database: database,
-  });
-  const runBot: RunBot = async (setupMock, options) => {
+  const runBot: RunBot = async (bots, setupMock, options) => {
     const { messages, sendMessage, buildMocks, unconsumedMocks, whenBotSends } = initTelegramMock();
     if (setupMock) {
       await setupMock({ whenBotSends, sendMessage });
     }
     buildMocks();
+
+    const app = await createApp(bots, {
+      synchronize: true,
+      type: 'sqlite',
+      name: name,
+      database: database,
+    });
     await app.launch();
-    global['app_started'] = true;
+    global['app'] = app;
     await new Promise(r => setTimeout(r, options?.timeout ?? 100));
 
     const unconsumed = unconsumedMocks();
@@ -44,13 +45,12 @@ beforeEach(async () => {
     return messages;
   };
 
-  global['app'] = app;
   global['runBot'] = runBot;
   global['dbConnectionName'] = name;
 });
 
 afterEach(async () => {
-  if (global['app_started'] === true) {
+  if (global['app']) {
     await global['app'].stop();
   } else {
     // used when the test gets stuck, comment it out (if test behaves weird) to debug
