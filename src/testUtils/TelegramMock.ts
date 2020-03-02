@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import nock, { ReplyFnResult } from 'nock';
 import { Update, Message, User, Chat } from 'telegram-typings';
+import { NockResponse } from '../types/testOnly';
 
-type NockResponse = (uri: string, requestBody: Record<string, any>) => ReplyFnResult;
 type Predicate = (uri: string, requestBody: Record<string, any>) => boolean;
 interface ResponseGenerator {
   predicate: Predicate;
@@ -168,7 +168,7 @@ class WhenBuilder {
     }
   }
 
-  public thenSendBot(message: Message | NockResponse | string) {
+  public thenSendBot = (message: Message | NockResponse | string) => {
     if (typeof message === 'string') {
       this.thenReply = createUserMessage(message);
     } else if (typeof message === 'function') {
@@ -176,14 +176,18 @@ class WhenBuilder {
     } else {
       this.thenReply = message;
     }
-  }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public thenDoNothing() {}
+    return this;
+  };
 
-  public persist() {
+  public thenDoNothing = () => {
+    return this;
+  };
+
+  public persist = () => {
     this.persistReplies = true;
-  }
+    return this;
+  };
 
   match: Predicate = (uri, requestBody) => {
     return requestBody.text === this.predicateMessage.text;

@@ -24,4 +24,15 @@ describe('app', () => {
     expect(messages[1].text).toBe('world');
     expect(messages[3].text).toBe('holla');
   });
+
+  it('send message without waiting for bot', async () => {
+    const messages = await sendBotMessage('greetings', ({ sendMessage }) => {
+      sendMessage('hi');
+    });
+
+    expect(messages.length).toEqual(3);
+    expect(messages[0].text).toBe('greetings');
+    expect(messages[1].text).toBe('hi');
+    expect(messages[2].text).toBe('holla');
+  });
 });

@@ -27,12 +27,12 @@ beforeEach(async () => {
     database: database,
   });
   const sendBotMessage: SendBotMessage = async (message, setupMock, options) => {
-    const { messages, sendMessage, buildMocks, unconsumedMocks, ...others } = initTelegramMock();
+    const { messages, sendMessage, buildMocks, unconsumedMocks, whenBotSends } = initTelegramMock();
+    sendMessage(message);
     if (setupMock) {
-      await setupMock({ ...others });
+      await setupMock({ whenBotSends, sendMessage });
     }
     buildMocks();
-    sendMessage(message);
     await app.launch();
     global['app_started'] = true;
     await new Promise(r => setTimeout(r, options?.timeout ?? 100));
