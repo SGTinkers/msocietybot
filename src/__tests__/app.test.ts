@@ -14,4 +14,14 @@ describe('app', () => {
     expect(messages.length).toEqual(2);
     expect(messages[1].text).toBe('holla');
   });
+
+  it('bot should reply with world and holla when hello and hi is received', async () => {
+    const messages = await sendBotMessage('hello', ({ whenBotSends }) => {
+      whenBotSends('world').thenSendBot('hi');
+    });
+
+    expect(messages.length).toEqual(4);
+    expect(messages[1].text).toBe('world');
+    expect(messages[3].text).toBe('holla');
+  });
 });
