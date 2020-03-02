@@ -1,45 +1,18 @@
-import { initializeBotMock } from '../testUtils/BotMock';
-
 describe('app', () => {
   it('bot should reply with world when hello is received', async () => {
-    const { sendMessage, sentMessages } = initializeBotMock({
-      messageForBot: {
-        update_id: 1,
-        message: {
-          message_id: 1,
-          from: 1,
-          chat: 1,
-          date: new Date().toISOString(),
-          text: 'hello',
-          entities: [],
-        },
-      },
-    });
+    const messages = await sendBotMessage('hello');
 
-    await act();
-
-    expect(sendMessage.isDone()).toBe(true);
-    expect(sentMessages[0].text).toBe('world');
+    console.log(messages);
+    expect(messages.length).toEqual(2);
+    expect(messages[1].text).toBe('world');
   });
 
   it('bot should reply with holla when hi is received', async () => {
-    const { sendMessage, sentMessages } = initializeBotMock({
-      messageForBot: {
-        update_id: 1,
-        message: {
-          message_id: 1,
-          from: 1,
-          chat: 1,
-          date: new Date().toISOString(),
-          text: 'hi',
-          entities: [],
-        },
-      },
+    const messages = await sendBotMessage('hi', ({ whenBotSends }) => {
+      whenBotSends('holla').thenDoNothing();
     });
 
-    await act();
-
-    expect(sendMessage.isDone()).toBe(true);
-    expect(sentMessages[0].text).toBe('holla');
+    expect(messages.length).toEqual(2);
+    expect(messages[1].text).toBe('holla');
   });
 });

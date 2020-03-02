@@ -4,13 +4,13 @@ import 'reflect-metadata';
 import { unlinkSync, rmdirSync } from 'fs';
 import { uuid } from 'uuidv4';
 import { createApp } from './app';
-import { cleanUp } from './testUtils/BotMock';
+import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock';
+import { SendBotMessage } from './types/testOnly';
 
 const TESTDB_BASE_DIR = './.testdb';
 
 beforeEach(async () => {
   process.env.BOT_TOKEN = undefined;
-  process.env.BOT_API_ROOT = 'http://localhost';
 
   const name = uuid();
   const database = `${TESTDB_BASE_DIR}/${name}.db`;
@@ -26,24 +26,37 @@ beforeEach(async () => {
     name: name,
     database: database,
   });
-  const wait = async (ms = 300) => await new Promise(r => setTimeout(r, ms));
-
-  global['app'] = app;
-  global['act'] = async (ms?: number) => {
+  const sendBotMessage: SendBotMessage = async (message, setupMock, options) => {
+    const { messages, sendMessage, buildMocks, unconsumedMocks, ...others } = initTelegramMock();
+    if (setupMock) {
+      await setupMock({ ...others });
+    }
+    buildMocks();
+    sendMessage(message);
     await app.launch();
     global['app_started'] = true;
-    await wait(ms);
+    await new Promise(r => setTimeout(r, options?.timeout ?? 100));
+
+    const unconsumed = unconsumedMocks();
+    if (unconsumed.length > 0) {
+      throw new Error(`Found ${unconsumed.length} 'whens' not triggered. Please check your test act again.`);
+    }
+
+    return messages;
   };
+
+  global['app'] = app;
+  global['sendBotMessage'] = sendBotMessage;
 });
 
 afterEach(async () => {
   if (global['app_started'] === true) {
     await global['app'].stop();
   } else {
-    // used when the test gets stuck
+    // used when the test gets stuck, comment it out (if test behaves weird) to debug
     process.exit(1);
   }
-  cleanUp();
+  cleanUpTelegramMock();
 });
 
 afterAll(() => {
