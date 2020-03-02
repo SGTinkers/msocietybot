@@ -5,7 +5,7 @@ import { unlinkSync, rmdirSync } from 'fs';
 import { uuid } from 'uuidv4';
 import { createApp } from './app';
 import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock';
-import { SendBotMessage } from './types/testOnly';
+import { RunBot } from './types/testOnly';
 
 const TESTDB_BASE_DIR = './.testdb';
 
@@ -26,9 +26,8 @@ beforeEach(async () => {
     name: name,
     database: database,
   });
-  const sendBotMessage: SendBotMessage = async (message, setupMock, options) => {
+  const runBot: RunBot = async (setupMock, options) => {
     const { messages, sendMessage, buildMocks, unconsumedMocks, whenBotSends } = initTelegramMock();
-    sendMessage(message);
     if (setupMock) {
       await setupMock({ whenBotSends, sendMessage });
     }
@@ -46,7 +45,7 @@ beforeEach(async () => {
   };
 
   global['app'] = app;
-  global['sendBotMessage'] = sendBotMessage;
+  global['runBot'] = runBot;
 });
 
 afterEach(async () => {

@@ -1,4 +1,3 @@
-/* eslint-disable no-var */
 import { Message } from 'telegram-typings';
 import { ReplyFnResult } from 'nock';
 
@@ -16,12 +15,11 @@ interface ActArgs {
   sendMessage: (message: Message | string) => void;
 }
 
-export type SendBotMessage = (
-  message: Message | string,
+export type RunBot = (
   act?: (args: ActArgs) => void | Promise<void>,
   options?: { timeout?: number },
 ) => Promise<Message[]>;
 
 declare global {
-  const sendBotMessage: SendBotMessage;
+  const runBot: RunBot;
 }

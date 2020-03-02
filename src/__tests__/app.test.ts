@@ -1,13 +1,16 @@
 describe('app', () => {
   it('bot should reply with world when hello is received', async () => {
-    const messages = await sendBotMessage('hello');
+    const messages = await runBot(({ sendMessage }) => {
+      sendMessage('hello');
+    });
 
     expect(messages.length).toEqual(2);
     expect(messages[1].text).toBe('world');
   });
 
   it('bot should reply with holla when hi is received', async () => {
-    const messages = await sendBotMessage('hi', ({ whenBotSends }) => {
+    const messages = await runBot(({ whenBotSends, sendMessage }) => {
+      sendMessage('hi');
       whenBotSends('holla').thenDoNothing();
     });
 
@@ -16,7 +19,8 @@ describe('app', () => {
   });
 
   it('bot should reply with world and holla when hello and hi is received', async () => {
-    const messages = await sendBotMessage('hello', ({ whenBotSends }) => {
+    const messages = await runBot(({ whenBotSends, sendMessage }) => {
+      sendMessage('hello');
       whenBotSends('world').thenSendBot('hi');
     });
 
@@ -26,7 +30,8 @@ describe('app', () => {
   });
 
   it('send message without waiting for bot', async () => {
-    const messages = await sendBotMessage('greetings', ({ sendMessage }) => {
+    const messages = await runBot(({ sendMessage }) => {
+      sendMessage('greetings');
       sendMessage('hi');
     });
 
