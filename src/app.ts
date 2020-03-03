@@ -1,4 +1,4 @@
-import { createConnection, getConnectionOptions, ConnectionOptions } from 'typeorm';
+import { createConnection, getConnectionOptions, ConnectionOptions, getManager } from 'typeorm';
 import Telegraf, { ContextMessageUpdate, Middleware } from 'telegraf';
 
 async function setupConnection(typeOrmConnectionOptions?: ConnectionOptions) {
@@ -17,6 +17,8 @@ export async function createApp(
   await setupConnection(typeOrmConnectionOptions);
 
   const bot = new Telegraf(process.env.BOT_TOKEN);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (bot.context as Record<string, any>).entityManager = getManager(dbConnectionName);
   middlewares.forEach(middleware => bot.use(middleware));
 
   return bot;
