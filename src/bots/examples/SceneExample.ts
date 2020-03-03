@@ -6,7 +6,7 @@ import session from 'telegraf/session';
 const { leave } = Stage;
 
 // Create scene
-const scene = new Scene('welcome_setup');
+const scene = new Scene('scene_example');
 scene.enter(ctx => ctx.reply('Hi'));
 scene.leave(ctx => ctx.reply('Bye'));
 scene.hears(/hi/gi, leave());
@@ -22,6 +22,6 @@ stage.register(scene);
 const bot = new Composer();
 bot.use(session());
 bot.use(stage.middleware());
-bot.command('welcome_setup', ctx => ctx.scene.enter('welcome_setup'));
+bot.command('try_scene', ctx => ctx.scene.enter('scene_example'));
 
 export { bot as SceneExampleBot };

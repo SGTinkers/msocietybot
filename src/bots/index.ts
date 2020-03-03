@@ -2,8 +2,11 @@ import { WelcomeExampleBot } from './examples/WelcomeExample';
 import { SceneExampleBot } from './examples/SceneExample';
 import { ScriberBot } from './Scriber';
 
-export default {
+export const Bots = {
+  ScriberBot,
+};
+
+export const ExampleBots = {
   WelcomeExampleBot,
   SceneExampleBot,
-  ScriberBot,
 };
