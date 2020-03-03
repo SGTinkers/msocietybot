@@ -115,6 +115,44 @@ describe('Scriber', () => {
     expect(chats[0].createdAt).toEqual(existingChat.createdAt);
     expect(chats[0].updatedAt).toEqual(existingChat.updatedAt);
   });
+
+  it('insert chat and user into db if does not exists', async () => {
+    const telegramChat = createTelegramChat(createTelegramUser());
+    await runBot([ScriberBot], ({ sendMessage }) => {
+      const message: TelegramMessage = {
+        message_id: -1,
+        chat: telegramChat,
+        date: new Date().getTime(),
+      };
+      sendMessage(message);
+    });
+
+    const chats = await entityManager.find(Chat);
+
+    expect(chats.length).toEqual(1);
+    expect(chats[0]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramChat.id,
+        type: telegramChat.type,
+      }),
+    );
+    expect(chats[0].createdAt).not.toBeNull();
+    expect(chats[0].updatedAt).not.toBeNull();
+
+    const users = await entityManager.find(User);
+
+    expect(users.length).toEqual(1);
+    expect(users[0]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramChat.id,
+        firstName: telegramChat.first_name,
+        lastName: telegramChat.last_name,
+        username: telegramChat.username,
+      }),
+    );
+    expect(users[0].createdAt).not.toBeNull();
+    expect(users[0].updatedAt).not.toBeNull();
+  });
 });
 
 async function createUserInDb() {
@@ -153,9 +191,20 @@ function createTelegramUser(): TelegramUser {
   };
 }
 
-function createTelegramChat(): TelegramChat {
+function createTelegramChat(typeOrUser?: string | TelegramUser): TelegramChat {
+  const fields: Record<string, string | number> = {};
+  if (typeof typeOrUser === 'string') {
+    fields['type'] = typeOrUser;
+  } else if (typeOrUser) {
+    fields['id'] = typeOrUser.id;
+    fields['first_name'] = typeOrUser.first_name;
+    fields['last_name'] = typeOrUser.last_name;
+    fields['username'] = typeOrUser.username;
+    fields['type'] = 'private';
+  }
   return {
     id: -10000,
     type: 'group',
+    ...fields,
   };
 }

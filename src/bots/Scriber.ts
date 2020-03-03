@@ -42,4 +42,14 @@ async function upsertChat(entityManager: EntityManager, telegramChat: TelegramCh
     chat.type = telegramChat.type;
     await entityManager.save(chat);
   }
+
+  if (telegramChat.type === 'private') {
+    await upsertUser(entityManager, {
+      id: telegramChat.id,
+      first_name: telegramChat.first_name,
+      last_name: telegramChat.last_name,
+      username: telegramChat.username,
+      is_bot: false,
+    });
+  }
 }
