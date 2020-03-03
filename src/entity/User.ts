@@ -3,7 +3,7 @@ import { Role } from './Role';
 import { UserPreference } from './UserPreference';
 import { Chat } from './Chat';
 import { Message } from './Message';
-
+import { Reputation } from './Reputation';
 @Entity('user')
 export class User {
   @PrimaryColumn('bigint')
@@ -64,6 +64,12 @@ export class User {
     message => message.userLeft,
   )
   userLeftMessages: Message[];
+
+  @OneToMany(
+    () => Reputation,
+    reputations => reputations.user,
+  )
+  reputations: Reputation[];
 
   @Column()
   createdAt: Date;
