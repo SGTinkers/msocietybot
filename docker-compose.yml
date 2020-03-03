@@ -1,7 +1,7 @@
 version: "3"
 services:
   app:
-    container_name: 'msocietybot'
+    container_name: msocietybot
     build:
       context: .
       dockerfile: dev.Dockerfile
@@ -9,9 +9,13 @@ services:
       - main_net
     depends_on: 
       - database
+    command: npm start
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
   database:
-    image: "postgres:11-alpine"
-    container_name: "postgres"
+    image: postgres:11-alpine
+    container_name: postgres
     ports:
       - 5432:5432
     volumes:

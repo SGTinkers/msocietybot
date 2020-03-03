@@ -37,6 +37,7 @@
       "tsc": "tsc --noEmit",
       "lint": "eslint src --max-warnings 0 --ext js,ts,tsx",
       "create-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
+      "create-entity": "ts-node ./node_modules/typeorm/cli.js entity:create -n",
       "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run"
    },
    "husky": {
