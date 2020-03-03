@@ -1,6 +1,5 @@
 import { ScriberBot } from './Scriber';
 import { Message as TelegramMessage, User as TelegramUser } from 'telegram-typings';
-import { getRepository } from 'typeorm';
 import { User } from '../entity/User';
 
 describe('Scriber', () => {
@@ -12,7 +11,7 @@ describe('Scriber', () => {
       last_name: 'Bakr',
       username: 'abu_bakr',
     };
-    await runBot([ScriberBot], ({ sendMessage }) => {
+    const { entityManager } = await runBot([ScriberBot], ({ sendMessage }) => {
       const newMemberMessage: TelegramMessage = {
         message_id: -1,
         chat: {
@@ -25,8 +24,7 @@ describe('Scriber', () => {
       sendMessage(newMemberMessage);
     });
 
-    const userRepository = getRepository(User, dbConnectionName);
-    const users = await userRepository.find();
+    const users = await entityManager.find(User);
 
     expect(users.length).toEqual(1);
     expect(users[0]).toStrictEqual(
