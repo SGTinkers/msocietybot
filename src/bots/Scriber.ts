@@ -1,8 +1,9 @@
 import Composer from 'telegraf/composer';
 import { EntityManager } from 'typeorm';
 import { User } from '../entity/User';
-import { User as TelegramUser, Chat as TelegramChat } from 'telegram-typings';
+import { User as TelegramUser, Chat as TelegramChat, Message as TelegramMessage } from 'telegram-typings';
 import { Chat } from '../entity/Chat';
+import { Message } from '../entity/Message';
 
 export const ScriberBot = new Composer();
 ScriberBot.on('message', ctx => {
@@ -11,7 +12,25 @@ ScriberBot.on('message', ctx => {
   if (ctx.message.new_chat_members && ctx.message.new_chat_members.length > 0) {
     ctx.message.new_chat_members.forEach(member => upsertUser(ctx.entityManager, member));
   }
+
+  upsertMessage(ctx.entityManager, ctx.message);
 });
+
+async function upsertMessage(entityManager: EntityManager, telegramMessage: TelegramMessage) {
+  const message = await entityManager.findOne(Message, telegramMessage.message_id);
+  if (message === undefined) {
+    const newMessage = entityManager.create(Message, {
+      id: telegramMessage.message_id,
+      unixtime: telegramMessage.date,
+      text: telegramMessage.text,
+    });
+    await entityManager.save(newMessage);
+  } else {
+    message.unixtime = telegramMessage.date;
+    message.text = telegramMessage.text;
+    await entityManager.save(message);
+  }
+}
 
 async function upsertUser(entityManager: EntityManager, telegramUser: TelegramUser) {
   const user = await entityManager.findOne(User, telegramUser.id);
@@ -30,6 +49,7 @@ async function upsertUser(entityManager: EntityManager, telegramUser: TelegramUs
     await entityManager.save(user);
   }
 }
+
 async function upsertChat(entityManager: EntityManager, telegramChat: TelegramChat) {
   const chat = await entityManager.findOne(Chat, telegramChat.id);
   if (chat === undefined) {

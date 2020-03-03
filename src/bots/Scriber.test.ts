@@ -2,6 +2,7 @@ import { ScriberBot } from './Scriber';
 import { Message as TelegramMessage, User as TelegramUser, Chat as TelegramChat } from 'telegram-typings';
 import { User } from '../entity/User';
 import { Chat } from '../entity/Chat';
+import { Message } from '../entity/Message';
 
 describe('Scriber', () => {
   it('insert user into db if does not exists', async () => {
@@ -153,6 +154,27 @@ describe('Scriber', () => {
     expect(users[0].createdAt).not.toBeNull();
     expect(users[0].updatedAt).not.toBeNull();
   });
+
+  it('insert message into db if does not exists', async () => {
+    const telegramMessage = createTelegramMessage();
+    telegramMessage.text = 'hello world';
+    await runBot([ScriberBot], ({ sendMessage }) => {
+      sendMessage(telegramMessage);
+    });
+
+    const messages = await entityManager.find(Message);
+
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramMessage.message_id,
+        unixtime: telegramMessage.date,
+        text: telegramMessage.text,
+      }),
+    );
+    expect(messages[0].createdAt).not.toBeNull();
+    expect(messages[0].updatedAt).not.toBeNull();
+  });
 });
 
 async function createUserInDb() {
@@ -206,5 +228,17 @@ function createTelegramChat(typeOrUser?: string | TelegramUser): TelegramChat {
     id: -10000,
     type: 'group',
     ...fields,
+  };
+}
+
+function createTelegramMessage(
+  chat: TelegramChat = createTelegramChat(),
+  user: TelegramUser = createTelegramUser(),
+): TelegramMessage {
+  return {
+    message_id: 10,
+    date: new Date().getTime(),
+    chat: chat,
+    from: user,
   };
 }
