@@ -1,6 +1,7 @@
 import { Message } from 'telegram-typings';
 import { ReplyFnResult } from 'nock';
 import { ContextMessageUpdate, Middleware } from 'telegraf';
+import { EntityManager } from 'typeorm';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type NockResponse = (uri: string, requestBody: Record<string, any>) => ReplyFnResult;
@@ -20,7 +21,7 @@ export type RunBot = (
   bots: Array<Middleware<ContextMessageUpdate>>,
   act?: (args: ActArgs) => void | Promise<void>,
   options?: { timeout?: number },
-) => Promise<Message[]>;
+) => Promise<{ entityManager: EntityManager; messages: Message[] }>;
 
 declare global {
   const runBot: RunBot;

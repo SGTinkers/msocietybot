@@ -6,6 +6,7 @@ import { uuid } from 'uuidv4';
 import { createApp } from './app';
 import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock';
 import { RunBot } from './types/testOnly';
+import { getManager } from 'typeorm';
 
 const TESTDB_BASE_DIR = './.testdb';
 
@@ -42,7 +43,7 @@ beforeEach(() => {
       throw new Error(`Found ${unconsumed.length} 'whens' not triggered. Please check your test act again.`);
     }
 
-    return messages;
+    return { entityManager: getManager(name), messages };
   };
 
   global['runBot'] = runBot;
