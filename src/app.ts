@@ -1,6 +1,10 @@
 import { createConnection, getConnectionOptions, ConnectionOptions, getManager } from 'typeorm';
 import Telegraf, { ContextMessageUpdate, Middleware } from 'telegraf';
 
+declare global {
+  const dbConnectionName: string;
+}
+
 async function setupConnection(typeOrmConnectionOptions?: ConnectionOptions) {
   let connectionOptions = await getConnectionOptions();
   if (typeOrmConnectionOptions) {
