@@ -6,14 +6,14 @@ import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
 
 export const ScriberBot = new Composer();
-ScriberBot.on('message', ctx => {
-  upsertChat(ctx.entityManager, ctx.message.chat);
+ScriberBot.on('message', async ctx => {
+  await upsertChat(ctx.entityManager, ctx.message.chat);
 
   if (ctx.message.new_chat_members && ctx.message.new_chat_members.length > 0) {
-    ctx.message.new_chat_members.forEach(member => upsertUser(ctx.entityManager, member));
+    await Promise.all(ctx.message.new_chat_members.map(member => upsertUser(ctx.entityManager, member)));
   }
 
-  upsertMessage(ctx.entityManager, ctx.message);
+  await upsertMessage(ctx.entityManager, ctx.message);
 });
 
 async function upsertMessage(entityManager: EntityManager, telegramMessage: TelegramMessage) {
