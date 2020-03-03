@@ -6,7 +6,7 @@ testBot.hears('hi', ctx => ctx.reply('holla'));
 
 describe('TelegramMock', () => {
   it('bot should reply with world when hello is received', async () => {
-    const { messages } = await runBot([testBot], ({ sendMessage }) => {
+    const messages = await runBot([testBot], ({ sendMessage }) => {
       sendMessage('hello');
     });
 
@@ -15,7 +15,7 @@ describe('TelegramMock', () => {
   });
 
   it('bot should reply with holla when hi is received', async () => {
-    const { messages } = await runBot([testBot], ({ whenBotSends, sendMessage }) => {
+    const messages = await runBot([testBot], ({ whenBotSends, sendMessage }) => {
       sendMessage('hi');
       whenBotSends('holla').thenDoNothing();
     });
@@ -25,7 +25,7 @@ describe('TelegramMock', () => {
   });
 
   it('bot should reply with world and holla when hello and hi is received', async () => {
-    const { messages } = await runBot([testBot], ({ whenBotSends, sendMessage }) => {
+    const messages = await runBot([testBot], ({ whenBotSends, sendMessage }) => {
       sendMessage('hello');
       whenBotSends('world').thenSendBot('hi');
     });
@@ -36,7 +36,7 @@ describe('TelegramMock', () => {
   });
 
   it('bot should reply with world (regex matched) and holla when hello and hi is received', async () => {
-    const { messages } = await runBot([testBot], ({ whenBotSends, sendMessage }) => {
+    const messages = await runBot([testBot], ({ whenBotSends, sendMessage }) => {
       sendMessage('hello');
       whenBotSends(/^worl/).thenSendBot('hi');
     });
@@ -47,7 +47,7 @@ describe('TelegramMock', () => {
   });
 
   it('send message without waiting for bot', async () => {
-    const { messages } = await runBot([testBot], ({ sendMessage }) => {
+    const messages = await runBot([testBot], ({ sendMessage }) => {
       sendMessage('greetings');
       sendMessage('hi');
     });

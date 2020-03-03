@@ -21,8 +21,9 @@ export type RunBot = (
   bots: Array<Middleware<ContextMessageUpdate>>,
   act?: (args: ActArgs) => void | Promise<void>,
   options?: { timeout?: number },
-) => Promise<{ entityManager: EntityManager; messages: Message[] }>;
+) => Promise<Message[]>;
 
 declare global {
   const runBot: RunBot;
+  const entityManager: EntityManager;
 }
