@@ -50,7 +50,6 @@ beforeEach(async () => {
 
   global['runBot'] = runBot;
   global['entityManager'] = getManager(name);
-  global['dbConnectionName'] = name;
 });
 
 afterEach(async () => {

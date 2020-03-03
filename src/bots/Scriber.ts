@@ -5,10 +5,10 @@ import { User as TelegramUser } from 'telegram-typings';
 
 export const ScriberBot = new Composer();
 ScriberBot.on('new_chat_members', ctx => {
-  ctx.message.new_chat_members.forEach(member => insertUserIfNotExists(ctx.entityManager, member));
+  ctx.message.new_chat_members.forEach(member => upsertUser(ctx.entityManager, member));
 });
 
-async function insertUserIfNotExists(entityManager: EntityManager, telegramUser: TelegramUser) {
+async function upsertUser(entityManager: EntityManager, telegramUser: TelegramUser) {
   const user = await entityManager.findOne(User, telegramUser.id);
   if (user === undefined) {
     const newUser = entityManager.create(User, {
@@ -17,6 +17,11 @@ async function insertUserIfNotExists(entityManager: EntityManager, telegramUser:
       lastName: telegramUser.last_name,
       username: telegramUser.username,
     });
-    await entityManager.save(User, newUser);
+    await entityManager.save(newUser);
+  } else {
+    user.firstName = telegramUser.first_name;
+    user.lastName = telegramUser.last_name;
+    user.username = telegramUser.username;
+    await entityManager.save(user);
   }
 }
