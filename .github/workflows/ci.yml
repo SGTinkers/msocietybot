@@ -34,6 +34,11 @@ jobs:
     - name: Test & Coverage
       if: success()
       run: npm run test -- --collect-coverage
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v1
+      with:
+        name: code-coverage-report
+        path: coverage/
     - name: Notify Completed
       uses: appleboy/telegram-action@0.0.7
       if: success() || failure()
