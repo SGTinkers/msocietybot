@@ -1,21 +1,30 @@
-# Awesome Project Build with TypeORM
+﷽
+# MSOCIETY Bot
+![CI](https://github.com/SGTinkers/msocietybot/workflows/CI/badge.svg)
 
-Steps to run this project:
+A unified platform to manage MSOCIETY community.
+
+This project is rewritten to Typescript from Go: https://gitlab.com/msociety/msocietybot
+
+## Running
 
 1. Run `npm i` command
-2. Setup database settings inside `ormconfig.json` file
+2. Copy `env.sample` to `.env`
+2. Setup database settings inside `.env` file
 3. Run `npm start` command
 
-With Docker:
+### Running (with Docker):
 
 ```
 # First time only:
-docker-compose run database # Shut down after database has been set up
-docker-compose run app npm run migrate
+$ docker-compose run database # Shut down after database has been set up
+$ docker-compose run app npm run migrate
 
 # Every other time:
-docker-compose up
+$ docker-compose up
 ```
 
-# Telegraf
-We are working on integrating [Telegraf](https://github.com/influxdata/telegraf)
+### Running tests:
+```
+$ npm run test
+```
