@@ -8,6 +8,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
 
     steps:
     - name: Notify Push
@@ -18,19 +20,19 @@ jobs:
         format: markdown
         message: CI event triggered for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
     - uses: actions/checkout@v2
-    - name: Run a multi-line script
-      run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
     - name: Setup Node
+      if: success()
       uses: actions/setup-node@v1
       with:
-        node-version: '10.x'
+        node-version: '12.x'
     - name: Install Dependencies
+      if: success()
       run: npm install
     - name: Lint
+      if: success()
       run: npm run lint
     - name: Test & Coverage
+      if: success()
       run: npm run test -- --collect-coverage
     - name: Notify Completed
       uses: appleboy/telegram-action@0.0.7
@@ -39,3 +41,4 @@ jobs:
         token: ${{ secrets.TELEGRAM_TOKEN }}
         format: markdown
         message: CI completed with status ${{job.status}} for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
+  
