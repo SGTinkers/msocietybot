@@ -1,7 +1,9 @@
-import WelcomeExample from './WelcomeExample';
-import SceneExample from './SceneExample';
+import { WelcomeExampleBot } from './examples/WelcomeExample';
+import { SceneExampleBot } from './examples/SceneExample';
+import { ScriberBot } from './Scriber';
 
 export default {
-  WelcomeExample,
-  SceneExample,
+  WelcomeExampleBot,
+  SceneExampleBot,
+  ScriberBot,
 };

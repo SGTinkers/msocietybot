@@ -1,6 +1,6 @@
 import Composer from 'telegraf/composer';
 import { getRepository } from 'typeorm';
-import { User } from '../entity/User';
+import { User } from '../../entity/User';
 
 const bot = new Composer();
 bot.on('new_chat_members', ctx => {
@@ -23,4 +23,4 @@ bot.on('new_chat_members', ctx => {
   });
 });
 
-export default bot;
+export { bot as WelcomeExampleBot };

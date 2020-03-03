@@ -4,6 +4,6 @@ import 'reflect-metadata';
 import { createApp } from './app';
 import Bots from './bots';
 
-createApp([Bots.SceneExample, Bots.WelcomeExample])
+createApp(Object.values(Bots))
   .then(app => app.launch())
   .catch(error => console.error(error));

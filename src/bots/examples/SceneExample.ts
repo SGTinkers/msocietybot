@@ -24,4 +24,4 @@ bot.use(session());
 bot.use(stage.middleware());
 bot.command('welcome_setup', ctx => ctx.scene.enter('welcome_setup'));
 
-export default bot;
+export { bot as SceneExampleBot };
