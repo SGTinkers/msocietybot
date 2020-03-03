@@ -1,6 +1,9 @@
 ﷽
 # MSOCIETY Bot
 ![CI](https://github.com/SGTinkers/msocietybot/workflows/CI/badge.svg)
+![Dependencies](https://david-dm.org/SGTinkers/msocietybot.svg)
+[![codecov](https://codecov.io/gh/SGTinkers/msocietybot/branch/master/graph/badge.svg)](https://codecov.io/gh/SGTinkers/msocietybot)
+[![Known Vulnerabilities](https://snyk.io/test/github/SGTinkers/msocietybot/badge.svg?targetFile=package.json)](https://snyk.io/test/github/SGTinkers/msocietybot?targetFile=package.json)
 
 A unified platform to manage MSOCIETY community.
 
