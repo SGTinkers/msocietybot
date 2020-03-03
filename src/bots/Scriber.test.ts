@@ -3,7 +3,7 @@ import { Message as TelegramMessage, User as TelegramUser } from 'telegram-typin
 import { User } from '../entity/User';
 
 describe('Scriber', () => {
-  it('insert user into db', async () => {
+  it('insert user into db if does not exists', async () => {
     const userAbu: TelegramUser = {
       id: 2,
       is_bot: false,
@@ -11,7 +11,7 @@ describe('Scriber', () => {
       last_name: 'Bakr',
       username: 'abu_bakr',
     };
-    const { entityManager } = await runBot([ScriberBot], ({ sendMessage }) => {
+    await runBot([ScriberBot], ({ sendMessage }) => {
       const newMemberMessage: TelegramMessage = {
         message_id: -1,
         chat: {

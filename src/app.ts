@@ -1,20 +1,21 @@
-import { createConnection, getConnectionOptions, ConnectionOptions, getManager } from 'typeorm';
+import {
+  createConnection as createTypeOrmConnection,
+  getConnectionOptions,
+  ConnectionOptions,
+  getManager,
+  Connection,
+} from 'typeorm';
 import Telegraf, { ContextMessageUpdate, Middleware } from 'telegraf';
 
-async function setupConnection(typeOrmConnectionOptions?: ConnectionOptions) {
+export async function createConnection(typeOrmConnectionOptions?: ConnectionOptions) {
   let connectionOptions = await getConnectionOptions();
   if (typeOrmConnectionOptions) {
     connectionOptions = Object.assign({}, connectionOptions, typeOrmConnectionOptions);
   }
-  return await createConnection(connectionOptions);
+  return await createTypeOrmConnection(connectionOptions);
 }
 
-export async function createApp(
-  middlewares: Array<Middleware<ContextMessageUpdate>>,
-  typeOrmConnectionOptions?: ConnectionOptions,
-) {
-  const connection = await setupConnection(typeOrmConnectionOptions);
-
+export function createApp(connection: Connection, middlewares: Array<Middleware<ContextMessageUpdate>>) {
   const bot = new Telegraf(process.env.BOT_TOKEN);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (bot.context as Record<string, any>).entityManager = getManager(connection.name);

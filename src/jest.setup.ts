@@ -3,14 +3,14 @@ dotenv();
 import 'reflect-metadata';
 import { unlinkSync, rmdirSync } from 'fs';
 import { uuid } from 'uuidv4';
-import { createApp } from './app';
+import { createApp, createConnection } from './app';
 import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock';
 import { RunBot } from './types/testOnly';
 import { getManager } from 'typeorm';
 
 const TESTDB_BASE_DIR = './.testdb';
 
-beforeEach(() => {
+beforeEach(async () => {
   process.env.BOT_TOKEN = undefined;
 
   const name = uuid();
@@ -21,6 +21,13 @@ beforeEach(() => {
     // eslint-disable-next-line no-empty
   } catch (e) {}
 
+  const connection = await createConnection({
+    synchronize: true,
+    type: 'sqlite',
+    name: name,
+    database: database,
+  });
+
   const runBot: RunBot = async (bots, setupMock, options) => {
     const { messages, sendMessage, buildMocks, unconsumedMocks, whenBotSends } = initTelegramMock();
     if (setupMock) {
@@ -28,12 +35,7 @@ beforeEach(() => {
     }
     buildMocks();
 
-    const app = await createApp(bots, {
-      synchronize: true,
-      type: 'sqlite',
-      name: name,
-      database: database,
-    });
+    const app = createApp(connection, bots);
     await app.launch();
     global['app'] = app;
     await new Promise(r => setTimeout(r, options?.timeout ?? 100));
@@ -43,10 +45,11 @@ beforeEach(() => {
       throw new Error(`Found ${unconsumed.length} 'whens' not triggered. Please check your test act again.`);
     }
 
-    return { entityManager: getManager(name), messages };
+    return messages;
   };
 
   global['runBot'] = runBot;
+  global['entityManager'] = getManager(name);
   global['dbConnectionName'] = name;
 });
 
