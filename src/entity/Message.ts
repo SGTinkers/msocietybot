@@ -65,7 +65,7 @@ export class Message {
   @Column({ nullable: true })
   signature: string | null;
 
-  @Column()
+  @Column({ nullable: true })
   text: string;
 
   @Column({ nullable: true })
