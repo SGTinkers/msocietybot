@@ -13,6 +13,8 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+    environment:
+      DEBUG: telegraf:client,msocietybot
   database:
     image: postgres:11-alpine
     container_name: postgres
