@@ -5,34 +5,80 @@ import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
 
 describe('Scriber', () => {
-  it('insert user into db if does not exists', async () => {
+  describe('insert user into db if does not exists', () => {
     const userAbu = createTelegramUser();
-    await runBot([ScriberBot], ({ sendMessage }) => {
-      const newMemberMessage: TelegramMessage = {
-        message_id: -1,
-        chat: {
-          id: -100000,
-          type: 'group',
-        },
-        date: new Date().getTime(),
-        new_chat_members: [userAbu],
-      };
-      sendMessage(newMemberMessage);
+
+    const assert = async () => {
+      const users = await entityManager.find(User);
+
+      expect(users.length).toEqual(1);
+      expect(users[0]).toStrictEqual(
+        expect.objectContaining({
+          id: userAbu.id,
+          firstName: userAbu.first_name,
+          lastName: userAbu.last_name,
+          username: userAbu.username,
+        }),
+      );
+      expect(users[0].createdAt).not.toBeNull();
+      expect(users[0].updatedAt).not.toBeNull();
+    };
+
+    it('from', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: createTelegramChat(),
+          date: new Date().getTime(),
+          from: userAbu,
+        };
+        sendMessage(message);
+      });
+
+      await assert();
     });
 
-    const users = await entityManager.find(User);
+    it('forward_from', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: createTelegramChat(),
+          date: new Date().getTime(),
+          forward_from: userAbu,
+        };
+        sendMessage(message);
+      });
 
-    expect(users.length).toEqual(1);
-    expect(users[0]).toStrictEqual(
-      expect.objectContaining({
-        id: userAbu.id,
-        firstName: userAbu.first_name,
-        lastName: userAbu.last_name,
-        username: userAbu.username,
-      }),
-    );
-    expect(users[0].createdAt).not.toBeNull();
-    expect(users[0].updatedAt).not.toBeNull();
+      await assert();
+    });
+
+    it('new_chat_members', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: createTelegramChat(),
+          date: new Date().getTime(),
+          new_chat_members: [userAbu],
+        };
+        sendMessage(message);
+      });
+
+      await assert();
+    });
+
+    it('left_chat_member', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: createTelegramChat(),
+          date: new Date().getTime(),
+          left_chat_member: userAbu,
+        };
+        sendMessage(message);
+      });
+
+      await assert();
+    });
   });
 
   it('update user in db if exists', async () => {
