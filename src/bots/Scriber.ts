@@ -9,6 +9,18 @@ export const ScriberBot = new Composer();
 ScriberBot.on('message', async ctx => {
   await upsertChat(ctx.entityManager, ctx.message.chat);
 
+  if (ctx.message.from) {
+    await upsertUser(entityManager, ctx.message.from);
+  }
+
+  if (ctx.message.forward_from) {
+    await upsertUser(entityManager, ctx.message.forward_from);
+  }
+
+  if (ctx.message.left_chat_member) {
+    await upsertUser(entityManager, ctx.message.left_chat_member);
+  }
+
   if (ctx.message.new_chat_members && ctx.message.new_chat_members.length > 0) {
     await Promise.all(ctx.message.new_chat_members.map(member => upsertUser(ctx.entityManager, member)));
   }
