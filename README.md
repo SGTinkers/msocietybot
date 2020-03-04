@@ -16,18 +16,23 @@ This project is rewritten to Typescript from Go: https://gitlab.com/msociety/mso
 2. Setup database settings inside `.env` file
 3. Run `npm start` command
 
-### Running (with Docker):
+### Running (with Docker)
 
 ```
 # First time only:
 $ docker-compose run database # Shut down after database has been set up
-$ docker-compose run app npm run migrate
 
 # Every other time:
 $ docker-compose up
 ```
 
-### Running tests:
+### Running tests
 ```
 $ npm run test
+```
+
+### Output Verbose Logging
+You can turn on debug (verbose) logging via supplying the env `DEBUG`:
+```
+$ DEBUG=telegraf:client,msocietybot npm run start
 ```
