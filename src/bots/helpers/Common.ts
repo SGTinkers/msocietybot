@@ -4,7 +4,7 @@ import Composer from 'telegraf/composer';
 const bot = new Composer();
 bot.use((ctx, next) => {
   ctx.replyToMessage = (text, message_id) => {
-    return ctx.reply(text, { reply_to_message_id: message_id });
+    return ctx.replyWithMarkdown(text, { reply_to_message_id: message_id });
   };
   next();
 });
