@@ -14,15 +14,15 @@ ScriberBot.on('message', async ctx => {
   }
 
   if (ctx.message.from) {
-    await upsertUser(entityManager, ctx.message.from);
+    await upsertUser(ctx.entityManager, ctx.message.from);
   }
 
   if (ctx.message.forward_from) {
-    await upsertUser(entityManager, ctx.message.forward_from);
+    await upsertUser(ctx.entityManager, ctx.message.forward_from);
   }
 
   if (ctx.message.left_chat_member) {
-    await upsertUser(entityManager, ctx.message.left_chat_member);
+    await upsertUser(ctx.entityManager, ctx.message.left_chat_member);
   }
 
   if (ctx.message.new_chat_members && ctx.message.new_chat_members.length > 0) {
