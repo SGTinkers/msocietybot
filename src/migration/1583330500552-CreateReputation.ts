@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateReputation1583315540736 implements MigrationInterface {
-  name = 'CreateReputation1583315540736';
+export class CreateReputation1583330500552 implements MigrationInterface {
+  name = 'CreateReputation1583330500552';
 
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(
