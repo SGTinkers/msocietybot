@@ -72,10 +72,12 @@ async function upsertChat(entityManager: EntityManager, telegramChat: TelegramCh
     const chat = entityManager.create(Chat, {
       id: telegramChat.id,
       type: telegramChat.type,
+      title: telegramChat.title,
     });
     await entityManager.save(chat);
   } else {
     chat.type = telegramChat.type;
+    chat.title = telegramChat.title;
     await entityManager.save(chat);
   }
 
