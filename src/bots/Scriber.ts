@@ -6,7 +6,7 @@ import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
 
 export const ScriberBot = new Composer();
-ScriberBot.on('message', async ctx => {
+ScriberBot.on('message', async (ctx, next) => {
   await upsertChat(ctx.entityManager, ctx.message.chat);
 
   if (ctx.message.forward_from_chat) {
@@ -30,6 +30,8 @@ ScriberBot.on('message', async ctx => {
   }
 
   await upsertMessage(ctx.entityManager, ctx.message);
+
+  next();
 });
 
 async function upsertMessage(entityManager: EntityManager, telegramMessage: TelegramMessage) {
