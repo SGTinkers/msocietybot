@@ -67,9 +67,15 @@ export class User {
 
   @OneToMany(
     () => Reputation,
-    reputations => reputations.user,
+    reputations => reputations.to_user,
   )
   reputations: Reputation[];
+
+  @OneToMany(
+    () => Reputation,
+    reputations => reputations.from_user,
+  )
+  reputationsGiven: Reputation[];
 
   @Column()
   createdAt: Date;
