@@ -38,7 +38,7 @@ beforeEach(async () => {
     const app = createApp(connection, bots);
     await app.launch();
     global['app'] = app;
-    await new Promise(r => setTimeout(r, options?.timeout ?? 100));
+    await new Promise(r => setTimeout(r, options?.timeout ?? 200));
 
     const unconsumed = unconsumedMocks();
     if (unconsumed.length > 0) {
