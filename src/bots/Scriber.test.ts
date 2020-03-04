@@ -124,6 +124,7 @@ describe('Scriber', () => {
         expect.objectContaining({
           id: telegramChat.id,
           type: telegramChat.type,
+          title: telegramChat.title,
         }),
       );
       expect(chats[totalChats - 1].createdAt).not.toBeNull();
@@ -147,6 +148,7 @@ describe('Scriber', () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
         const chat = createTelegramChat();
         chat.id = -100;
+        chat.title = 'Some old chat title';
         const message: TelegramMessage = {
           message_id: -1,
           chat: chat,
@@ -183,7 +185,7 @@ describe('Scriber', () => {
       }),
     );
     expect(chats[0].createdAt).toEqual(existingChat.createdAt);
-    expect(chats[0].updatedAt).toEqual(existingChat.updatedAt);
+    expect(chats[0].updatedAt).not.toEqual(existingChat.updatedAt);
   });
 
   it('insert chat and user into db if does not exists', async () => {
@@ -293,6 +295,11 @@ function createTelegramChat(typeOrUser?: string | TelegramUser): TelegramChat {
     fields['username'] = typeOrUser.username;
     fields['type'] = 'private';
   }
+
+  if (fields['type'] !== 'private') {
+    fields['title'] = 'Some chat title';
+  }
+
   return {
     id: -10000,
     type: 'group',
