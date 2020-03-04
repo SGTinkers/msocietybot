@@ -1,6 +1,32 @@
-import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToOne, PrimaryColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  BeforeInsert,
+  BeforeUpdate,
+  ManyToOne,
+  PrimaryColumn,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
 import { User } from './User';
 import { Chat } from './Chat';
+import {
+  Audio,
+  Contact,
+  Document,
+  Invoice,
+  Location,
+  MessageEntity,
+  PassportData,
+  PhotoSize,
+  Sticker,
+  SuccessfulPayment,
+  Venue,
+  Video,
+  VideoNote,
+  Voice,
+} from 'telegram-typings';
 
 @Entity('messages')
 export class Message {
@@ -65,50 +91,50 @@ export class Message {
   @Column({ nullable: true })
   signature: string | null;
 
-  @Column()
+  @Column({ nullable: true })
   text: string;
 
   @Column({ nullable: true })
   payload: string | null;
 
   @Column('simple-json', { nullable: true })
-  entities: { [key: string]: string } | null;
+  entities: MessageEntity[] | null;
 
   @Column({ nullable: true })
   caption: string | null;
 
   @Column('simple-json', { nullable: true })
-  captionEntities: { [key: string]: string } | null;
+  captionEntities: MessageEntity[] | null;
 
   @Column('simple-json', { nullable: true })
-  audio: { [key: string]: string } | null;
+  audio: Audio | null;
 
   @Column('simple-json', { nullable: true })
-  document: { [key: string]: string } | null;
+  document: Document | null;
 
   @Column('simple-json', { nullable: true })
-  photo: { [key: string]: string } | null;
+  photo: PhotoSize[] | null;
 
   @Column('simple-json', { nullable: true })
-  sticker: { [key: string]: string } | null;
+  sticker: Sticker | null;
 
   @Column('simple-json', { nullable: true })
-  voice: { [key: string]: string } | null;
+  voice: Voice | null;
 
   @Column('simple-json', { nullable: true })
-  videoNote: { [key: string]: string } | null;
+  videoNote: VideoNote | null;
 
   @Column('simple-json', { nullable: true })
-  video: { [key: string]: string } | null;
+  video: Video | null;
 
   @Column('simple-json', { nullable: true })
-  contact: { [key: string]: string } | null;
+  contact: Contact | null;
 
   @Column('simple-json', { nullable: true })
-  location: { [key: string]: string } | null;
+  location: Location | null;
 
   @Column('simple-json', { nullable: true })
-  venue: { [key: string]: string } | null;
+  venue: Venue | null;
 
   @ManyToOne(
     () => User,
@@ -128,10 +154,11 @@ export class Message {
   newGroupTitle: string | null;
 
   @Column('simple-json', { nullable: true })
-  newGroupPhoto: { [key: string]: string } | null;
+  newGroupPhoto: PhotoSize[] | null;
 
-  @Column({ nullable: true })
-  usersJoined: string | null;
+  @ManyToMany(() => User, { nullable: true })
+  @JoinTable()
+  usersJoined: User[] | null;
 
   @Column({ nullable: true })
   groupPhotoDeleted: boolean | null;
@@ -171,6 +198,39 @@ export class Message {
     { nullable: true },
   )
   pinnedMessage: Message | null;
+
+  @ManyToOne(() => User, { nullable: true })
+  forwardFrom: User | null;
+
+  @ManyToOne(() => Chat, { nullable: true })
+  forwardFromChat: Chat | null;
+
+  @ManyToOne(() => Message, { nullable: true })
+  forwardFromMessage: Message | null;
+
+  @Column({ nullable: true })
+  forwardSignature: string | null;
+
+  @Column({ nullable: true })
+  forwardDate: Date | null;
+
+  @Column({ nullable: true })
+  mediaGroupId: string | null;
+
+  @Column({ nullable: true })
+  authorSignature: string | null;
+
+  @Column('simple-json', { nullable: true })
+  invoice: Invoice | null;
+
+  @Column('simple-json', { nullable: true })
+  successfulPayment: SuccessfulPayment | null;
+
+  @Column({ nullable: true })
+  connectedWebsite: string | null;
+
+  @Column('simple-json', { nullable: true })
+  passportData: PassportData | null;
 
   @Column()
   createdAt: Date;

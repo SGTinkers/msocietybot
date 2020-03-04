@@ -2,36 +2,83 @@ import { ScriberBot } from './Scriber';
 import { Message as TelegramMessage, User as TelegramUser, Chat as TelegramChat } from 'telegram-typings';
 import { User } from '../entity/User';
 import { Chat } from '../entity/Chat';
+import { Message } from '../entity/Message';
 
 describe('Scriber', () => {
-  it('insert user into db if does not exists', async () => {
+  describe('insert user into db if does not exists', () => {
     const userAbu = createTelegramUser();
-    await runBot([ScriberBot], ({ sendMessage }) => {
-      const newMemberMessage: TelegramMessage = {
-        message_id: -1,
-        chat: {
-          id: -100000,
-          type: 'group',
-        },
-        date: new Date().getTime(),
-        new_chat_members: [userAbu],
-      };
-      sendMessage(newMemberMessage);
+
+    const assert = async () => {
+      const users = await entityManager.find(User);
+
+      expect(users.length).toEqual(1);
+      expect(users[0]).toStrictEqual(
+        expect.objectContaining({
+          id: userAbu.id,
+          firstName: userAbu.first_name,
+          lastName: userAbu.last_name,
+          username: userAbu.username,
+        }),
+      );
+      expect(users[0].createdAt).not.toBeNull();
+      expect(users[0].updatedAt).not.toBeNull();
+    };
+
+    it('from', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: createTelegramChat(),
+          date: new Date().getTime(),
+          from: userAbu,
+        };
+        sendMessage(message);
+      });
+
+      await assert();
     });
 
-    const users = await entityManager.find(User);
+    it('forward_from', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: createTelegramChat(),
+          date: new Date().getTime(),
+          forward_from: userAbu,
+        };
+        sendMessage(message);
+      });
 
-    expect(users.length).toEqual(1);
-    expect(users[0]).toStrictEqual(
-      expect.objectContaining({
-        id: userAbu.id,
-        firstName: userAbu.first_name,
-        lastName: userAbu.last_name,
-        username: userAbu.username,
-      }),
-    );
-    expect(users[0].createdAt).not.toBeNull();
-    expect(users[0].updatedAt).not.toBeNull();
+      await assert();
+    });
+
+    it('new_chat_members', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: createTelegramChat(),
+          date: new Date().getTime(),
+          new_chat_members: [userAbu],
+        };
+        sendMessage(message);
+      });
+
+      await assert();
+    });
+
+    it('left_chat_member', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: createTelegramChat(),
+          date: new Date().getTime(),
+          left_chat_member: userAbu,
+        };
+        sendMessage(message);
+      });
+
+      await assert();
+    });
   });
 
   it('update user in db if exists', async () => {
@@ -66,28 +113,53 @@ describe('Scriber', () => {
     expect(users[0].updatedAt).not.toEqual(existingUser.updatedAt);
   });
 
-  it('insert chat into db if does not exists', async () => {
+  describe('insert chat into db if does not exists', () => {
     const telegramChat = createTelegramChat();
-    await runBot([ScriberBot], ({ sendMessage }) => {
-      const message: TelegramMessage = {
-        message_id: -1,
-        chat: telegramChat,
-        date: new Date().getTime(),
-      };
-      sendMessage(message);
+
+    const assert = async (totalChats = 1) => {
+      const chats = await entityManager.find(Chat);
+
+      expect(chats.length).toEqual(totalChats);
+      expect(chats[totalChats - 1]).toStrictEqual(
+        expect.objectContaining({
+          id: telegramChat.id,
+          type: telegramChat.type,
+          title: telegramChat.title,
+        }),
+      );
+      expect(chats[totalChats - 1].createdAt).not.toBeNull();
+      expect(chats[totalChats - 1].updatedAt).not.toBeNull();
+    };
+
+    it('chat', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: telegramChat,
+          date: new Date().getTime(),
+        };
+        sendMessage(message);
+      });
+
+      await assert();
     });
 
-    const chats = await entityManager.find(Chat);
+    it('forward_from_chat', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const chat = createTelegramChat();
+        chat.id = -100;
+        chat.title = 'Some old chat title';
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: chat,
+          forward_from_chat: telegramChat,
+          date: new Date().getTime(),
+        };
+        sendMessage(message);
+      });
 
-    expect(chats.length).toEqual(1);
-    expect(chats[0]).toStrictEqual(
-      expect.objectContaining({
-        id: telegramChat.id,
-        type: telegramChat.type,
-      }),
-    );
-    expect(chats[0].createdAt).not.toBeNull();
-    expect(chats[0].updatedAt).not.toBeNull();
+      await assert(2);
+    });
   });
 
   it('update chat in db if exists', async () => {
@@ -113,7 +185,7 @@ describe('Scriber', () => {
       }),
     );
     expect(chats[0].createdAt).toEqual(existingChat.createdAt);
-    expect(chats[0].updatedAt).toEqual(existingChat.updatedAt);
+    expect(chats[0].updatedAt).not.toEqual(existingChat.updatedAt);
   });
 
   it('insert chat and user into db if does not exists', async () => {
@@ -152,6 +224,27 @@ describe('Scriber', () => {
     );
     expect(users[0].createdAt).not.toBeNull();
     expect(users[0].updatedAt).not.toBeNull();
+  });
+
+  it('insert message into db if does not exists', async () => {
+    const telegramMessage = createTelegramMessage();
+    telegramMessage.text = 'hello world';
+    await runBot([ScriberBot], ({ sendMessage }) => {
+      sendMessage(telegramMessage);
+    });
+
+    const messages = await entityManager.find(Message);
+
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramMessage.message_id,
+        unixtime: telegramMessage.date,
+        text: telegramMessage.text,
+      }),
+    );
+    expect(messages[0].createdAt).not.toBeNull();
+    expect(messages[0].updatedAt).not.toBeNull();
   });
 });
 
@@ -202,9 +295,26 @@ function createTelegramChat(typeOrUser?: string | TelegramUser): TelegramChat {
     fields['username'] = typeOrUser.username;
     fields['type'] = 'private';
   }
+
+  if (fields['type'] !== 'private') {
+    fields['title'] = 'Some chat title';
+  }
+
   return {
     id: -10000,
     type: 'group',
     ...fields,
+  };
+}
+
+function createTelegramMessage(
+  chat: TelegramChat = createTelegramChat(),
+  user: TelegramUser = createTelegramUser(),
+): TelegramMessage {
+  return {
+    message_id: 10,
+    date: new Date().getTime(),
+    chat: chat,
+    from: user,
   };
 }

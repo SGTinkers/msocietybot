@@ -2,6 +2,7 @@ import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToOne, PrimaryColumn, O
 import { User } from './User';
 import { ChatPreference } from './ChatPreference';
 import { Message } from './Message';
+import { ChatPhoto } from 'telegram-typings';
 
 @Entity('chats')
 export class Chat {
@@ -16,10 +17,31 @@ export class Chat {
     user => user.chats,
     { nullable: true },
   )
-  user: User;
+  user: User | null;
+
+  @Column({ nullable: true })
+  allMembersAreAdministrators: boolean | null;
 
   @Column({ nullable: true })
   title: string | null;
+
+  @Column({ nullable: true })
+  description: string | null;
+
+  @Column('simple-json', { nullable: true })
+  photo: ChatPhoto | null;
+
+  @Column({ nullable: true })
+  inviteLink: string | null;
+
+  @ManyToOne(() => Message, { nullable: true })
+  pinnedMessage: Message | null;
+
+  @Column({ nullable: true })
+  stickerSetName: string | null;
+
+  @Column({ nullable: true })
+  botCanSetStickerSet: boolean | null;
 
   @OneToMany(
     () => ChatPreference,
