@@ -9,6 +9,10 @@ export const ScriberBot = new Composer();
 ScriberBot.on('message', async ctx => {
   await upsertChat(ctx.entityManager, ctx.message.chat);
 
+  if (ctx.message.forward_from_chat) {
+    await upsertChat(ctx.entityManager, ctx.message.forward_from_chat);
+  }
+
   if (ctx.message.from) {
     await upsertUser(entityManager, ctx.message.from);
   }
