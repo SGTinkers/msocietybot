@@ -12,7 +12,12 @@ export async function createConnection(typeOrmConnectionOptions?: ConnectionOpti
   if (typeOrmConnectionOptions) {
     connectionOptions = Object.assign({}, connectionOptions, typeOrmConnectionOptions);
   }
-  return await createTypeOrmConnection(connectionOptions);
+  const connection = await createTypeOrmConnection(connectionOptions);
+  if (!connectionOptions.synchronize) {
+    await connection.runMigrations({ transaction: 'all' });
+  }
+
+  return connection;
 }
 
 export function createApp(connection: Connection, middlewares: Array<Middleware<ContextMessageUpdate>>) {
