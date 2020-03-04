@@ -113,28 +113,51 @@ describe('Scriber', () => {
     expect(users[0].updatedAt).not.toEqual(existingUser.updatedAt);
   });
 
-  it('insert chat into db if does not exists', async () => {
+  describe('insert chat into db if does not exists', () => {
     const telegramChat = createTelegramChat();
-    await runBot([ScriberBot], ({ sendMessage }) => {
-      const message: TelegramMessage = {
-        message_id: -1,
-        chat: telegramChat,
-        date: new Date().getTime(),
-      };
-      sendMessage(message);
+
+    const assert = async (totalChats = 1) => {
+      const chats = await entityManager.find(Chat);
+
+      expect(chats.length).toEqual(totalChats);
+      expect(chats[totalChats - 1]).toStrictEqual(
+        expect.objectContaining({
+          id: telegramChat.id,
+          type: telegramChat.type,
+        }),
+      );
+      expect(chats[totalChats - 1].createdAt).not.toBeNull();
+      expect(chats[totalChats - 1].updatedAt).not.toBeNull();
+    };
+
+    it('chat', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: telegramChat,
+          date: new Date().getTime(),
+        };
+        sendMessage(message);
+      });
+
+      await assert();
     });
 
-    const chats = await entityManager.find(Chat);
+    it('forward_from_chat', async () => {
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const chat = createTelegramChat();
+        chat.id = -100;
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: chat,
+          forward_from_chat: telegramChat,
+          date: new Date().getTime(),
+        };
+        sendMessage(message);
+      });
 
-    expect(chats.length).toEqual(1);
-    expect(chats[0]).toStrictEqual(
-      expect.objectContaining({
-        id: telegramChat.id,
-        type: telegramChat.type,
-      }),
-    );
-    expect(chats[0].createdAt).not.toBeNull();
-    expect(chats[0].updatedAt).not.toBeNull();
+      await assert(2);
+    });
   });
 
   it('update chat in db if exists', async () => {
