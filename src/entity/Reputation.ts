@@ -24,7 +24,7 @@ export class Reputation {
   @JoinColumn()
   user: User;
 
-  @OneToOne(() => Chat)
+  @ManyToOne(() => Chat)
   @JoinColumn()
   chat: Chat;
 
