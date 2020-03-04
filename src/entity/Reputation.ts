@@ -21,8 +21,15 @@ export class Reputation {
     () => User,
     user => user.reputations,
   )
-  @JoinColumn()
-  user: User;
+  @JoinColumn({ name: 'from_user_id' })
+  from_user: User;
+
+  @ManyToOne(
+    () => User,
+    user => user.reputations,
+  )
+  @JoinColumn({ name: 'to_user_id' })
+  to_user: User;
 
   @ManyToOne(() => Chat)
   @JoinColumn()
@@ -32,7 +39,7 @@ export class Reputation {
   @JoinColumn()
   message: Message;
 
-  @Column({ default: 1 })
+  @Column({ default: 1, nullable: false })
   value: number;
 
   @Column()
