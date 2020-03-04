@@ -1,5 +1,5 @@
 import Composer from 'telegraf/composer';
-import { EntityManager } from 'typeorm';
+import { EntityManager, FindConditions } from 'typeorm';
 import { User } from '../entity/User';
 import { User as TelegramUser, Chat as TelegramChat, Message as TelegramMessage } from 'telegram-typings';
 import { Chat } from '../entity/Chat';
@@ -7,7 +7,7 @@ import { Message } from '../entity/Message';
 
 export const ScriberBot = new Composer();
 ScriberBot.on('message', async (ctx, next) => {
-  await upsertChat(ctx.entityManager, ctx.message.chat);
+  const chat = await upsertChat(ctx.entityManager, ctx.message.chat);
 
   if (ctx.message.forward_from_chat) {
     await upsertChat(ctx.entityManager, ctx.message.forward_from_chat);
@@ -29,24 +29,28 @@ ScriberBot.on('message', async (ctx, next) => {
     await Promise.all(ctx.message.new_chat_members.map(member => upsertUser(ctx.entityManager, member)));
   }
 
-  await upsertMessage(ctx.entityManager, ctx.message);
+  await upsertMessage(ctx.entityManager, chat, ctx.message);
 
   next();
 });
 
-async function upsertMessage(entityManager: EntityManager, telegramMessage: TelegramMessage) {
-  const message = await entityManager.findOne(Message, telegramMessage.message_id);
+async function upsertMessage(entityManager: EntityManager, chat: Chat, telegramMessage: TelegramMessage) {
+  const message = await entityManager.findOne(Message, {
+    id: telegramMessage.message_id,
+    chat: chat.id,
+  } as FindConditions<Message>);
   if (message === undefined) {
     const newMessage = entityManager.create(Message, {
       id: telegramMessage.message_id,
       unixtime: telegramMessage.date,
       text: telegramMessage.text,
+      chat: chat,
     });
-    await entityManager.save(newMessage);
+    return await entityManager.save(newMessage);
   } else {
     message.unixtime = telegramMessage.date;
     message.text = telegramMessage.text;
-    await entityManager.save(message);
+    return await entityManager.save(message);
   }
 }
 
@@ -59,30 +63,16 @@ async function upsertUser(entityManager: EntityManager, telegramUser: TelegramUs
       lastName: telegramUser.last_name,
       username: telegramUser.username,
     });
-    await entityManager.save(newUser);
+    return await entityManager.save(newUser);
   } else {
     user.firstName = telegramUser.first_name;
     user.lastName = telegramUser.last_name;
     user.username = telegramUser.username;
-    await entityManager.save(user);
+    return await entityManager.save(user);
   }
 }
 
 async function upsertChat(entityManager: EntityManager, telegramChat: TelegramChat) {
-  const chat = await entityManager.findOne(Chat, telegramChat.id);
-  if (chat === undefined) {
-    const chat = entityManager.create(Chat, {
-      id: telegramChat.id,
-      type: telegramChat.type,
-      title: telegramChat.title,
-    });
-    await entityManager.save(chat);
-  } else {
-    chat.type = telegramChat.type;
-    chat.title = telegramChat.title;
-    await entityManager.save(chat);
-  }
-
   if (telegramChat.type === 'private') {
     await upsertUser(entityManager, {
       id: telegramChat.id,
@@ -91,5 +81,19 @@ async function upsertChat(entityManager: EntityManager, telegramChat: TelegramCh
       username: telegramChat.username,
       is_bot: false,
     });
+  }
+
+  const chat = await entityManager.findOne(Chat, telegramChat.id);
+  if (chat === undefined) {
+    const chat = entityManager.create(Chat, {
+      id: telegramChat.id,
+      type: telegramChat.type,
+      title: telegramChat.title,
+    });
+    return await entityManager.save(chat);
+  } else {
+    chat.type = telegramChat.type;
+    chat.title = telegramChat.title;
+    return await entityManager.save(chat);
   }
 }
