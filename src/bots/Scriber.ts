@@ -7,35 +7,42 @@ import { Message } from '../entity/Message';
 
 export const ScriberBot = new Composer();
 ScriberBot.on('message', async (ctx, next) => {
+  await handleMessage(ctx.entityManager, ctx.message);
+  next();
+});
+
+async function handleMessage(entityManager: EntityManager, message: TelegramMessage) {
   const messageFields: Partial<Message> = {};
-  const chat = await upsertChat(ctx.entityManager, ctx.message.chat);
+  const chat = await upsertChat(entityManager, message.chat);
 
-  if (ctx.message.forward_from_chat) {
-    messageFields.forwardFromChat = await upsertChat(ctx.entityManager, ctx.message.forward_from_chat);
+  if (message.forward_from_chat) {
+    messageFields.forwardFromChat = await upsertChat(entityManager, message.forward_from_chat);
   }
 
-  if (ctx.message.from) {
-    messageFields.sender = await upsertUser(ctx.entityManager, ctx.message.from);
+  if (message.from) {
+    messageFields.sender = await upsertUser(entityManager, message.from);
   }
 
-  if (ctx.message.forward_from) {
-    messageFields.forwardFrom = await upsertUser(ctx.entityManager, ctx.message.forward_from);
+  if (message.forward_from) {
+    messageFields.forwardFrom = await upsertUser(entityManager, message.forward_from);
   }
 
-  if (ctx.message.left_chat_member) {
-    messageFields.userLeft = await upsertUser(ctx.entityManager, ctx.message.left_chat_member);
+  if (message.left_chat_member) {
+    messageFields.userLeft = await upsertUser(entityManager, message.left_chat_member);
   }
 
-  if (ctx.message.new_chat_members && ctx.message.new_chat_members.length > 0) {
+  if (message.new_chat_members && message.new_chat_members.length > 0) {
     messageFields.usersJoined = [];
-    const users = await Promise.all(ctx.message.new_chat_members.map(member => upsertUser(ctx.entityManager, member)));
+    const users = await Promise.all(message.new_chat_members.map(member => upsertUser(entityManager, member)));
     users.forEach((user: User) => messageFields.usersJoined.push(user));
   }
 
-  await upsertMessage(ctx.entityManager, chat, ctx.message, messageFields);
+  if (message.reply_to_message) {
+    messageFields.replyToMessage = await handleMessage(entityManager, message.reply_to_message);
+  }
 
-  next();
-});
+  return await upsertMessage(entityManager, chat, message, messageFields);
+}
 
 async function upsertMessage(
   entityManager: EntityManager,

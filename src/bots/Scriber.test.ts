@@ -259,6 +259,43 @@ describe('Scriber', () => {
     expect(messages[0].createdAt).not.toBeNull();
     expect(messages[0].updatedAt).not.toBeNull();
   });
+
+  it('insert reply message into db if does not exists', async () => {
+    const telegramRepliedMessage = createTelegramMessage();
+    telegramRepliedMessage.message_id = 12345;
+    telegramRepliedMessage.text = 'some absurd thing here';
+    const telegramMessage = createTelegramMessage();
+    telegramMessage.text = 'hello world';
+    telegramMessage.reply_to_message = telegramRepliedMessage;
+    await runBot([ScriberBot], ({ sendMessage }) => {
+      sendMessage(telegramMessage);
+    });
+
+    const messages = await entityManager.find(Message, { relations: ['replyToMessage'] });
+
+    expect(messages.length).toEqual(2);
+    expect(messages[0]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramRepliedMessage.message_id,
+        unixtime: telegramRepliedMessage.date,
+        text: telegramRepliedMessage.text,
+      }),
+    );
+    expect(messages[0].createdAt).not.toBeNull();
+    expect(messages[0].updatedAt).not.toBeNull();
+    expect(messages[1]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramMessage.message_id,
+        unixtime: telegramMessage.date,
+        text: telegramMessage.text,
+        replyToMessage: expect.objectContaining({
+          id: telegramRepliedMessage.message_id,
+        }),
+      }),
+    );
+    expect(messages[1].createdAt).not.toBeNull();
+    expect(messages[1].updatedAt).not.toBeNull();
+  });
 });
 
 async function createUserInDb() {
