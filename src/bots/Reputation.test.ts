@@ -219,15 +219,19 @@ function createTelegramChat(typeOrUser?: string | TelegramUser): TelegramChat {
   };
 }
 
-let messageId = 1;
+function* idGenerator(): Generator<number> {
+  let index = 0;
+  while (true) yield index++;
+}
 
 function createTelegramMessage(
   chat: TelegramChat = createTelegramChat(),
   user: TelegramUser,
   text: string,
 ): TelegramMessage {
+  const idGen = idGenerator();
   return {
-    message_id: messageId++,
+    message_id: idGen.next().value,
     date: new Date().getTime(),
     chat: chat,
     from: user,
@@ -241,8 +245,9 @@ function createTelegramReply(
   text: string,
   reply_to_message: TelegramMessage,
 ): TelegramMessage {
+  const idGen = idGenerator();
   return {
-    message_id: messageId++,
+    message_id: idGen.next().value,
     date: new Date().getTime(),
     chat: chat,
     from: user,
