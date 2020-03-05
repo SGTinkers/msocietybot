@@ -19,33 +19,31 @@ describe('ReputationBot', () => {
 
     const assert = async msg => {
       const reputations = await entityManager.find(Reputation, {
-        relations: ['fromUser', 'toUser', 'chat', 'message'],
+        relations: ['chat', 'message'],
       });
 
       expect(reputations.length).toEqual(1);
-      expect(reputations[0]).toStrictEqual(
-        expect.objectContaining({
-          value: 1,
-          // Vote recipient
-          // toUser: {
-          //   id: msg.reply_to_message.from.id,
-          //   username: msg.reply_to_message.from.username,
-          // },
-          // Vote sender
-          // fromUser: {
-          //   id: msg.from.id,
-          //   username: msg.from.username,
-          // },
-          // Where it happened
-          chat: {
-            id: msg.chat.id,
-          },
-          // The message that created the vote.
-          message: {
-            id: msg.message_id,
-          },
-        }),
-      );
+      expect(reputations[0]).toMatchObject({
+        value: 1,
+        // Vote recipient
+        // toUser: {
+        //   id: msg.reply_to_message.from.id,
+        //   username: msg.reply_to_message.from.username,
+        // },
+        // Vote sender
+        // fromUser: {
+        //   id: msg.from.id,
+        //   username: msg.from.username,
+        // },
+        // Where it happened
+        chat: {
+          id: msg.chat.id,
+        },
+        // The message that created the vote.
+        message: {
+          id: msg.message_id,
+        },
+      });
       expect(reputations[0].createdAt).not.toBeNull();
       expect(reputations[0].updatedAt).not.toBeNull();
     };
@@ -191,33 +189,31 @@ describe('ReputationBot', () => {
 
     const assert = async msg => {
       const reputations = await entityManager.find(Reputation, {
-        relations: ['fromUser', 'toUser', 'chat', 'message'],
+        relations: ['chat', 'message'],
       });
 
       expect(reputations.length).toEqual(1);
-      expect(reputations[0]).toStrictEqual(
-        expect.objectContaining({
-          value: -1,
-          // Vote recipient
-          // toUser: {
-          //   id: msg.reply_to_message.from.id,
-          //   username: msg.reply_to_message.from.username,
-          // },
-          // Vote sender
-          // fromUser: {
-          //   id: msg.from.id,
-          //   username: msg.from.username,
-          // },
-          // Where it happened
-          chat: {
-            id: msg.chat.id,
-          },
-          // The message that created the vote.
-          message: {
-            id: msg.message_id,
-          },
-        }),
-      );
+      expect(reputations[0]).toMatchObject({
+        value: -1,
+        // Vote recipient
+        // toUser: {
+        //   id: msg.reply_to_message.from.id,
+        //   username: msg.reply_to_message.from.username,
+        // },
+        // Vote sender
+        // fromUser: {
+        //   id: msg.from.id,
+        //   username: msg.from.username,
+        // },
+        // Where it happened
+        chat: {
+          id: msg.chat.id,
+        },
+        // The message that created the vote.
+        message: {
+          id: msg.message_id,
+        },
+      });
       expect(reputations[0].createdAt).not.toBeNull();
       expect(reputations[0].updatedAt).not.toBeNull();
     };
