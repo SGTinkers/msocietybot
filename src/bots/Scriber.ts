@@ -66,6 +66,7 @@ async function upsertMessage(
   } else {
     message.unixtime = telegramMessage.date;
     message.text = telegramMessage.text;
+    message.chat = chat;
     Object.keys(partialMessage).forEach(k => (message[k] = partialMessage[k]));
     return await entityManager.save(message);
   }
