@@ -2,6 +2,7 @@ import { ReputationBot } from './Reputation';
 import { ScriberBot } from './Scriber';
 import { Message as TelegramMessage, User as TelegramUser, Chat as TelegramChat } from 'telegram-typings';
 import { Reputation } from '../entity/Reputation';
+import { User } from '../entity/User';
 
 describe('ReputationBot', () => {
   const userGen = telegramUserGenerator();
@@ -413,8 +414,14 @@ function createTelegramReply(
   };
 }
 
-async function createUserInDb(user: TelegramUser) {
+async function createUserInDb(telegramUser: TelegramUser) {
   try {
+    const user = entityManager.create(User, {
+      id: telegramUser.id,
+      firstName: telegramUser.first_name,
+      lastName: telegramUser.last_name,
+      username: telegramUser.username,
+    });
     return await entityManager.save(user);
   } catch (e) {
     console.error(e);
