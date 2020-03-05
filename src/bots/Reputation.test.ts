@@ -1,4 +1,5 @@
 import { ReputationBot } from './Reputation';
+import { ScriberBot } from './Scriber';
 import { Message as TelegramMessage, User as TelegramUser, Chat as TelegramChat } from 'telegram-typings';
 import { Reputation } from '../entity/Reputation';
 
@@ -37,7 +38,7 @@ describe('ReputationBot', () => {
     it('when user replies "thank you" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thank you', mainMessage);
 
-      await runBot([ReputationBot], ({ sendMessage }) => {
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
@@ -47,7 +48,7 @@ describe('ReputationBot', () => {
     it('when user replies "thanks" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
 
-      await runBot([ReputationBot], ({ sendMessage }) => {
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
@@ -57,7 +58,7 @@ describe('ReputationBot', () => {
     it('when user replies "👍" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍', mainMessage);
 
-      await runBot([ReputationBot], ({ sendMessage }) => {
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
@@ -67,7 +68,7 @@ describe('ReputationBot', () => {
     it('when user replies "💯" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '💯', mainMessage);
 
-      await runBot([ReputationBot], ({ sendMessage }) => {
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
@@ -77,7 +78,7 @@ describe('ReputationBot', () => {
     it('when user replies "👆" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👆', mainMessage);
 
-      await runBot([ReputationBot], ({ sendMessage }) => {
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
@@ -87,7 +88,7 @@ describe('ReputationBot', () => {
     it('when user replies "🆙" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🆙', mainMessage);
 
-      await runBot([ReputationBot], ({ sendMessage }) => {
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
@@ -97,7 +98,7 @@ describe('ReputationBot', () => {
     it('when user replies "🔥" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔥', mainMessage);
 
-      await runBot([ReputationBot], ({ sendMessage }) => {
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
@@ -109,7 +110,7 @@ describe('ReputationBot', () => {
     it('when user replies "thanks" + other things to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
 
-      await runBot([ReputationBot], ({ sendMessage }) => {
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
@@ -119,7 +120,7 @@ describe('ReputationBot', () => {
     it('when user replies "👍🏽" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏽', mainMessage);
 
-      await runBot([ReputationBot], ({ sendMessage }) => {
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
@@ -129,7 +130,7 @@ describe('ReputationBot', () => {
     it('when user replies "👍🏻" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏻', mainMessage);
 
-      await runBot([ReputationBot], ({ sendMessage }) => {
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
