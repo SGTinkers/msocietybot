@@ -5,8 +5,8 @@ import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
 
 describe('Scriber', () => {
-  const assertMessageContains = async <E = {}>(containing: E) => {
-    const messages = await entityManager.find(Message, { relations: Object.keys(containing) });
+  const assertMessageContains = async <E = {}>(containing: E, relations?: string[]) => {
+    const messages = await entityManager.find(Message, { relations: relations ? relations : Object.keys(containing) });
 
     expect(messages.length).toEqual(1);
     expect(messages[0]).toStrictEqual(expect.objectContaining(containing));
@@ -127,15 +127,15 @@ describe('Scriber', () => {
   describe('insert chat into db if does not exists', () => {
     const telegramChat = createTelegramChat();
 
-    const assert = async (totalChats = 1) => {
+    const assert = async (totalChats = 1, chat: TelegramChat = telegramChat) => {
       const chats = await entityManager.find(Chat);
 
       expect(chats.length).toEqual(totalChats);
       expect(chats[totalChats - 1]).toStrictEqual(
         expect.objectContaining({
-          id: telegramChat.id,
-          type: telegramChat.type,
-          title: telegramChat.title,
+          id: chat.id,
+          type: chat.type,
+          title: chat.title,
         }),
       );
       expect(chats[totalChats - 1].createdAt).not.toBeNull();
@@ -172,6 +172,26 @@ describe('Scriber', () => {
 
       await assert(2);
       await assertMessageContains({ forwardFromChat: expect.objectContaining({ id: telegramChat.id }) });
+    });
+
+    it('private', async () => {
+      const userAbu = createTelegramUser();
+      const privateChat = createTelegramChat(userAbu);
+      await runBot([ScriberBot], ({ sendMessage }) => {
+        const message: TelegramMessage = {
+          message_id: -1,
+          chat: privateChat,
+          date: new Date().getTime(),
+        };
+        sendMessage(message);
+      });
+
+      await assertMessageContains(
+        {
+          chat: expect.objectContaining({ user: expect.objectContaining({ id: userAbu.id }) }),
+        },
+        ['chat', 'chat.user'],
+      );
     });
   });
 

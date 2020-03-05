@@ -90,8 +90,9 @@ async function upsertUser(entityManager: EntityManager, telegramUser: TelegramUs
 }
 
 async function upsertChat(entityManager: EntityManager, telegramChat: TelegramChat) {
+  const partialChat: Partial<Chat> = {};
   if (telegramChat.type === 'private') {
-    await upsertUser(entityManager, {
+    partialChat.user = await upsertUser(entityManager, {
       id: telegramChat.id,
       first_name: telegramChat.first_name,
       last_name: telegramChat.last_name,
@@ -106,11 +107,13 @@ async function upsertChat(entityManager: EntityManager, telegramChat: TelegramCh
       id: telegramChat.id,
       type: telegramChat.type,
       title: telegramChat.title,
+      ...partialChat,
     });
     return await entityManager.save(chat);
   } else {
     chat.type = telegramChat.type;
     chat.title = telegramChat.title;
+    Object.keys(partialChat).forEach(k => (chat[k] = partialChat[k]));
     return await entityManager.save(chat);
   }
 }
