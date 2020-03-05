@@ -1,7 +1,7 @@
 import { config as dotenv } from 'dotenv';
 dotenv();
 import 'reflect-metadata';
-import { unlinkSync, rmdirSync } from 'fs';
+import { rmdirSync } from 'fs';
 import { uuid } from 'uuidv4';
 import { createApp, createConnection } from './app';
 import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock';
@@ -10,16 +10,18 @@ import { getManager } from 'typeorm';
 
 const TESTDB_BASE_DIR = './.testdb';
 
+beforeAll(() => {
+  try {
+    rmdirSync(TESTDB_BASE_DIR, { recursive: true });
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+});
+
 beforeEach(async () => {
   process.env.BOT_TOKEN = undefined;
 
   const name = uuid();
   const database = `${TESTDB_BASE_DIR}/${name}.db`;
-
-  try {
-    unlinkSync(database);
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
 
   const connection = await createConnection({
     // NOTE: When creating migration for test, ensure to delete all lines related to temporary_messages
@@ -39,7 +41,12 @@ beforeEach(async () => {
     const app = createApp(connection, bots);
     await app.launch();
     global['app'] = app;
-    await new Promise(r => setTimeout(r, options?.timeout ?? 200));
+
+    await new Promise(r =>
+      setTimeout(() => {
+        app.stop(r);
+      }, options?.timeout ?? 100),
+    );
 
     const unconsumed = unconsumedMocks();
     if (unconsumed.length > 0) {
@@ -62,11 +69,4 @@ afterEach(async () => {
     process.exit(1);
   }
   cleanUpTelegramMock();
-});
-
-afterAll(() => {
-  try {
-    rmdirSync(TESTDB_BASE_DIR, { recursive: true });
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
 });
