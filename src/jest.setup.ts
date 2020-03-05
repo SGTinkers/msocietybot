@@ -22,7 +22,8 @@ beforeEach(async () => {
   } catch (e) {}
 
   const connection = await createConnection({
-    synchronize: true,
+    // NOTE: When creating migration for test, ensure to delete all lines related to temporary_messages
+    migrations: ['src/testUtils/migration/**/*.ts'],
     type: 'sqlite',
     name: name,
     database: database,
@@ -50,12 +51,13 @@ beforeEach(async () => {
 
   global['runBot'] = runBot;
   global['entityManager'] = getManager(name);
+  global['testSetupCompleted'] = true;
 });
 
 afterEach(async () => {
   if (global['app']) {
     await global['app'].stop();
-  } else {
+  } else if (global['testSetupCompleted']) {
     // used when the test gets stuck, comment it out (if test behaves weird) to debug
     process.exit(1);
   }
