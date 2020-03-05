@@ -1,40 +1,48 @@
 import Composer from 'telegraf/composer';
 import { EntityManager, FindConditions } from 'typeorm';
 import { User } from '../entity/User';
-import { User as TelegramUser, Chat as TelegramChat, Message as TelegramMessage } from 'telegram-typings';
+import { Chat as TelegramChat, Message as TelegramMessage, User as TelegramUser } from 'telegram-typings';
 import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
 
 export const ScriberBot = new Composer();
 ScriberBot.on('message', async (ctx, next) => {
+  const messageFields: Partial<Message> = {};
   const chat = await upsertChat(ctx.entityManager, ctx.message.chat);
 
   if (ctx.message.forward_from_chat) {
-    await upsertChat(ctx.entityManager, ctx.message.forward_from_chat);
+    messageFields.forwardFromChat = await upsertChat(ctx.entityManager, ctx.message.forward_from_chat);
   }
 
   if (ctx.message.from) {
-    await upsertUser(ctx.entityManager, ctx.message.from);
+    messageFields.sender = await upsertUser(ctx.entityManager, ctx.message.from);
   }
 
   if (ctx.message.forward_from) {
-    await upsertUser(ctx.entityManager, ctx.message.forward_from);
+    messageFields.forwardFrom = await upsertUser(ctx.entityManager, ctx.message.forward_from);
   }
 
   if (ctx.message.left_chat_member) {
-    await upsertUser(ctx.entityManager, ctx.message.left_chat_member);
+    messageFields.userLeft = await upsertUser(ctx.entityManager, ctx.message.left_chat_member);
   }
 
   if (ctx.message.new_chat_members && ctx.message.new_chat_members.length > 0) {
-    await Promise.all(ctx.message.new_chat_members.map(member => upsertUser(ctx.entityManager, member)));
+    messageFields.usersJoined = [];
+    const users = await Promise.all(ctx.message.new_chat_members.map(member => upsertUser(ctx.entityManager, member)));
+    users.forEach((user: User) => messageFields.usersJoined.push(user));
   }
 
-  await upsertMessage(ctx.entityManager, chat, ctx.message);
+  await upsertMessage(ctx.entityManager, chat, ctx.message, messageFields);
 
   next();
 });
 
-async function upsertMessage(entityManager: EntityManager, chat: Chat, telegramMessage: TelegramMessage) {
+async function upsertMessage(
+  entityManager: EntityManager,
+  chat: Chat,
+  telegramMessage: TelegramMessage,
+  partialMessage: Partial<Message> = {},
+) {
   const message = await entityManager.findOne(Message, {
     id: telegramMessage.message_id,
     chat: chat.id,
@@ -45,11 +53,13 @@ async function upsertMessage(entityManager: EntityManager, chat: Chat, telegramM
       unixtime: telegramMessage.date,
       text: telegramMessage.text,
       chat: chat,
+      ...partialMessage,
     });
     return await entityManager.save(newMessage);
   } else {
     message.unixtime = telegramMessage.date;
     message.text = telegramMessage.text;
+    Object.keys(partialMessage).forEach(k => (message[k] = partialMessage[k]));
     return await entityManager.save(message);
   }
 }

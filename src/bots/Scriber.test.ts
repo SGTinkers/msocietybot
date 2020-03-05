@@ -5,6 +5,13 @@ import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
 
 describe('Scriber', () => {
+  const assertMessageContains = async <E = {}>(containing: E) => {
+    const messages = await entityManager.find(Message, { relations: Object.keys(containing) });
+
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toStrictEqual(expect.objectContaining(containing));
+  };
+
   describe('insert user into db if does not exists', () => {
     const userAbu = createTelegramUser();
 
@@ -36,6 +43,7 @@ describe('Scriber', () => {
       });
 
       await assert();
+      await assertMessageContains({ sender: expect.objectContaining({ id: userAbu.id }) });
     });
 
     it('forward_from', async () => {
@@ -50,6 +58,7 @@ describe('Scriber', () => {
       });
 
       await assert();
+      await assertMessageContains({ forwardFrom: expect.objectContaining({ id: userAbu.id }) });
     });
 
     it('new_chat_members', async () => {
@@ -64,6 +73,7 @@ describe('Scriber', () => {
       });
 
       await assert();
+      await assertMessageContains({ usersJoined: [expect.objectContaining({ id: userAbu.id })] });
     });
 
     it('left_chat_member', async () => {
@@ -78,6 +88,7 @@ describe('Scriber', () => {
       });
 
       await assert();
+      await assertMessageContains({ userLeft: expect.objectContaining({ id: userAbu.id }) });
     });
   });
 
@@ -142,6 +153,7 @@ describe('Scriber', () => {
       });
 
       await assert();
+      await assertMessageContains({ chat: expect.objectContaining({ id: telegramChat.id }) });
     });
 
     it('forward_from_chat', async () => {
@@ -159,6 +171,7 @@ describe('Scriber', () => {
       });
 
       await assert(2);
+      await assertMessageContains({ forwardFromChat: expect.objectContaining({ id: telegramChat.id }) });
     });
   });
 
