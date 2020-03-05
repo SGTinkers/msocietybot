@@ -13,8 +13,15 @@ This project is rewritten to Typescript from Go: https://gitlab.com/msociety/mso
 
 1. Run `npm i` command
 2. Copy `env.sample` to `.env`
-2. Setup database settings inside `.env` file
-3. Run `npm start` command
+3. Setup database settings inside `.env` file
+4. [Create new bot](https://core.telegram.org/bots#6-botfather) and add token to `.env` file
+5. Run `npm start` command
+
+### Output verbose logging
+You can turn on debug (verbose) logging via supplying the env `DEBUG`:
+```bash
+$ DEBUG=telegraf:client,msocietybot npm run start
+```
 
 ### Running (with Docker)
 
@@ -31,12 +38,6 @@ $ docker-compose up
 ### Running tests
 ```bash
 $ npm run test
-```
-
-### Output verbose logging
-You can turn on debug (verbose) logging via supplying the env `DEBUG`:
-```bash
-$ DEBUG=telegraf:client,msocietybot npm run start
 ```
 
 ### Migration scripts
