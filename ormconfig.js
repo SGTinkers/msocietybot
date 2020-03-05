@@ -3,7 +3,7 @@
 const { SnakeNamingStrategy } = require('typeorm-naming-strategies');
 
 module.exports = {
-  type: 'postgres',
+  type: process.env.TYPEORM_TYPE || 'postgres',
   host: process.env.POSTGRES_HOST,
   port: process.env.POSTGRES_PORT,
   username: process.env.POSTGRES_USERNAME,
@@ -13,11 +13,11 @@ module.exports = {
   logging: false,
   namingStrategy: new SnakeNamingStrategy(),
   entities: ['src/entity/**/*.ts'],
-  migrations: ['src/migration/**/*.ts'],
+  migrations: [process.env.TYPEORM_MIGRATIONS || 'src/migration/**/*.ts'],
   subscribers: ['src/subscriber/**/*.ts'],
   cli: {
     entitiesDir: 'src/entity',
-    migrationsDir: 'src/migration',
+    migrationsDir: process.env.TYPEORM_MIGRATION_DIR || 'src/migration',
     subscribersDir: 'src/subscriber',
   },
 };

@@ -1,7 +1,7 @@
 import { config as dotenv } from 'dotenv';
 dotenv();
 import 'reflect-metadata';
-import { unlinkSync, rmdirSync } from 'fs';
+import { rmdirSync } from 'fs';
 import { uuid } from 'uuidv4';
 import { createApp, createConnection } from './app';
 import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock';
@@ -10,19 +10,22 @@ import { getManager } from 'typeorm';
 
 const TESTDB_BASE_DIR = './.testdb';
 
+beforeAll(() => {
+  try {
+    rmdirSync(TESTDB_BASE_DIR, { recursive: true });
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+});
+
 beforeEach(async () => {
   process.env.BOT_TOKEN = undefined;
 
   const name = uuid();
   const database = `${TESTDB_BASE_DIR}/${name}.db`;
 
-  try {
-    unlinkSync(database);
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
-
   const connection = await createConnection({
-    synchronize: true,
+    // NOTE: When creating migration for test, ensure to delete all lines related to temporary_messages
+    migrations: ['src/testUtils/migration/**/*.ts'],
     type: 'sqlite',
     name: name,
     database: database,
@@ -38,7 +41,12 @@ beforeEach(async () => {
     const app = createApp(connection, bots);
     await app.launch();
     global['app'] = app;
-    await new Promise(r => setTimeout(r, options?.timeout ?? 100));
+
+    await new Promise(r =>
+      setTimeout(() => {
+        app.stop(r);
+      }, options?.timeout ?? 100),
+    );
 
     const unconsumed = unconsumedMocks();
     if (unconsumed.length > 0) {
@@ -50,21 +58,15 @@ beforeEach(async () => {
 
   global['runBot'] = runBot;
   global['entityManager'] = getManager(name);
+  global['testSetupCompleted'] = true;
 });
 
 afterEach(async () => {
   if (global['app']) {
     await global['app'].stop();
-  } else {
+  } else if (global['testSetupCompleted']) {
     // used when the test gets stuck, comment it out (if test behaves weird) to debug
     process.exit(1);
   }
   cleanUpTelegramMock();
-});
-
-afterAll(() => {
-  try {
-    rmdirSync(TESTDB_BASE_DIR, { recursive: true });
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
 });

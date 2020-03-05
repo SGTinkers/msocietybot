@@ -59,6 +59,7 @@ export class Message {
   @ManyToOne(
     () => Chat,
     chat => chat.messages,
+    { primary: true },
   )
   chat: Chat;
 
