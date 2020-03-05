@@ -2,8 +2,6 @@ import Composer from 'telegraf/composer';
 import { EntityManager, LessThan } from 'typeorm';
 import { Reputation } from '../entity/Reputation';
 import { User as TelegramUser, Chat as TelegramChat, Message as TelegramMessage } from 'telegram-typings';
-// import { User } from '../entity/User';
-// import { Chat } from '../entity/Chat';
 
 const bot = new Composer();
 
@@ -187,7 +185,7 @@ const insertReputation = async (
   const newReputation = entityManager.create(Reputation.name, {
     from_user: sender.id,
     to_user: recipient.id,
-    message: telegramMessage.message_id,
+    message: { id: telegramMessage.message_id, chat: telegramChat.id },
     chat: telegramChat.id,
     value,
   });
