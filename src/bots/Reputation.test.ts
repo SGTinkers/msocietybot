@@ -16,13 +16,33 @@ describe('ReputationBot', () => {
       'amazingly interesting message sent by me!',
     );
 
-    const assert = async () => {
-      const reputations = await entityManager.find(Reputation);
+    const assert = async msg => {
+      const reputations = await entityManager.find(Reputation, {
+        relations: ['fromUser', 'toUser', 'chat', 'message'],
+      });
 
       expect(reputations.length).toEqual(1);
       expect(reputations[0]).toStrictEqual(
         expect.objectContaining({
           value: 1,
+          // Vote recipient
+          toUser: {
+            id: msg.reply_to_message.from.id,
+            username: msg.reply_to_message.from.id,
+          },
+          // Vote sender
+          fromUser: {
+            id: msg.from.id,
+            username: msg.from.username,
+          },
+          // Where it happened
+          chat: {
+            id: msg.chat.id,
+          },
+          // The message that created the vote.
+          message: {
+            id: msg.message_id,
+          },
         }),
       );
       expect(reputations[0].createdAt).not.toBeNull();
@@ -39,7 +59,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert();
+      await assert(triggerMessage);
     });
     it('when user replies "thanks" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
@@ -49,7 +69,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert();
+      await assert(triggerMessage);
     });
     it('when user replies "👍" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍', mainMessage);
@@ -59,7 +79,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert();
+      await assert(triggerMessage);
     });
     it('when user replies "💯" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '💯', mainMessage);
@@ -69,7 +89,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert();
+      await assert(triggerMessage);
     });
     it('when user replies "👆" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👆', mainMessage);
@@ -79,7 +99,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert();
+      await assert(triggerMessage);
     });
     it('when user replies "🆙" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🆙', mainMessage);
@@ -89,7 +109,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert();
+      await assert(triggerMessage);
     });
     it('when user replies "🔥" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔥', mainMessage);
@@ -99,19 +119,24 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert();
+      await assert(triggerMessage);
     });
 
     // Testing other edge cases
     it('when user replies "thanks" + other things to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
+      const triggerMessage: TelegramMessage = createTelegramReply(
+        thisChat,
+        senderUser,
+        '123zxcthanksas-flj',
+        mainMessage,
+      );
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
-      await assert();
+      await assert(triggerMessage);
     });
     it('when user replies "👍🏽" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏽', mainMessage);
@@ -121,7 +146,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert();
+      await assert(triggerMessage);
     });
     it('when user replies "👍🏻" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏻', mainMessage);
@@ -131,35 +156,137 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert();
+      await assert(triggerMessage);
     });
     // it('when user has enough votes in their quota', () => { });
   });
 
-  // describe('decreases reputation', () => {
-  //   const mainMessage: TelegramMessage = createTelegramMessage(
-  //     thisChat,
-  //     recipientUser,
-  //     'terribly bad message shared by me',
-  //   );
+  describe('decreases reputation', () => {
+    const mainMessage: TelegramMessage = createTelegramMessage(
+      thisChat,
+      recipientUser,
+      'terribly bad message shared by me',
+    );
 
-  //   const assert = async msg => {
-  //     const reputations = await entityManager.find(Reputation);
+    const assert = async msg => {
+      const reputations = await entityManager.find(Reputation, {
+        relations: ['fromUser', 'toUser', 'chat', 'message'],
+      });
 
-  //     expect(reputations.length).toEqual(1);
-  //     expect(reputations[0]).toStrictEqual(
-  //       expect.objectContaining({
-  //         from_user: senderUser.id,
-  //         to_user: recipientUser.id,
-  //         message: msg.message_id,
-  //         chat: thisChat.id,
-  //         value: -1,
-  //       }),
-  //     );
-  //     expect(reputations[0].createdAt).not.toBeNull();
-  //     expect(reputations[0].updatedAt).not.toBeNull();
-  //   };
-  // });
+      expect(reputations.length).toEqual(1);
+      expect(reputations[0]).toStrictEqual(
+        expect.objectContaining({
+          value: -1,
+          // Vote recipient
+          toUser: {
+            id: msg.reply_to_message.from.id,
+            username: msg.reply_to_message.from.id,
+          },
+          // Vote sender
+          fromUser: {
+            id: msg.from.id,
+            username: msg.from.username,
+          },
+          // Where it happened
+          chat: {
+            id: msg.chat.id,
+          },
+          // The message that created the vote.
+          message: {
+            id: msg.message_id,
+          },
+        }),
+      );
+      expect(reputations[0].createdAt).not.toBeNull();
+      expect(reputations[0].updatedAt).not.toBeNull();
+    };
+
+    // Testing main tokens:
+    // /👎|👇|🔽|boo|eww/
+    it('when user replies "👎" to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👎', mainMessage);
+
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      await assert(triggerMessage);
+    });
+    it('when user replies "👇" to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👇', mainMessage);
+
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      await assert(triggerMessage);
+    });
+    it('when user replies "🔽" to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔽', mainMessage);
+
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      await assert(triggerMessage);
+    });
+    it('when user replies "boo" to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
+
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      await assert(triggerMessage);
+    });
+    it('when user replies "eww" to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'eww', mainMessage);
+
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      await assert(triggerMessage);
+    });
+
+    // Testing other edge cases
+    it('when user replies "👎🏾" to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👎🏾', mainMessage);
+
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      await assert(triggerMessage);
+    });
+    it('when user replies "👇🏾" to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👇🏾', mainMessage);
+
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      await assert(triggerMessage);
+    });
+
+    it('when user replies "boo" + other things to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boooo!', mainMessage);
+
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      await assert(triggerMessage);
+    });
+  });
 
   // describe('does not change reputation', () => {
   //   it('when a user replies to themselves', () => { });
