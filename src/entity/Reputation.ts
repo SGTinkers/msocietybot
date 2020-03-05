@@ -22,14 +22,14 @@ export class Reputation {
     user => user.reputations,
   )
   @JoinColumn({ name: 'from_user_id' })
-  from_user: User;
+  fromUser: User;
 
   @ManyToOne(
     () => User,
     user => user.reputations,
   )
   @JoinColumn({ name: 'to_user_id' })
-  to_user: User;
+  toUser: User;
 
   @ManyToOne(() => Chat)
   @JoinColumn()

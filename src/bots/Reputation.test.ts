@@ -16,16 +16,12 @@ describe('ReputationBot', () => {
       'amazingly interesting message sent by me!',
     );
 
-    const assert = async msg => {
+    const assert = async () => {
       const reputations = await entityManager.find(Reputation);
 
       expect(reputations.length).toEqual(1);
       expect(reputations[0]).toStrictEqual(
         expect.objectContaining({
-          from_user: senderUser.id,
-          to_user: recipientUser.id, // Not sure about this one
-          message: msg.message_id,
-          chat: thisChat.id,
           value: 1,
         }),
       );
@@ -43,7 +39,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert(triggerMessage);
+      await assert();
     });
     it('when user replies "thanks" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
@@ -53,7 +49,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert(triggerMessage);
+      await assert();
     });
     it('when user replies "👍" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍', mainMessage);
@@ -63,7 +59,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert(triggerMessage);
+      await assert();
     });
     it('when user replies "💯" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '💯', mainMessage);
@@ -73,7 +69,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert(triggerMessage);
+      await assert();
     });
     it('when user replies "👆" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👆', mainMessage);
@@ -83,7 +79,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert(triggerMessage);
+      await assert();
     });
     it('when user replies "🆙" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🆙', mainMessage);
@@ -93,7 +89,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert(triggerMessage);
+      await assert();
     });
     it('when user replies "🔥" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔥', mainMessage);
@@ -103,7 +99,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert(triggerMessage);
+      await assert();
     });
 
     // Testing other edge cases
@@ -115,7 +111,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert(triggerMessage);
+      await assert();
     });
     it('when user replies "👍🏽" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏽', mainMessage);
@@ -125,7 +121,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert(triggerMessage);
+      await assert();
     });
     it('when user replies "👍🏻" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏻', mainMessage);
@@ -135,7 +131,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      await assert(triggerMessage);
+      await assert();
     });
     // it('when user has enough votes in their quota', () => { });
   });

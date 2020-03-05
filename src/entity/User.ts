@@ -67,13 +67,13 @@ export class User {
 
   @OneToMany(
     () => Reputation,
-    reputations => reputations.to_user,
+    reputations => reputations.toUser,
   )
   reputations: Reputation[];
 
   @OneToMany(
     () => Reputation,
-    reputations => reputations.from_user,
+    reputations => reputations.fromUser,
   )
   reputationsGiven: Reputation[];
 
