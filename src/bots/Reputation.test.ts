@@ -28,7 +28,7 @@ describe('ReputationBot', () => {
           // Vote recipient
           toUser: {
             id: msg.reply_to_message.from.id,
-            username: msg.reply_to_message.from.id,
+            username: msg.reply_to_message.from.username,
           },
           // Vote sender
           fromUser: {
@@ -53,6 +53,8 @@ describe('ReputationBot', () => {
     // /thank you|thanks|👍|💯|👆|🆙|🔥/
     it('when user replies "thank you" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thank you', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -63,6 +65,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "thanks" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -73,6 +77,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "👍" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -83,6 +89,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "💯" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '💯', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -93,6 +101,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "👆" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👆', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -103,6 +113,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "🆙" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🆙', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -113,6 +125,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "🔥" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔥', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -130,6 +144,8 @@ describe('ReputationBot', () => {
         '123zxcthanksas-flj',
         mainMessage,
       );
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -140,6 +156,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "👍🏽" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏽', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -150,6 +168,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "👍🏻" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏻', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -180,7 +200,7 @@ describe('ReputationBot', () => {
           // Vote recipient
           toUser: {
             id: msg.reply_to_message.from.id,
-            username: msg.reply_to_message.from.id,
+            username: msg.reply_to_message.from.username,
           },
           // Vote sender
           fromUser: {
@@ -205,6 +225,8 @@ describe('ReputationBot', () => {
     // /👎|👇|🔽|boo|eww/
     it('when user replies "👎" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👎', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -225,6 +247,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "🔽" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔽', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -235,6 +259,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "boo" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -245,6 +271,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "eww" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'eww', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -257,6 +285,8 @@ describe('ReputationBot', () => {
     // Testing other edge cases
     it('when user replies "👎🏾" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👎🏾', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -267,6 +297,8 @@ describe('ReputationBot', () => {
     });
     it('when user replies "👇🏾" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👇🏾', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -278,6 +310,8 @@ describe('ReputationBot', () => {
 
     it('when user replies "boo" + other things to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boooo!', mainMessage);
+      await createUserInDb(senderUser);
+      await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -377,4 +411,12 @@ function createTelegramReply(
     reply_to_message,
     text,
   };
+}
+
+async function createUserInDb(user: TelegramUser) {
+  try {
+    return await entityManager.save(user);
+  } catch (e) {
+    console.error(e);
+  }
 }
