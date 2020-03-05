@@ -12,7 +12,7 @@ const voteQuota = 3;
 const voteQuotaDuration = 24;
 const defaultVoteValue = 1;
 
-bot.hears(/thank you|thanks|👍|💯|👆|🆙/, async ctx => {
+bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/, async ctx => {
   if (ctx.message.reply_to_message !== undefined) {
     const sender = ctx.message.from;
     const recipient = ctx.message.reply_to_message.from;
@@ -96,7 +96,7 @@ bot.command('vote_quota', async ctx => {
     if (votes.length >= voteQuota) {
       ctx.replyWithMarkdown(
         `You have used your *${voteQuota}* votes in the last *${voteQuotaDuration}* hour window. \nYou will receive a new vote in *${duration.hours} hours* and *${duration.minutes} minutes*`,
-        { reply_to_message_id: ctx.message.message_id },
+        { reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null },
       );
     } else {
       const remainingQuota = voteQuota - votes.length;
@@ -105,6 +105,19 @@ bot.command('vote_quota', async ctx => {
       );
     }
   }
+});
+
+bot.command('reputation', async ctx => {
+  const globalScore = await getGlobalScore(ctx.entityManager, ctx.message.from);
+  let msg = `*${ctx.message.from.first_name}*, `;
+  if (ctx.chat.title) {
+    const localScore = await getReputationScore(ctx.entityManager, ctx.message.from, ctx.chat);
+    msg += `your reputation in this chat *(${ctx.chat.title})* is: *(${localScore})*\n`;
+  }
+  msg += `Your total reputation is *(${globalScore})*.`;
+  ctx.replyWithMarkdown(msg, {
+    reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null,
+  });
 });
 
 const getDuration = (start, end) => {
@@ -142,7 +155,21 @@ const getReputationScore = async (
   telegramChat: TelegramChat,
 ) => {
   const reputations = await entityManager.find(Reputation, {
-    where: { to_user: telegramUser.id, chat: telegramChat.id },
+    where: {
+      to_user: telegramUser.id,
+      chat: telegramChat.id,
+    },
+  });
+  let score = 0;
+  reputations.forEach(rep => (score += rep.value));
+  return score;
+};
+
+const getGlobalScore = async (entityManager: EntityManager, telegramUser: TelegramUser) => {
+  const reputations = await entityManager.find(Reputation, {
+    where: {
+      to_user: telegramUser.id,
+    },
   });
   let score = 0;
   reputations.forEach(rep => (score += rep.value));
