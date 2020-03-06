@@ -1,7 +1,7 @@
 import { config as dotenv } from 'dotenv';
 dotenv();
 import 'reflect-metadata';
-import { rmdirSync } from 'fs';
+import { rmdirSync, mkdirSync } from 'fs';
 import { uuid } from 'uuidv4';
 import { createApp, createConnection } from './app';
 import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock';
@@ -15,6 +15,8 @@ beforeAll(() => {
     rmdirSync(TESTDB_BASE_DIR, { recursive: true });
     // eslint-disable-next-line no-empty
   } catch (e) {}
+
+  mkdirSync(TESTDB_BASE_DIR);
 });
 
 beforeEach(async () => {
@@ -45,7 +47,7 @@ beforeEach(async () => {
     await new Promise(r =>
       setTimeout(() => {
         app.stop(r);
-      }, options?.timeout ?? 300),
+      }, options?.timeout ?? 400),
     );
 
     const unconsumed = unconsumedMocks();
