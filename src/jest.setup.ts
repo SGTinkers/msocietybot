@@ -47,7 +47,7 @@ beforeEach(async () => {
     await new Promise(r =>
       setTimeout(() => {
         app.stop(r);
-      }, options?.timeout ?? 400),
+      }, options?.timeout ?? 500),
     );
 
     const unconsumed = unconsumedMocks();
