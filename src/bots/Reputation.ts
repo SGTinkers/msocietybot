@@ -1,7 +1,7 @@
 import Composer from 'telegraf/composer';
 import { EntityManager, LessThan } from 'typeorm';
 import { Reputation } from '../entity/Reputation';
-import { User as TelegramUser, Chat as TelegramChat, Message as TelegramMessage } from 'telegram-typings';
+import { Chat as TelegramChat, Message as TelegramMessage, User as TelegramUser } from 'telegram-typings';
 
 const bot = new Composer();
 
@@ -18,18 +18,18 @@ bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/, async ctx => {
 
     // Can't vote for yourself :)
     if (recipient.id === sender.id) {
-      ctx.reply('Good try there but nope. 🙃', { reply_to_message_id: ctx.message.message_id });
+      await ctx.reply('Good try there but nope. 🙃', { reply_to_message_id: ctx.message.message_id });
     }
     // Can't vote for the bot.
     else if (recipient.id === ctx.botInfo.id) {
       // eslint-disable-next-line quotes
-      ctx.reply("🙂 I'm flattered but there's no point in licking my boots.", {
+      await ctx.reply("🙂 I'm flattered but there's no point in licking my boots.", {
         reply_to_message_id: ctx.message.message_id,
       });
     }
     // Does user have enough votes in their quota to give out?
     else if (!canVote) {
-      ctx.reply(
+      await ctx.reply(
         `You have already used up your vote quota of ${voteQuota} for the past ${voteQuotaDuration} hours. Please try again later!\nUse /vote_quota to check your quota.`,
         { reply_to_message_id: ctx.message.message_id },
       );
@@ -39,7 +39,7 @@ bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/, async ctx => {
       await insertReputation(ctx.entityManager, sender, recipient, ctx.chat, ctx.message, defaultVoteValue);
       const senderRep = await getReputationScore(ctx.entityManager, sender, ctx.chat);
       const recipientRep = await getReputationScore(ctx.entityManager, recipient, ctx.chat);
-      ctx.replyWithMarkdown(
+      await ctx.replyWithMarkdown(
         `*${sender.first_name}* (${senderRep}) has increased reputation of *${recipient.first_name}* (${recipientRep})`,
         { reply_to_message_id: ctx.message.message_id },
       );
@@ -55,18 +55,18 @@ bot.hears(/👎|👇|🔽|boo|eww/, async ctx => {
 
     // Can't vote for yourself :)
     if (recipient.id === sender.id) {
-      ctx.replyWithMarkdown('Are you _ok_?', { reply_to_message_id: ctx.message.message_id });
+      await ctx.replyWithMarkdown('Are you _ok_?', { reply_to_message_id: ctx.message.message_id });
     }
     // Can't vote for the bot.
     else if (recipient.id === ctx.botInfo.id) {
       // eslint-disable-next-line quotes
-      ctx.reply('🙂 Excuse me?', {
+      await ctx.reply('🙂 Excuse me?', {
         reply_to_message_id: ctx.message.message_id,
       });
     }
     // Does user have enough votes in their quota to give out?
     else if (!canVote) {
-      ctx.reply(
+      await ctx.reply(
         `You have already used up your vote quota of ${voteQuota} for the past ${voteQuotaDuration} hours. Please try again later!\nUse /vote_quota to check your quota.`,
         { reply_to_message_id: ctx.message.message_id },
       );
@@ -76,7 +76,7 @@ bot.hears(/👎|👇|🔽|boo|eww/, async ctx => {
       await insertReputation(ctx.entityManager, sender, recipient, ctx.chat, ctx.message, defaultVoteValue * -1);
       const senderRep = await getReputationScore(ctx.entityManager, sender, ctx.chat);
       const recipientRep = await getReputationScore(ctx.entityManager, recipient, ctx.chat);
-      ctx.replyWithMarkdown(
+      await ctx.replyWithMarkdown(
         `*${sender.first_name}* (${senderRep}) has decreased reputation of *${recipient.first_name}* (${recipientRep})`,
         { reply_to_message_id: ctx.message.message_id },
       );
@@ -92,13 +92,13 @@ bot.command('vote_quota', async ctx => {
     const duration = getDuration(new Date(nextVote), new Date());
 
     if (votes.length >= voteQuota) {
-      ctx.replyWithMarkdown(
+      await ctx.replyWithMarkdown(
         `You have used your *${voteQuota}* votes in the last *${voteQuotaDuration}* hour window. \nYou will receive a new vote in *${duration.hours} hours* and *${duration.minutes} minutes*`,
         { reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null },
       );
     } else {
       const remainingQuota = voteQuota - votes.length;
-      ctx.replyWithMarkdown(
+      await ctx.replyWithMarkdown(
         `You have ${remainingQuota} out of ${voteQuota} votes remaining. \nYou will receive a new vote in *${duration.hours} hours* and *${duration.minutes} minutes*`,
       );
     }
@@ -113,7 +113,7 @@ bot.command('reputation', async ctx => {
     msg += `your reputation in this chat *(${ctx.chat.title})* is: *(${localScore})*\n`;
   }
   msg += `Your total reputation is *(${globalScore})*.`;
-  ctx.replyWithMarkdown(msg, {
+  await ctx.replyWithMarkdown(msg, {
     reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null,
   });
 });
@@ -132,14 +132,12 @@ const getRecentVotes = async (entityManager: EntityManager, telegramUser: Telegr
   const now = new Date();
   const voteLimit = now.setHours(now.getHours() - hoursAgo);
 
-  const reputations = await entityManager.find(Reputation, {
+  return await entityManager.find(Reputation, {
     where: {
       from_user_id: telegramUser.id,
       created_at: LessThan(voteLimit),
     },
   });
-
-  return reputations;
 };
 
 const isAllowedToVote = async (entityManager: EntityManager, telegramUser: TelegramUser) => {
