@@ -13,6 +13,8 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+    environment:
+      DEBUG: msocietybot
   database:
     image: postgres:11-alpine
     container_name: postgres
@@ -25,6 +27,17 @@ services:
     env_file: .env
     environment:
       PGDATA: /var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 3000:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@msociety.tech
+      PGADMIN_DEFAULT_PASSWORD: password
+    networks:
+      - main_net
+    depends_on: 
+      - database
 
 networks:
   main_net:
