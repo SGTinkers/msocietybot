@@ -7,6 +7,7 @@ describe('ReputationBot', () => {
   const userGen = telegramUserGenerator();
   const senderUser = userGen.next().value;
   const recipientUser = userGen.next().value;
+  const botUser = userGen.next().value;
   const thisChat = createTelegramChat();
 
   describe('increases reputation', () => {
@@ -287,11 +288,51 @@ describe('ReputationBot', () => {
     });
   });
 
-  // describe('does not change reputation', () => {
-  //   it('when a user replies to themselves', () => { });
-  //   it('when a user replies to another bot', () => { });
-  //   it('when a user replies to this bot', () => { });
-  // });
+  describe('does not change reputation', () => {
+    const assert = async rowCount => {
+      const reputations = await entityManager.find(Reputation);
+      expect(reputations.length).toEqual(rowCount);
+    };
+
+    it('when a user replies to themselves', async () => {
+      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
+      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'reply one', mainMessage);
+
+      await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(replyMessage);
+      });
+      await assert(0);
+    });
+    it('when a user replies to another bot', async () => {
+      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
+      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'reply one', mainMessage);
+
+      await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(replyMessage);
+      });
+      await assert(0);
+    });
+
+    it('when a user exceeds quota', async () => {
+      const idGen = idGenerator();
+      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, recipientUser, 'i am so cool');
+      const replies: TelegramMessage[] = [];
+
+      // Assuming quota is 3. Voting 4 times would only allow 3 votes in.
+      for (let i = 0; i < 4; i++) {
+        replies.push(createTelegramReply(thisChat, senderUser, 'thanks', mainMessage, idGen.next().value));
+      }
+
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        replies.forEach(sendMessage);
+      });
+
+      await assert(3);
+    });
+  });
 });
 
 function* telegramUserGenerator(): Generator {
@@ -311,10 +352,10 @@ function* telegramUserGenerator(): Generator {
   };
   yield {
     id: 3,
-    is_bot: false,
+    is_bot: true,
     first_name: 'Uthman',
     last_name: 'Ibn Affan',
-    username: 'uthman_affan',
+    username: 'uthman_affan_bot',
   };
 }
 
@@ -342,10 +383,10 @@ function createTelegramChat(typeOrUser?: string | TelegramUser): TelegramChat {
 }
 
 // For use when chaining replies.
-// function* idGenerator(): Generator<number> {
-//   let index = 0;
-//   while (true) yield index++;
-// }
+function* idGenerator(): Generator<number> {
+  let index = 2;
+  while (true) yield index++;
+}
 
 function createTelegramMessage(
   chat: TelegramChat = createTelegramChat(),
