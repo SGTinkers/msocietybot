@@ -15,10 +15,9 @@ const TESTDB_BASE_DIR = './.testdb';
 beforeAll(() => {
   try {
     rmdirSync(TESTDB_BASE_DIR, { recursive: true });
+    mkdirSync(TESTDB_BASE_DIR);
     // eslint-disable-next-line no-empty
   } catch (e) {}
-
-  mkdirSync(TESTDB_BASE_DIR);
 });
 
 beforeEach(async () => {
@@ -49,7 +48,7 @@ beforeEach(async () => {
     await new Promise(r =>
       setTimeout(() => {
         app.stop(r);
-      }, options?.timeout ?? 300),
+      }, options?.timeout ?? 200),
     );
 
     const unconsumed = unconsumedMocks();
