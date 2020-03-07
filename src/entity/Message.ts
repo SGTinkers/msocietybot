@@ -53,13 +53,13 @@ export class Message {
   )
   replies: Message[];
 
-  @Column('bigint')
+  @Column({ type: 'bigint', nullable: false })
   unixtime: number;
 
   @ManyToOne(
     () => Chat,
     chat => chat.messages,
-    { primary: true },
+    { primary: true, nullable: false },
   )
   chat: Chat;
 
@@ -83,7 +83,7 @@ export class Message {
   @Column({ nullable: true })
   lastEdit: Date | null;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'simple-json', nullable: true })
   editHistory: string | null;
 
   @Column({ nullable: true })
@@ -233,10 +233,10 @@ export class Message {
   @Column('simple-json', { nullable: true })
   passportData: PassportData | null;
 
-  @Column()
+  @Column({ nullable: false })
   createdAt: Date;
 
-  @Column()
+  @Column({ nullable: false })
   updatedAt: Date;
 
   @Column({ nullable: true })

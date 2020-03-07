@@ -9,9 +9,10 @@ export class Permission {
   @ManyToOne(
     () => Role,
     role => role.permissions,
+    { nullable: false },
   )
   role: Role;
 
-  @Column()
+  @Column({ nullable: false })
   name: string;
 }

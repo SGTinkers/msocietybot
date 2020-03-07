@@ -77,10 +77,10 @@ export class User {
   )
   reputationsGiven: Reputation[];
 
-  @Column()
+  @Column({ nullable: false })
   createdAt: Date;
 
-  @Column()
+  @Column({ nullable: false })
   updatedAt: Date;
 
   @Column({ nullable: true })

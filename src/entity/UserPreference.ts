@@ -7,20 +7,20 @@ export class UserPreference {
   @ManyToOne(
     () => User,
     user => user.preferences,
-    { primary: true },
+    { primary: true, nullable: false },
   )
   user: User;
 
   @PrimaryColumn()
   key: string;
 
-  @Column()
+  @Column({ nullable: false })
   value: string;
 
-  @Column()
+  @Column({ nullable: false })
   createdAt: Date;
 
-  @Column()
+  @Column({ nullable: false })
   updatedAt: Date;
 
   @Column({ nullable: true })

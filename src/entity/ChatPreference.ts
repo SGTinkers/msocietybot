@@ -7,20 +7,20 @@ export class ChatPreference {
   @ManyToOne(
     () => Chat,
     chat => chat.preferences,
-    { primary: true },
+    { primary: true, nullable: false },
   )
   chat: Chat;
 
   @PrimaryColumn()
   key: string;
 
-  @Column()
+  @Column({ nullable: false })
   value: string;
 
-  @Column()
+  @Column({ nullable: false })
   createdAt: Date;
 
-  @Column()
+  @Column({ nullable: false })
   updatedAt: Date;
 
   @Column({ nullable: true })

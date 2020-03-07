@@ -7,8 +7,8 @@ export class Role {
   @PrimaryGeneratedColumn({ type: 'integer' })
   id: number;
 
-  @Column()
-  name: string | null;
+  @Column({ nullable: false })
+  name: string;
 
   @Column({ nullable: true })
   displayName: string | null;
@@ -28,10 +28,10 @@ export class Role {
   )
   users: User[];
 
-  @Column()
+  @Column({ nullable: false })
   createdAt: Date;
 
-  @Column()
+  @Column({ nullable: false })
   updatedAt: Date;
 
   @Column({ nullable: true })

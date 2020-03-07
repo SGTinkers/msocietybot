@@ -9,7 +9,7 @@ export class Chat {
   @PrimaryColumn('bigint')
   id: number;
 
-  @Column()
+  @Column({ nullable: false })
   type: string;
 
   @ManyToOne(
@@ -73,10 +73,10 @@ export class Chat {
   )
   migratedFromMessages: Message[];
 
-  @Column()
+  @Column({ nullable: false })
   createdAt: Date;
 
-  @Column()
+  @Column({ nullable: false })
   updatedAt: Date;
 
   @Column({ nullable: true })
