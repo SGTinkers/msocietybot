@@ -8,6 +8,8 @@ import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock'
 import { RunBot } from './types/testOnly';
 import { getManager } from 'typeorm';
 
+jest.retryTimes(3);
+
 const TESTDB_BASE_DIR = './.testdb';
 
 beforeAll(() => {
@@ -47,7 +49,7 @@ beforeEach(async () => {
     await new Promise(r =>
       setTimeout(() => {
         app.stop(r);
-      }, options?.timeout ?? 500),
+      }, options?.timeout ?? 300),
     );
 
     const unconsumed = unconsumedMocks();
