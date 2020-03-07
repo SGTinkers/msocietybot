@@ -180,14 +180,14 @@ const insertReputation = async (
   telegramMessage: TelegramMessage,
   value,
 ) => {
-  const newReputation = entityManager.create(Reputation.name, {
-    fromUser: sender.id,
-    toUser: recipient.id,
-    message: { id: telegramMessage.message_id, chat: telegramChat.id },
-    chat: telegramChat.id,
+  const newReputation = entityManager.create(Reputation, {
+    fromUser: { id: sender.id },
+    toUser: { id: recipient.id },
+    message: { id: telegramMessage.message_id, chat: { id: telegramChat.id } },
+    chat: { id: telegramChat.id },
     value,
   });
-  await entityManager.save(Reputation.name, newReputation);
+  await entityManager.save(Reputation, newReputation);
 };
 
 export { bot as ReputationBot };
