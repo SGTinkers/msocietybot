@@ -2,7 +2,6 @@ import { ReputationBot } from './Reputation';
 import { ScriberBot } from './Scriber';
 import { Message as TelegramMessage, User as TelegramUser, Chat as TelegramChat } from 'telegram-typings';
 import { Reputation } from '../entity/Reputation';
-// import { User } from '../entity/User';
 
 describe('ReputationBot', () => {
   const userGen = telegramUserGenerator();
@@ -19,31 +18,33 @@ describe('ReputationBot', () => {
 
     const assert = async msg => {
       const reputations = await entityManager.find(Reputation, {
-        relations: ['chat', 'message'],
+        relations: ['chat', 'message', 'fromUser', 'toUser'],
       });
 
       expect(reputations.length).toEqual(1);
-      expect(reputations[0]).toMatchObject({
-        value: 1,
-        // Vote recipient
-        // toUser: {
-        //   id: msg.reply_to_message.from.id,
-        //   username: msg.reply_to_message.from.username,
-        // },
-        // Vote sender
-        // fromUser: {
-        //   id: msg.from.id,
-        //   username: msg.from.username,
-        // },
-        // Where it happened
-        chat: {
-          id: msg.chat.id,
-        },
-        // The message that created the vote.
-        message: {
-          id: msg.message_id,
-        },
-      });
+      expect(reputations[0]).toStrictEqual(
+        expect.objectContaining({
+          value: 1,
+          // Vote recipient
+          toUser: expect.objectContaining({
+            id: msg.reply_to_message.from.id,
+            username: msg.reply_to_message.from.username,
+          }),
+          // Vote sender
+          fromUser: expect.objectContaining({
+            id: msg.from.id,
+            username: msg.from.username,
+          }),
+          // Where it happened
+          chat: expect.objectContaining({
+            id: msg.chat.id,
+          }),
+          // The message that created the vote.
+          message: expect.objectContaining({
+            id: msg.message_id,
+          }),
+        }),
+      );
       expect(reputations[0].createdAt).not.toBeNull();
       expect(reputations[0].updatedAt).not.toBeNull();
     };
@@ -52,8 +53,6 @@ describe('ReputationBot', () => {
     // /thank you|thanks|👍|💯|👆|🆙|🔥/
     it('when user replies "thank you" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thank you', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -64,8 +63,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "thanks" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -76,8 +73,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "👍" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -88,8 +83,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "💯" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '💯', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -100,8 +93,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "👆" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👆', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -112,8 +103,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "🆙" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🆙', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -124,8 +113,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "🔥" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔥', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -143,8 +130,6 @@ describe('ReputationBot', () => {
         '123zxcthanksas-flj',
         mainMessage,
       );
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -155,8 +140,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "👍🏽" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏽', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -167,8 +150,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "👍🏻" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏻', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -189,31 +170,33 @@ describe('ReputationBot', () => {
 
     const assert = async msg => {
       const reputations = await entityManager.find(Reputation, {
-        relations: ['chat', 'message'],
+        relations: ['chat', 'message', 'fromUser', 'toUser'],
       });
 
       expect(reputations.length).toEqual(1);
-      expect(reputations[0]).toMatchObject({
-        value: -1,
-        // Vote recipient
-        // toUser: {
-        //   id: msg.reply_to_message.from.id,
-        //   username: msg.reply_to_message.from.username,
-        // },
-        // Vote sender
-        // fromUser: {
-        //   id: msg.from.id,
-        //   username: msg.from.username,
-        // },
-        // Where it happened
-        chat: {
-          id: msg.chat.id,
-        },
-        // The message that created the vote.
-        message: {
-          id: msg.message_id,
-        },
-      });
+      expect(reputations[0]).toStrictEqual(
+        expect.objectContaining({
+          value: -1,
+          // Vote recipient
+          toUser: expect.objectContaining({
+            id: msg.reply_to_message.from.id,
+            username: msg.reply_to_message.from.username,
+          }),
+          // Vote sender
+          fromUser: expect.objectContaining({
+            id: msg.from.id,
+            username: msg.from.username,
+          }),
+          // Where it happened
+          chat: expect.objectContaining({
+            id: msg.chat.id,
+          }),
+          // The message that created the vote.
+          message: expect.objectContaining({
+            id: msg.message_id,
+          }),
+        }),
+      );
       expect(reputations[0].createdAt).not.toBeNull();
       expect(reputations[0].updatedAt).not.toBeNull();
     };
@@ -222,8 +205,6 @@ describe('ReputationBot', () => {
     // /👎|👇|🔽|boo|eww/
     it('when user replies "👎" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👎', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -244,8 +225,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "🔽" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔽', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -256,8 +235,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "boo" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -268,8 +245,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "eww" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'eww', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -282,8 +257,6 @@ describe('ReputationBot', () => {
     // Testing other edge cases
     it('when user replies "👎🏾" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👎🏾', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -294,9 +267,6 @@ describe('ReputationBot', () => {
     });
     it('when user replies "👇🏾" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👇🏾', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
-
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
@@ -307,8 +277,6 @@ describe('ReputationBot', () => {
 
     it('when user replies "boo" + other things to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boooo!', mainMessage);
-      // await createUserInDb(senderUser);
-      // await createUserInDb(recipientUser);
 
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -409,17 +377,3 @@ function createTelegramReply(
     text,
   };
 }
-
-// async function createUserInDb(telegramUser: TelegramUser) {
-//   try {
-//     const user = entityManager.create(User, {
-//       id: telegramUser.id,
-//       firstName: telegramUser.first_name,
-//       lastName: telegramUser.last_name,
-//       username: telegramUser.username,
-//     });
-//     return await entityManager.save(user);
-//   } catch (e) {
-//     console.error(e);
-//   }
-// }

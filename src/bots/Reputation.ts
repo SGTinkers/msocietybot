@@ -152,7 +152,7 @@ const getReputationScore = async (
 ) => {
   const reputations = await entityManager.find(Reputation, {
     where: {
-      to_user: telegramUser.id,
+      toUser: telegramUser.id,
       chat: telegramChat.id,
     },
   });
@@ -164,7 +164,7 @@ const getReputationScore = async (
 const getGlobalScore = async (entityManager: EntityManager, telegramUser: TelegramUser) => {
   const reputations = await entityManager.find(Reputation, {
     where: {
-      to_user: telegramUser.id,
+      toUser: telegramUser.id,
     },
   });
   let score = 0;
@@ -181,8 +181,8 @@ const insertReputation = async (
   value,
 ) => {
   const newReputation = entityManager.create(Reputation.name, {
-    from_user: sender.id,
-    to_user: recipient.id,
+    fromUser: sender.id,
+    toUser: recipient.id,
     message: { id: telegramMessage.message_id, chat: telegramChat.id },
     chat: telegramChat.id,
     value,
