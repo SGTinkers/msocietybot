@@ -54,6 +54,16 @@ jobs:
         tags: latest
         tag_names: true
         tag_semver: true
+    - name: Deploy Staging
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USERNAME }}
+        key: ${{ secrets.DEPLOY_KEY }}
+        script: |
+          podman stop msocietybot-staging || true
+          podman rm msocietybot-staging || true
+          podman run -d --name msocietybot-staging --env-file $HOME/staging.env --pod msocietybot-pod msociety/msocietybot
     - name: Notify Completed
       uses: appleboy/telegram-action@0.0.7
       if: success() || failure()
