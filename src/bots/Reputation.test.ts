@@ -294,9 +294,9 @@ describe('ReputationBot', () => {
       expect(reputations.length).toEqual(rowCount);
     };
 
-    it('when a user replies to themselves', async () => {
+    it('when a user sends "thanks" to themselves', async () => {
       const mainMessage: TelegramMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
-      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'reply one', mainMessage);
+      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
 
       await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -304,9 +304,30 @@ describe('ReputationBot', () => {
       });
       await assert(0);
     });
-    it('when a user replies to another bot', async () => {
+    it('when a user sends "thanks" to the bot', async () => {
       const mainMessage: TelegramMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
-      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'reply one', mainMessage);
+      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
+
+      await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(replyMessage);
+      });
+      await assert(0);
+    });
+
+    it('when a user sends "boo" to themselves', async () => {
+      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
+      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
+
+      await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(replyMessage);
+      });
+      await assert(0);
+    });
+    it('when a user sends "boo" to the bot', async () => {
+      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
+      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
 
       await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
         sendMessage(mainMessage);

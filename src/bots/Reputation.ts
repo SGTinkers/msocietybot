@@ -1,20 +1,15 @@
 import Composer from 'telegraf/composer';
-import { EntityManager, LessThan } from 'typeorm';
-import { Reputation } from '../entity/Reputation';
+import { EntityManager } from 'typeorm';
+import { Reputation, voteQuota, voteQuotaDuration, defaultVoteValue } from '../entity/Reputation';
 import { Chat as TelegramChat, Message as TelegramMessage, User as TelegramUser } from 'telegram-typings';
 
 const bot = new Composer();
-
-// TODO: Move this to some config file.
-const voteQuota = 3;
-const voteQuotaDuration = 24;
-const defaultVoteValue = 1;
 
 bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/, async ctx => {
   if (ctx.message.reply_to_message !== undefined) {
     const sender = ctx.message.from;
     const recipient = ctx.message.reply_to_message.from;
-    const canVote = await isAllowedToVote(ctx.entityManager, sender);
+    const canVote = await Reputation.isAllowedToVote(ctx.entityManager, sender);
 
     // Can't vote for yourself :)
     if (recipient.id === sender.id) {
@@ -37,8 +32,8 @@ bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/, async ctx => {
     // Can't vote for bots
     else if (!recipient.is_bot && canVote) {
       await insertReputation(ctx.entityManager, sender, recipient, ctx.chat, ctx.message, defaultVoteValue);
-      const senderRep = await getReputationScore(ctx.entityManager, sender, ctx.chat);
-      const recipientRep = await getReputationScore(ctx.entityManager, recipient, ctx.chat);
+      const senderRep = await Reputation.getLocalReputation(ctx.entityManager, sender, ctx.chat);
+      const recipientRep = await Reputation.getLocalReputation(ctx.entityManager, recipient, ctx.chat);
       await ctx.replyWithMarkdown(
         `*${sender.first_name}* (${senderRep}) has increased reputation of *${recipient.first_name}* (${recipientRep})`,
         { reply_to_message_id: ctx.message.message_id },
@@ -51,7 +46,7 @@ bot.hears(/👎|👇|🔽|boo|eww/, async ctx => {
   if (ctx.message.reply_to_message !== undefined) {
     const sender = ctx.message.from;
     const recipient = ctx.message.reply_to_message.from;
-    const canVote = await isAllowedToVote(ctx.entityManager, sender);
+    const canVote = await Reputation.isAllowedToVote(ctx.entityManager, sender);
 
     // Can't vote for yourself :)
     if (recipient.id === sender.id) {
@@ -74,8 +69,8 @@ bot.hears(/👎|👇|🔽|boo|eww/, async ctx => {
     // Can't vote for bots
     else if (!recipient.is_bot && canVote) {
       await insertReputation(ctx.entityManager, sender, recipient, ctx.chat, ctx.message, defaultVoteValue * -1);
-      const senderRep = await getReputationScore(ctx.entityManager, sender, ctx.chat);
-      const recipientRep = await getReputationScore(ctx.entityManager, recipient, ctx.chat);
+      const senderRep = await Reputation.getLocalReputation(ctx.entityManager, sender, ctx.chat);
+      const recipientRep = await Reputation.getLocalReputation(ctx.entityManager, recipient, ctx.chat);
       await ctx.replyWithMarkdown(
         `*${sender.first_name}* (${senderRep}) has decreased reputation of *${recipient.first_name}* (${recipientRep})`,
         { reply_to_message_id: ctx.message.message_id },
@@ -85,31 +80,28 @@ bot.hears(/👎|👇|🔽|boo|eww/, async ctx => {
 });
 
 bot.command('vote_quota', async ctx => {
-  const votes = await getRecentVotes(ctx.entityManager, ctx.message.from, voteQuotaDuration);
-  if (votes.length > 0) {
-    const lastVote = votes[0].createdAt;
-    const nextVote = lastVote.setHours(lastVote.getHours() + voteQuotaDuration);
-    const duration = getDuration(new Date(nextVote), new Date());
+  const { nextVote, votesGiven } = await Reputation.getVoteQuota(ctx.entityManager, ctx.message.from);
 
-    if (votes.length >= voteQuota) {
-      await ctx.replyWithMarkdown(
-        `You have used your *${voteQuota}* votes in the last *${voteQuotaDuration}* hour window. \nYou will receive a new vote in *${duration.hours} hours* and *${duration.minutes} minutes*`,
-        { reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null },
-      );
-    } else {
-      const remainingQuota = voteQuota - votes.length;
-      await ctx.replyWithMarkdown(
-        `You have ${remainingQuota} out of ${voteQuota} votes remaining. \nYou will receive a new vote in *${duration.hours} hours* and *${duration.minutes} minutes*`,
-      );
+  if (votesGiven >= voteQuota) {
+    await ctx.replyWithMarkdown(
+      `You have used your *${voteQuota}* votes in the last *${voteQuotaDuration}* hour window. \nYou will receive a new vote in *${nextVote.hours} hours* and *${nextVote.minutes} minutes*`,
+      { reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null },
+    );
+  } else {
+    const remainingQuota = voteQuota - votesGiven;
+    let msg = `You have ${remainingQuota} out of ${voteQuota} votes remaining.`;
+    if (nextVote) {
+      msg += `\nYou will receive a new vote in *${nextVote.hours} hours* and *${nextVote.minutes} minutes*`;
     }
+    await ctx.replyWithMarkdown(msg);
   }
 });
 
 bot.command('reputation', async ctx => {
-  const globalScore = await getGlobalScore(ctx.entityManager, ctx.message.from);
+  const globalScore = await Reputation.getGlobalReputation(ctx.entityManager, ctx.message.from);
   let msg = `*${ctx.message.from.first_name}*, `;
   if (ctx.chat.title) {
-    const localScore = await getReputationScore(ctx.entityManager, ctx.message.from, ctx.chat);
+    const localScore = await Reputation.getLocalReputation(ctx.entityManager, ctx.message.from, ctx.chat);
     msg += `your reputation in this chat *(${ctx.chat.title})* is: *(${localScore})*\n`;
   }
   msg += `Your total reputation is *(${globalScore})*.`;
@@ -117,60 +109,6 @@ bot.command('reputation', async ctx => {
     reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null,
   });
 });
-
-const getDuration = (start, end) => {
-  const msDiff = start.getTime() - end.getTime();
-  const minDiff = msDiff / 60000;
-  const hourDiff = Math.floor(msDiff / 3600000);
-  return {
-    hours: hourDiff,
-    minutes: Math.floor(minDiff - 60 * hourDiff),
-  };
-};
-
-const getRecentVotes = async (entityManager: EntityManager, telegramUser: TelegramUser, hoursAgo: number) => {
-  const now = new Date();
-  const voteLimit = now.setHours(now.getHours() - hoursAgo);
-
-  return await entityManager.find(Reputation, {
-    where: {
-      from_user_id: telegramUser.id,
-      created_at: LessThan(voteLimit),
-    },
-  });
-};
-
-const isAllowedToVote = async (entityManager: EntityManager, telegramUser: TelegramUser) => {
-  const reputations = await getRecentVotes(entityManager, telegramUser, voteQuotaDuration);
-  return reputations.length < voteQuota;
-};
-
-const getReputationScore = async (
-  entityManager: EntityManager,
-  telegramUser: TelegramUser,
-  telegramChat: TelegramChat,
-) => {
-  const reputations = await entityManager.find(Reputation, {
-    where: {
-      toUser: telegramUser.id,
-      chat: telegramChat.id,
-    },
-  });
-  let score = 0;
-  reputations.forEach(rep => (score += rep.value));
-  return score;
-};
-
-const getGlobalScore = async (entityManager: EntityManager, telegramUser: TelegramUser) => {
-  const reputations = await entityManager.find(Reputation, {
-    where: {
-      toUser: telegramUser.id,
-    },
-  });
-  let score = 0;
-  reputations.forEach(rep => (score += rep.value));
-  return score;
-};
 
 const insertReputation = async (
   entityManager: EntityManager,

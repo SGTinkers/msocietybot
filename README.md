@@ -26,10 +26,6 @@ $ DEBUG=telegraf:client,msocietybot npm run start
 ### Running (with Docker)
 
 ```bash
-# First time only:
-$ docker-compose run database # Shut down after database has been set up
-
-# Every other time:
 $ docker-compose up
 ```
 
