@@ -63,6 +63,7 @@ jobs:
         script: |
           podman stop msocietybot-staging || true
           podman rm msocietybot-staging || true
+          podman pull msociety/msocietybot
           podman run -d --name msocietybot-staging --env-file $HOME/staging.env --pod msocietybot-pod msociety/msocietybot
     - name: Notify Completed
       uses: appleboy/telegram-action@0.0.7
