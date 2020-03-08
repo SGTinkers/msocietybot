@@ -45,6 +45,15 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: coverage/coverage-final.json
         fail_ci_if_error: false
+    - name: Publish to Docker Hub
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: msociety/msocietybot
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        tags: latest
+        tag_names: true
+        tag_semver: true
     - name: Notify Completed
       uses: appleboy/telegram-action@0.0.7
       if: success() || failure()
@@ -53,4 +62,4 @@ jobs:
         token: ${{ secrets.TELEGRAM_TOKEN }}
         format: markdown
         message: CI completed with status ${{job.status}} for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
-  
+
