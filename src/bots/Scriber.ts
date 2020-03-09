@@ -108,6 +108,24 @@ async function upsertMessage(
   partialMessage.connectedWebsite = telegramMessage.connected_website;
   partialMessage.passportData = telegramMessage.passport_data;
 
+  if (telegramMessage.migrate_from_chat_id) {
+    const chat = await entityManager.findOne(Chat, {
+      id: telegramMessage.migrate_from_chat_id,
+    } as FindConditions<Chat>);
+    if (chat) {
+      partialMessage.migrateFromChat = chat;
+    }
+  }
+
+  if (telegramMessage.migrate_to_chat_id) {
+    const chat = await entityManager.findOne(Chat, {
+      id: telegramMessage.migrate_to_chat_id,
+    } as FindConditions<Chat>);
+    if (chat) {
+      partialMessage.migrateToChat = chat;
+    }
+  }
+
   const message = await entityManager.findOne(Message, {
     id: telegramMessage.message_id,
     chat: chat.id,

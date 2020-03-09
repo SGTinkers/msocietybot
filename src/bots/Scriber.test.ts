@@ -537,6 +537,64 @@ describe('Scriber', () => {
     expect(messages[0].createdAt).not.toBeNull();
     expect(messages[0].updatedAt).not.toBeNull();
   });
+
+  it('handle migration from', async () => {
+    const chat = await createChatInDb('group');
+    const telegramChat = createTelegramChat();
+    telegramChat.id = -2020;
+    const telegramMessage = createTelegramMessage(telegramChat);
+    telegramMessage.text = 'hello world';
+    telegramMessage.migrate_from_chat_id = chat.id;
+
+    await runBot([ScriberBot], ({ sendMessage }) => {
+      sendMessage(telegramMessage);
+    });
+
+    const messages = await entityManager.find(Message, { relations: ['migrateFromChat'] });
+
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramMessage.message_id,
+        unixtime: telegramMessage.date,
+        text: telegramMessage.text,
+        migrateFromChat: expect.objectContaining({
+          id: chat.id,
+        }),
+      } as Partial<Message>),
+    );
+    expect(messages[0].createdAt).not.toBeNull();
+    expect(messages[0].updatedAt).not.toBeNull();
+  });
+
+  it('handle migration to', async () => {
+    const chat = await createChatInDb('supergroup');
+    const telegramChat = createTelegramChat();
+    telegramChat.id = -2020;
+    const telegramMessage = createTelegramMessage(telegramChat);
+    telegramMessage.text = 'hello world';
+    telegramMessage.migrate_to_chat_id = chat.id;
+
+    await runBot([ScriberBot], ({ sendMessage }) => {
+      sendMessage(telegramMessage);
+    });
+
+    const messages = await entityManager.find(Message, { relations: ['migrateToChat'] });
+
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramMessage.message_id,
+        unixtime: telegramMessage.date,
+        text: telegramMessage.text,
+        migrateToChat: expect.objectContaining({
+          id: chat.id,
+        }),
+      } as Partial<Message>),
+    );
+    expect(messages[0].createdAt).not.toBeNull();
+    expect(messages[0].updatedAt).not.toBeNull();
+  });
 });
 
 async function createUserInDb() {
