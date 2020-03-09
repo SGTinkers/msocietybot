@@ -139,6 +139,18 @@ describe('ReputationBot', () => {
 
       await assert(triggerMessage);
     });
+    // Case insensitive should work
+    it('when user replies "ThAnKs" to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'ThAnKs', mainMessage);
+
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      await assert(triggerMessage);
+    });
+
     it('when user replies "👍🏽" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏽', mainMessage);
 
@@ -268,6 +280,18 @@ describe('ReputationBot', () => {
     });
     it('when user replies "👇🏾" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👇🏾', mainMessage);
+      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      await assert(triggerMessage);
+    });
+
+    // Case insensitive should work
+    it('when user replies "bOo" to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'bOo', mainMessage);
+
       await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);

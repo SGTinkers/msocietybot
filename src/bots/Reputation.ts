@@ -5,7 +5,7 @@ import { Chat as TelegramChat, Message as TelegramMessage, User as TelegramUser 
 
 const bot = new Composer();
 
-bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/, async ctx => {
+bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/i, async ctx => {
   if (ctx.message.reply_to_message !== undefined) {
     const sender = ctx.message.from;
     const recipient = ctx.message.reply_to_message.from;
@@ -42,7 +42,7 @@ bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/, async ctx => {
   }
 });
 
-bot.hears(/👎|👇|🔽|boo|eww/, async ctx => {
+bot.hears(/👎|👇|🔽|boo|eww/i, async ctx => {
   if (ctx.message.reply_to_message !== undefined) {
     const sender = ctx.message.from;
     const recipient = ctx.message.reply_to_message.from;
