@@ -93,7 +93,7 @@ export class Reputation {
       const lastVote = votes[0].createdAt;
       nextVote = lastVote.setHours(lastVote.getHours() + voteQuotaDuration);
     }
-    nextVote !== null ? getDuration(new Date(nextVote), new Date()) : null;
+    nextVote = nextVote !== null ? getDuration(new Date(nextVote), new Date()) : null;
     return { nextVote, votesGiven: votes.length };
   };
 
