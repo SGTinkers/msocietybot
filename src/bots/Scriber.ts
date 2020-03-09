@@ -10,6 +10,10 @@ ScriberBot.on('message', async (ctx, next) => {
   await handleMessage(ctx.entityManager, ctx.message);
   next();
 });
+ScriberBot.on('edited_message', async (ctx, next) => {
+  await handleMessage(ctx.entityManager, ctx.message);
+  next();
+});
 
 async function handleMessage(entityManager: EntityManager, message: TelegramMessage) {
   const messageFields: Partial<Message> = {};
@@ -99,6 +103,7 @@ async function upsertMessage(
     id: telegramMessage.message_id,
     chat: chat.id,
   } as FindConditions<Message>);
+
   if (message === undefined) {
     const newMessage = entityManager.create(Message, {
       id: telegramMessage.message_id,
@@ -109,6 +114,11 @@ async function upsertMessage(
     });
     return await entityManager.save(newMessage);
   } else {
+    if (telegramMessage.edit_date) {
+      message.editHistory = message.editHistory ? message.editHistory : [];
+      message.editHistory.push(JSON.parse(JSON.stringify(message)));
+      message.lastEdit = new Date(telegramMessage.edit_date);
+    }
     message.unixtime = telegramMessage.date;
     message.text = telegramMessage.text;
     message.chat = chat;

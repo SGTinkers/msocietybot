@@ -86,7 +86,7 @@ export class Message {
   lastEdit: Date | null;
 
   @Column({ type: 'simple-json', nullable: true })
-  editHistory: string | null;
+  editHistory: Message[] | null;
 
   @Column({ nullable: true })
   albumId: string | null;

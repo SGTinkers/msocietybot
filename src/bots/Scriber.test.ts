@@ -504,6 +504,39 @@ describe('Scriber', () => {
     expect(messages[0].createdAt).not.toBeNull();
     expect(messages[0].updatedAt).not.toBeNull();
   });
+
+  it('handle editing of message', async () => {
+    const telegramMessage = createTelegramMessage();
+    telegramMessage.text = 'hello world';
+    telegramMessage.edit_date = new Date().getTime();
+    const chat = await createChatInDb(telegramMessage.chat.type);
+    const originalMessage = await createMessageInDb(chat, { id: telegramMessage.message_id, text: 'original message' });
+
+    await runBot([ScriberBot], ({ sendMessage }) => {
+      sendMessage(telegramMessage);
+    });
+
+    const messages = await entityManager.find(Message);
+
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramMessage.message_id,
+        unixtime: telegramMessage.date,
+        text: telegramMessage.text,
+        lastEdit: new Date(telegramMessage.edit_date),
+        editHistory: expect.arrayContaining([
+          expect.objectContaining({
+            id: telegramMessage.message_id,
+            unixtime: originalMessage.unixtime,
+            text: originalMessage.text,
+          }),
+        ]),
+      } as Partial<Message>),
+    );
+    expect(messages[0].createdAt).not.toBeNull();
+    expect(messages[0].updatedAt).not.toBeNull();
+  });
 });
 
 async function createUserInDb() {
