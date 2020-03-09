@@ -35,9 +35,9 @@ beforeEach(async () => {
   });
 
   const runBot: RunBot = async (bots, setupMock, options) => {
-    const { messages, sendMessage, buildMocks, unconsumedMocks, whenBotSends } = initTelegramMock();
+    const { messages, sendMessage, sendEditedMessage, buildMocks, unconsumedMocks, whenBotSends } = initTelegramMock();
     if (setupMock) {
-      await setupMock({ whenBotSends, sendMessage });
+      await setupMock({ whenBotSends, sendMessage, sendEditedMessage });
     }
     buildMocks();
 

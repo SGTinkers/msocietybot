@@ -15,6 +15,7 @@ interface WhenBuilder {
 interface ActArgs {
   whenBotSends: (message: Message | string | RegExp) => WhenBuilder;
   sendMessage: (message: Message | string) => void;
+  sendEditedMessage: (message: Message | string) => void;
 }
 
 export type RunBot = (

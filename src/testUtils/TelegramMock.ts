@@ -82,6 +82,19 @@ export function initTelegramMock() {
     );
   };
 
+  const sendEditedMessage = (m: Message | string) => {
+    const message: Message = createUserMessage(m);
+
+    getUpdatesResponses.push(
+      updateReplyResult([
+        {
+          update_id: globals.updateId++,
+          edited_message: message,
+        },
+      ]),
+    );
+  };
+
   const sendMessageHandler: NockResponse = function(uri, requestBody) {
     const message: Message = createBotMessage(requestBody.text);
     messages.push(message);
@@ -111,6 +124,7 @@ export function initTelegramMock() {
     messages,
     buildMocks,
     sendMessage,
+    sendEditedMessage,
     unconsumedMocks,
   };
 }

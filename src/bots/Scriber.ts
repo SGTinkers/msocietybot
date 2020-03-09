@@ -1,3 +1,4 @@
+import createDebug from 'debug';
 import Composer from 'telegraf/composer';
 import { EntityManager, FindConditions } from 'typeorm';
 import { User } from '../entity/User';
@@ -5,19 +6,23 @@ import { Chat as TelegramChat, Message as TelegramMessage, User as TelegramUser 
 import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
 
+const debug = createDebug('msocietybot:scriber');
+
 export const ScriberBot = new Composer();
 ScriberBot.on('message', async (ctx, next) => {
   await ctx.entityManager.transaction(async entityManager => {
-    await handleMessage(entityManager, ctx.message);
+    const message = await handleMessage(entityManager, ctx.message);
+    debug('created message %s for chat %s', message.id, message.chat.id);
     next();
   });
 });
-// ScriberBot.on('edited_message', async (ctx, next) => {
-//   await ctx.entityManager.transaction(async (entityManager) => {
-//     await handleMessage(entityManager, ctx.message);
-//     next();
-//   });
-// });
+ScriberBot.on('edited_message', async (ctx, next) => {
+  await ctx.entityManager.transaction(async entityManager => {
+    const message = await handleMessage(entityManager, ctx.update.edited_message);
+    debug('edited message %s for chat: %s', message.id, message.chat.id);
+    next();
+  });
+});
 
 async function handleMessage(entityManager: EntityManager, message: TelegramMessage) {
   const messageFields: Partial<Message> = {};

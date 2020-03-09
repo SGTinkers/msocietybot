@@ -512,8 +512,8 @@ describe('Scriber', () => {
     const chat = await createChatInDb(telegramMessage.chat.type);
     const originalMessage = await createMessageInDb(chat, { id: telegramMessage.message_id, text: 'original message' });
 
-    await runBot([ScriberBot], ({ sendMessage }) => {
-      sendMessage(telegramMessage);
+    await runBot([ScriberBot], ({ sendEditedMessage }) => {
+      sendEditedMessage(telegramMessage);
     });
 
     const messages = await entityManager.find(Message);
