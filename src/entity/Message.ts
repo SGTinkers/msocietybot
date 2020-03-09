@@ -12,9 +12,11 @@ import {
 import { User } from './User';
 import { Chat } from './Chat';
 import {
+  Animation,
   Audio,
   Contact,
   Document,
+  Game,
   Invoice,
   Location,
   MessageEntity,
@@ -114,6 +116,12 @@ export class Message {
   document: Document | null;
 
   @Column('simple-json', { nullable: true })
+  animation: Animation | null;
+
+  @Column('simple-json', { nullable: true })
+  game: Game | null;
+
+  @Column('simple-json', { nullable: true })
   photo: PhotoSize[] | null;
 
   @Column('simple-json', { nullable: true })
@@ -165,7 +173,7 @@ export class Message {
   groupPhotoDeleted: boolean | null;
 
   @Column({ nullable: true })
-  groupPhotoCreated: boolean | null;
+  groupCreated: boolean | null;
 
   @Column({ nullable: true })
   supergroupCreated: boolean | null;

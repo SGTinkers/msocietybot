@@ -3,6 +3,7 @@ import { Message as TelegramMessage, User as TelegramUser, Chat as TelegramChat 
 import { User } from '../entity/User';
 import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
+import { DeepPartial } from 'typeorm';
 
 describe('Scriber', () => {
   const assertMessageContains = async <E = {}>(containing: E, relations?: string[]) => {
@@ -325,7 +326,11 @@ describe('Scriber', () => {
     telegramMessage.text = 'hello world';
     telegramMessage.reply_to_message = telegramRepliedMessage;
     const chat = await createChatInDb(telegramMessage.chat.type);
-    await createMessageInDb(chat, telegramRepliedMessage.message_id);
+    await createMessageInDb(chat, {
+      id: telegramRepliedMessage.message_id,
+      text: telegramRepliedMessage.text,
+      unixtime: telegramRepliedMessage.date,
+    });
 
     await runBot([ScriberBot], ({ sendMessage }) => {
       sendMessage(telegramMessage);
@@ -356,6 +361,149 @@ describe('Scriber', () => {
     expect(messages[1].createdAt).not.toBeNull();
     expect(messages[1].updatedAt).not.toBeNull();
   });
+
+  it('insert forwardFromMessage relation into db', async () => {
+    const telegramForwardedFromMessage = createTelegramMessage();
+    telegramForwardedFromMessage.message_id = 12345;
+    telegramForwardedFromMessage.text = 'some absurd thing here';
+    const telegramMessage = createTelegramMessage();
+    telegramMessage.text = 'hello world';
+    telegramMessage.forward_from_message_id = telegramForwardedFromMessage.message_id;
+    telegramMessage.forward_from_chat = telegramMessage.chat;
+    const chat = await createChatInDb(telegramMessage.chat.type);
+    await createMessageInDb(chat, {
+      id: telegramForwardedFromMessage.message_id,
+      text: telegramForwardedFromMessage.text,
+      unixtime: telegramForwardedFromMessage.date,
+    });
+
+    await runBot([ScriberBot], ({ sendMessage }) => {
+      sendMessage(telegramMessage);
+    });
+
+    const messages = await entityManager.find(Message, { relations: ['forwardFromMessage'] });
+
+    expect(messages.length).toEqual(2);
+    expect(messages[0]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramForwardedFromMessage.message_id,
+        unixtime: telegramForwardedFromMessage.date,
+        text: telegramForwardedFromMessage.text,
+      }),
+    );
+    expect(messages[0].createdAt).not.toBeNull();
+    expect(messages[0].updatedAt).not.toBeNull();
+    expect(messages[1]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramMessage.message_id,
+        unixtime: telegramMessage.date,
+        text: telegramMessage.text,
+        forwardFromMessage: expect.objectContaining({
+          id: telegramForwardedFromMessage.message_id,
+        }),
+      }),
+    );
+    expect(messages[1].createdAt).not.toBeNull();
+    expect(messages[1].updatedAt).not.toBeNull();
+  });
+
+  it('insert message with all optional fields into db', async () => {
+    const telegramMessage = createTelegramMessage();
+    telegramMessage.text = 'hello world';
+    telegramMessage.forward_date = new Date().getTime();
+    telegramMessage.forward_signature = 'forward_signature';
+    telegramMessage.media_group_id = 'media_group_id';
+    telegramMessage.author_signature = 'author_signature';
+    telegramMessage.entities = [{ type: 'type', offset: 0, length: 0 }];
+    telegramMessage.caption_entities = [{ type: 'type', offset: 0, length: 0 }];
+    telegramMessage.audio = { file_id: 'file_id', duration: 1 };
+    telegramMessage.document = { file_id: 'file_id' };
+    telegramMessage.animation = { file_id: 'file_id', width: 1, height: 1, duration: 1 };
+    telegramMessage.game = {
+      title: 'title',
+      description: 'desc',
+      photo: [{ file_id: 'file_id', width: 1, height: 1 }],
+    };
+    telegramMessage.photo = [{ file_id: 'file_id', width: 1, height: 1 }];
+    telegramMessage.sticker = { file_id: 'file_id', width: 1, height: 1 };
+    telegramMessage.video = { file_id: 'file_id', width: 1, height: 1, duration: 1 };
+    telegramMessage.voice = { file_id: 'file_id', duration: 1 };
+    telegramMessage.video_note = { file_id: 'file_id', length: 1, duration: 1 };
+    telegramMessage.caption = 'caption';
+    telegramMessage.contact = { phone_number: '1234', first_name: 'first_name' };
+    telegramMessage.location = { longitude: 1, latitude: 1 };
+    telegramMessage.venue = { location: { longitude: 1, latitude: 1 }, title: 'title', address: 'address' };
+    telegramMessage.new_chat_title = 'new_chat_title';
+    telegramMessage.new_chat_photo = [{ file_id: 'file_id', width: 1, height: 1 }];
+    telegramMessage.delete_chat_photo = true;
+    telegramMessage.group_chat_created = true;
+    telegramMessage.supergroup_chat_created = true;
+    telegramMessage.channel_chat_created = true;
+    telegramMessage.invoice = {
+      title: 'title',
+      currency: 'currency',
+      description: 'desc',
+      start_parameter: 'start_parameter',
+      total_amount: 1,
+    };
+    telegramMessage.successful_payment = {
+      currency: 'currency',
+      invoice_payload: 'invoice_payload',
+      order_info: {},
+      provider_payment_charge_id: 'charge_id',
+      shipping_option_id: 'shipping_option_id',
+      telegram_payment_charge_id: 'charge_id',
+      total_amount: 1,
+    };
+    telegramMessage.connected_website = 'connected_website';
+    telegramMessage.passport_data = { data: [{}], credentials: {} };
+
+    await runBot([ScriberBot], ({ sendMessage }) => {
+      sendMessage(telegramMessage);
+    });
+
+    const messages = await entityManager.find(Message);
+
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramMessage.message_id,
+        unixtime: telegramMessage.date,
+        text: telegramMessage.text,
+        forwardDate: new Date(telegramMessage.forward_date),
+        forwardSignature: telegramMessage.forward_signature,
+        mediaGroupId: telegramMessage.media_group_id,
+        authorSignature: telegramMessage.author_signature,
+        entities: telegramMessage.entities,
+        captionEntities: telegramMessage.caption_entities,
+        audio: telegramMessage.audio,
+        document: telegramMessage.document,
+        animation: telegramMessage.animation,
+        game: telegramMessage.game,
+        photo: telegramMessage.photo,
+        sticker: telegramMessage.sticker,
+        video: telegramMessage.video,
+        voice: telegramMessage.voice,
+        videoNote: telegramMessage.video_note,
+        caption: telegramMessage.caption,
+        contact: telegramMessage.contact,
+        location: telegramMessage.location,
+        venue: telegramMessage.venue,
+        newGroupTitle: telegramMessage.new_chat_title,
+        newGroupPhoto: telegramMessage.new_chat_photo,
+        groupPhotoDeleted: telegramMessage.delete_chat_photo,
+        groupCreated: telegramMessage.group_chat_created,
+        supergroupCreated: telegramMessage.supergroup_chat_created,
+        channelCreated: telegramMessage.channel_chat_created,
+        invoice: telegramMessage.invoice,
+        successfulPayment: telegramMessage.successful_payment,
+        connectedWebsite: telegramMessage.connected_website,
+        passportData: telegramMessage.passport_data,
+      } as Partial<Message>),
+    );
+    expect(messages[0].createdAt).not.toBeNull();
+    expect(messages[0].updatedAt).not.toBeNull();
+  });
 });
 
 async function createUserInDb() {
@@ -384,13 +532,13 @@ async function createChatInDb(type: string) {
   }
 }
 
-async function createMessageInDb(chat: Chat, id = 1) {
+async function createMessageInDb(chat: Chat, partialMessage: DeepPartial<Message> = { id: 1 }) {
   try {
     const message = entityManager.create(Message, {
-      id,
       unixtime: new Date().getTime(),
       text: 'Some text here',
       chat: chat,
+      ...partialMessage,
     });
     return await entityManager.save(message);
   } catch (e) {

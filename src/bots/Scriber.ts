@@ -41,6 +41,21 @@ async function handleMessage(entityManager: EntityManager, message: TelegramMess
     messageFields.replyToMessage = await handleMessage(entityManager, message.reply_to_message);
   }
 
+  if (message.pinned_message) {
+    messageFields.pinnedMessage = await handleMessage(entityManager, message.pinned_message);
+  }
+
+  if (message.forward_from_message_id) {
+    messageFields.forwardFromMessage = await entityManager.findOne(
+      Message,
+      {
+        id: message.forward_from_message_id,
+        chat: { id: message.forward_from_chat.id },
+      },
+      { relations: ['chat'] },
+    );
+  }
+
   return await upsertMessage(entityManager, chat, message, messageFields);
 }
 
@@ -50,6 +65,36 @@ async function upsertMessage(
   telegramMessage: TelegramMessage,
   partialMessage: Partial<Message> = {},
 ) {
+  partialMessage.forwardDate = new Date(telegramMessage.forward_date);
+  partialMessage.forwardSignature = telegramMessage.forward_signature;
+  partialMessage.mediaGroupId = telegramMessage.media_group_id;
+  partialMessage.authorSignature = telegramMessage.author_signature;
+  partialMessage.entities = telegramMessage.entities;
+  partialMessage.captionEntities = telegramMessage.caption_entities;
+  partialMessage.audio = telegramMessage.audio;
+  partialMessage.document = telegramMessage.document;
+  partialMessage.animation = telegramMessage.animation;
+  partialMessage.game = telegramMessage.game;
+  partialMessage.photo = telegramMessage.photo;
+  partialMessage.sticker = telegramMessage.sticker;
+  partialMessage.video = telegramMessage.video;
+  partialMessage.voice = telegramMessage.voice;
+  partialMessage.videoNote = telegramMessage.video_note;
+  partialMessage.caption = telegramMessage.caption;
+  partialMessage.contact = telegramMessage.contact;
+  partialMessage.location = telegramMessage.location;
+  partialMessage.venue = telegramMessage.venue;
+  partialMessage.newGroupTitle = telegramMessage.new_chat_title;
+  partialMessage.newGroupPhoto = telegramMessage.new_chat_photo;
+  partialMessage.groupPhotoDeleted = telegramMessage.delete_chat_photo;
+  partialMessage.groupCreated = telegramMessage.group_chat_created;
+  partialMessage.supergroupCreated = telegramMessage.supergroup_chat_created;
+  partialMessage.channelCreated = telegramMessage.channel_chat_created;
+  partialMessage.invoice = telegramMessage.invoice;
+  partialMessage.successfulPayment = telegramMessage.successful_payment;
+  partialMessage.connectedWebsite = telegramMessage.connected_website;
+  partialMessage.passportData = telegramMessage.passport_data;
+
   const message = await entityManager.findOne(Message, {
     id: telegramMessage.message_id,
     chat: chat.id,

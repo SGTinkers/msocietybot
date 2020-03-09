@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InitialMigration1583365332356 implements MigrationInterface {
-  name = 'InitialMigration1583365332356';
+export class InitialMigration1583759709462 implements MigrationInterface {
+  name = 'InitialMigration1583759709462';
 
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(
-      'CREATE TABLE "permissions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "role_id" integer)',
+      'CREATE TABLE "permissions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "role_id" integer NOT NULL)',
       undefined,
     );
     await queryRunner.query(
@@ -22,7 +22,11 @@ export class InitialMigration1583365332356 implements MigrationInterface {
       undefined,
     );
     await queryRunner.query(
-      'CREATE TABLE "messages" ("id" bigint NOT NULL, "unixtime" bigint NOT NULL, "original_unixtime" bigint, "last_edit" datetime, "edit_history" text, "album_id" varchar, "signature" varchar, "text" varchar, "payload" varchar, "entities" text, "caption" varchar, "caption_entities" text, "audio" text, "document" text, "photo" text, "sticker" text, "voice" text, "video_note" text, "video" text, "contact" text, "location" text, "venue" text, "new_group_title" varchar, "new_group_photo" text, "group_photo_deleted" boolean, "group_photo_created" boolean, "supergroup_created" boolean, "channel_created" boolean, "forward_signature" varchar, "forward_date" datetime, "media_group_id" varchar, "author_signature" varchar, "invoice" text, "successful_payment" text, "connected_website" varchar, "passport_data" text, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "deleted_at" datetime, "sender_id" bigint, "reply_to_message_id" bigint, "chat_id" bigint NOT NULL, "original_sender_id" bigint, "original_chat_id" bigint, "user_joined_id" bigint, "user_left_id" bigint, "migrate_to_chat_id" bigint, "migrate_from_chat_id" bigint, "pinned_message_id" bigint, "pinned_message_chat" bigint, "forward_from_id" bigint, "forward_from_chat_id" bigint, "forward_from_message_id" bigint, "forward_from_message_chat" bigint, PRIMARY KEY ("id", "chat_id"))',
+      'CREATE TABLE "messages" ("id" bigint NOT NULL, "unixtime" bigint NOT NULL, "original_unixtime" bigint, "last_edit" datetime, "edit_history" text, "album_id" varchar, "signature" varchar, "text" varchar, "payload" varchar, "entities" text, "caption" varchar, "caption_entities" text, "audio" text, "document" text, "animation" text, "game" text, "photo" text, "sticker" text, "voice" text, "video_note" text, "video" text, "contact" text, "location" text, "venue" text, "new_group_title" varchar, "new_group_photo" text, "group_photo_deleted" boolean, "group_created" boolean, "supergroup_created" boolean, "channel_created" boolean, "forward_signature" varchar, "forward_date" datetime, "media_group_id" varchar, "author_signature" varchar, "invoice" text, "successful_payment" text, "connected_website" varchar, "passport_data" text, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "deleted_at" datetime, "sender_id" bigint, "reply_to_message_id" bigint, "chat_id" bigint NOT NULL, "original_sender_id" bigint, "original_chat_id" bigint, "user_joined_id" bigint, "user_left_id" bigint, "migrate_to_chat_id" bigint, "migrate_from_chat_id" bigint, "pinned_message_id" bigint, "pinned_message_chat" bigint, "forward_from_id" bigint, "forward_from_chat_id" bigint, "forward_from_message_id" bigint, "forward_from_message_chat" bigint, PRIMARY KEY ("id", "chat_id"))',
+      undefined,
+    );
+    await queryRunner.query(
+      'CREATE TABLE "reputation" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "value" integer NOT NULL DEFAULT (1), "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "deleted_at" datetime, "from_user_id" bigint, "to_user_id" bigint, "chat_id" bigint, "message_id" bigint, "message_chat" bigint, CONSTRAINT "REL_c89129a8dd16dc8a7afe4d4b4b" UNIQUE ("message_id", "message_chat"))',
       undefined,
     );
     await queryRunner.query(
@@ -60,7 +64,7 @@ export class InitialMigration1583365332356 implements MigrationInterface {
     await queryRunner.query('CREATE INDEX "IDX_87b8888186ca9769c960e92687" ON "user_roles" ("user_id") ', undefined);
     await queryRunner.query('CREATE INDEX "IDX_b23c65e50a758245a33ee35fda" ON "user_roles" ("role_id") ', undefined);
     await queryRunner.query(
-      'CREATE TABLE "temporary_permissions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "role_id" integer, CONSTRAINT "FK_f10931e7bb05a3b434642ed2797" FOREIGN KEY ("role_id") REFERENCES "roles" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION)',
+      'CREATE TABLE "temporary_permissions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "role_id" integer NOT NULL, CONSTRAINT "FK_f10931e7bb05a3b434642ed2797" FOREIGN KEY ("role_id") REFERENCES "roles" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION)',
       undefined,
     );
     await queryRunner.query(
@@ -84,6 +88,16 @@ export class InitialMigration1583365332356 implements MigrationInterface {
       'CREATE UNIQUE INDEX "IDX_a97e76577c1cfb97f7efc663e5" ON "users_preferences" ("user_id", "key") ',
       undefined,
     );
+    await queryRunner.query(
+      'CREATE TABLE "temporary_reputation" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "value" integer NOT NULL DEFAULT (1), "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "deleted_at" datetime, "from_user_id" bigint, "to_user_id" bigint, "chat_id" bigint, "message_id" bigint, "message_chat" bigint, CONSTRAINT "REL_c89129a8dd16dc8a7afe4d4b4b" UNIQUE ("message_id", "message_chat"), CONSTRAINT "FK_6318e7cab1e73a7d58d4373c7a6" FOREIGN KEY ("from_user_id") REFERENCES "user" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION, CONSTRAINT "FK_092d6c747696d58b9e627565bda" FOREIGN KEY ("to_user_id") REFERENCES "user" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION, CONSTRAINT "FK_0ca5aaff74c6eadcf6cc0fdf9ff" FOREIGN KEY ("chat_id") REFERENCES "chats" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION, CONSTRAINT "FK_c89129a8dd16dc8a7afe4d4b4bc" FOREIGN KEY ("message_id", "message_chat") REFERENCES "messages" ("id", "chat_id") ON DELETE NO ACTION ON UPDATE NO ACTION)',
+      undefined,
+    );
+    await queryRunner.query(
+      'INSERT INTO "temporary_reputation"("id", "value", "created_at", "updated_at", "deleted_at", "from_user_id", "to_user_id", "chat_id", "message_id", "message_chat") SELECT "id", "value", "created_at", "updated_at", "deleted_at", "from_user_id", "to_user_id", "chat_id", "message_id", "message_chat" FROM "reputation"',
+      undefined,
+    );
+    await queryRunner.query('DROP TABLE "reputation"', undefined);
+    await queryRunner.query('ALTER TABLE "temporary_reputation" RENAME TO "reputation"', undefined);
     await queryRunner.query('DROP INDEX "IDX_b638bdbf0d286b303ac2639d26"', undefined);
     await queryRunner.query(
       'CREATE TABLE "temporary_chats_preferences" ("key" varchar NOT NULL, "value" varchar NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "deleted_at" datetime, "chat_id" bigint NOT NULL, CONSTRAINT "FK_f66ca9ae3490db14fd3d3546546" FOREIGN KEY ("chat_id") REFERENCES "chats" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION, PRIMARY KEY ("key", "chat_id"))',
@@ -211,16 +225,17 @@ export class InitialMigration1583365332356 implements MigrationInterface {
       'CREATE UNIQUE INDEX "IDX_b638bdbf0d286b303ac2639d26" ON "chats_preferences" ("chat_id", "key") ',
       undefined,
     );
-    await queryRunner.query('ALTER TABLE "messages" RENAME TO "temporary_messages"', undefined);
+    await queryRunner.query('ALTER TABLE "reputation" RENAME TO "temporary_reputation"', undefined);
     await queryRunner.query(
-      'CREATE TABLE "messages" ("id" bigint NOT NULL, "unixtime" bigint NOT NULL, "original_unixtime" bigint, "last_edit" datetime, "edit_history" text, "album_id" varchar, "signature" varchar, "text" varchar, "payload" varchar, "entities" text, "caption" varchar, "caption_entities" text, "audio" text, "document" text, "photo" text, "sticker" text, "voice" text, "video_note" text, "video" text, "contact" text, "location" text, "venue" text, "new_group_title" varchar, "new_group_photo" text, "group_photo_deleted" boolean, "group_photo_created" boolean, "supergroup_created" boolean, "channel_created" boolean, "forward_signature" varchar, "forward_date" datetime, "media_group_id" varchar, "author_signature" varchar, "invoice" text, "successful_payment" text, "connected_website" varchar, "passport_data" text, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "deleted_at" datetime, "sender_id" bigint, "reply_to_message_id" bigint, "chat_id" bigint NOT NULL, "original_sender_id" bigint, "original_chat_id" bigint, "user_joined_id" bigint, "user_left_id" bigint, "migrate_to_chat_id" bigint, "migrate_from_chat_id" bigint, "pinned_message_id" bigint, "pinned_message_chat" bigint, "forward_from_id" bigint, "forward_from_chat_id" bigint, "forward_from_message_id" bigint, "forward_from_message_chat" bigint, PRIMARY KEY ("id", "chat_id"))',
+      'CREATE TABLE "reputation" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "value" integer NOT NULL DEFAULT (1), "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "deleted_at" datetime, "from_user_id" bigint, "to_user_id" bigint, "chat_id" bigint, "message_id" bigint, "message_chat" bigint, CONSTRAINT "REL_c89129a8dd16dc8a7afe4d4b4b" UNIQUE ("message_id", "message_chat"))',
       undefined,
     );
     await queryRunner.query(
-      'INSERT INTO "messages"("id", "unixtime", "original_unixtime", "last_edit", "edit_history", "album_id", "signature", "text", "payload", "entities", "caption", "caption_entities", "audio", "document", "photo", "sticker", "voice", "video_note", "video", "contact", "location", "venue", "new_group_title", "new_group_photo", "group_photo_deleted", "group_photo_created", "supergroup_created", "channel_created", "forward_signature", "forward_date", "media_group_id", "author_signature", "invoice", "successful_payment", "connected_website", "passport_data", "created_at", "updated_at", "deleted_at", "sender_id", "reply_to_message_id", "chat_id", "original_sender_id", "original_chat_id", "user_joined_id", "user_left_id", "migrate_to_chat_id", "migrate_from_chat_id", "pinned_message_id", "pinned_message_chat", "forward_from_id", "forward_from_chat_id", "forward_from_message_id", "forward_from_message_chat") SELECT "id", "unixtime", "original_unixtime", "last_edit", "edit_history", "album_id", "signature", "text", "payload", "entities", "caption", "caption_entities", "audio", "document", "photo", "sticker", "voice", "video_note", "video", "contact", "location", "venue", "new_group_title", "new_group_photo", "group_photo_deleted", "group_photo_created", "supergroup_created", "channel_created", "forward_signature", "forward_date", "media_group_id", "author_signature", "invoice", "successful_payment", "connected_website", "passport_data", "created_at", "updated_at", "deleted_at", "sender_id", "reply_to_message_id", "chat_id", "original_sender_id", "original_chat_id", "user_joined_id", "user_left_id", "migrate_to_chat_id", "migrate_from_chat_id", "pinned_message_id", "pinned_message_chat", "forward_from_id", "forward_from_chat_id", "forward_from_message_id", "forward_from_message_chat" FROM "temporary_messages"',
+      'INSERT INTO "reputation"("id", "value", "created_at", "updated_at", "deleted_at", "from_user_id", "to_user_id", "chat_id", "message_id", "message_chat") SELECT "id", "value", "created_at", "updated_at", "deleted_at", "from_user_id", "to_user_id", "chat_id", "message_id", "message_chat" FROM "temporary_reputation"',
       undefined,
     );
-    await queryRunner.query('DROP TABLE "temporary_messages"', undefined);
+    await queryRunner.query('DROP TABLE "temporary_reputation"', undefined);
+    await queryRunner.query('DROP TABLE "messages"', undefined);
     await queryRunner.query('DROP INDEX "IDX_a97e76577c1cfb97f7efc663e5"', undefined);
     await queryRunner.query('ALTER TABLE "users_preferences" RENAME TO "temporary_users_preferences"', undefined);
     await queryRunner.query(
@@ -238,7 +253,7 @@ export class InitialMigration1583365332356 implements MigrationInterface {
     );
     await queryRunner.query('ALTER TABLE "permissions" RENAME TO "temporary_permissions"', undefined);
     await queryRunner.query(
-      'CREATE TABLE "permissions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "role_id" integer)',
+      'CREATE TABLE "permissions" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar NOT NULL, "role_id" integer NOT NULL)',
       undefined,
     );
     await queryRunner.query(
@@ -256,6 +271,7 @@ export class InitialMigration1583365332356 implements MigrationInterface {
     await queryRunner.query('DROP INDEX "IDX_b638bdbf0d286b303ac2639d26"', undefined);
     await queryRunner.query('DROP TABLE "chats_preferences"', undefined);
     await queryRunner.query('DROP TABLE "user"', undefined);
+    await queryRunner.query('DROP TABLE "reputation"', undefined);
     await queryRunner.query('DROP TABLE "messages"', undefined);
     await queryRunner.query('DROP INDEX "IDX_a97e76577c1cfb97f7efc663e5"', undefined);
     await queryRunner.query('DROP TABLE "users_preferences"', undefined);
