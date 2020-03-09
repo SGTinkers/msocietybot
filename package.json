@@ -3,9 +3,6 @@
    "version": "0.0.1",
    "description": "Awesome project developed with TypeORM.",
    "devDependencies": {
-      "@types/debug": "^4.1.5",
-      "@types/jest": "^25.1.3",
-      "@types/node": "^12.12.29",
       "@typescript-eslint/eslint-plugin": "^2.21.0",
       "@typescript-eslint/parser": "^2.21.0",
       "eslint": "^6.8.0",
@@ -18,12 +15,14 @@
       "nock": "^12.0.1",
       "prettier": "^1.19.1",
       "sqlite3": "^4.1.1",
-      "telegram-typings": "^4.0.0-beta",
-      "ts-jest": "^25.2.1",
-      "ts-node": "^8.6.2",
-      "typescript": "^3.8.3"
+      "ts-jest": "^25.2.1"
    },
    "dependencies": {
+      "@types/debug": "^4.1.5",
+      "@types/jest": "^25.1.3",
+      "@types/node": "^12.12.29",
+      "ts-node": "^8.6.2",
+      "typescript": "^3.8.3",
       "debug": "^4.1.1",
       "dotenv": "^8.2.0",
       "pg": "^7.3.0",
@@ -31,6 +30,7 @@
       "telegraf": "^3.36.0",
       "typeorm": "0.2.22",
       "typeorm-naming-strategies": "^1.1.0",
+      "telegram-typings": "^4.0.0-beta",
       "uuidv4": "^6.0.5"
    },
    "scripts": {
