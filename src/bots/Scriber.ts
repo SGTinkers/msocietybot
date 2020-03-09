@@ -7,13 +7,17 @@ import { Message } from '../entity/Message';
 
 export const ScriberBot = new Composer();
 ScriberBot.on('message', async (ctx, next) => {
-  await handleMessage(ctx.entityManager, ctx.message);
-  next();
+  await ctx.entityManager.transaction(async entityManager => {
+    await handleMessage(entityManager, ctx.message);
+    next();
+  });
 });
-ScriberBot.on('edited_message', async (ctx, next) => {
-  await handleMessage(ctx.entityManager, ctx.message);
-  next();
-});
+// ScriberBot.on('edited_message', async (ctx, next) => {
+//   await ctx.entityManager.transaction(async (entityManager) => {
+//     await handleMessage(entityManager, ctx.message);
+//     next();
+//   });
+// });
 
 async function handleMessage(entityManager: EntityManager, message: TelegramMessage) {
   const messageFields: Partial<Message> = {};
@@ -69,7 +73,7 @@ async function upsertMessage(
   telegramMessage: TelegramMessage,
   partialMessage: Partial<Message> = {},
 ) {
-  partialMessage.forwardDate = new Date(telegramMessage.forward_date);
+  partialMessage.forwardDate = telegramMessage.forward_date ? new Date(telegramMessage.forward_date) : null;
   partialMessage.forwardSignature = telegramMessage.forward_signature;
   partialMessage.mediaGroupId = telegramMessage.media_group_id;
   partialMessage.authorSignature = telegramMessage.author_signature;
