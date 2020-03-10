@@ -14,7 +14,14 @@ export async function createConnection(typeOrmConnectionOptions?: ConnectionOpti
   }
   const connection = await createTypeOrmConnection(connectionOptions);
   if (!connectionOptions.synchronize) {
-    await connection.runMigrations({ transaction: 'all' });
+    const migrations = await connection.runMigrations({ transaction: 'all' });
+    migrations.forEach(migration => {
+      console.log('DB: Migrated ' + migration.name + ' (' + migration.timestamp + ').');
+    });
+
+    if (migrations.length === 0) {
+      console.log('DB: All good! Nothing to migrate.');
+    }
   }
 
   return connection;
