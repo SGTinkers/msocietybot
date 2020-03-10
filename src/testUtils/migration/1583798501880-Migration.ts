@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InitialMigration1583759709462 implements MigrationInterface {
-  name = 'InitialMigration1583759709462';
+export class Migration1583798501880 implements MigrationInterface {
+  name = 'Migration1583798501880';
 
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(
@@ -22,7 +22,7 @@ export class InitialMigration1583759709462 implements MigrationInterface {
       undefined,
     );
     await queryRunner.query(
-      'CREATE TABLE "messages" ("id" bigint NOT NULL, "unixtime" bigint NOT NULL, "original_unixtime" bigint, "last_edit" datetime, "edit_history" text, "album_id" varchar, "signature" varchar, "text" varchar, "payload" varchar, "entities" text, "caption" varchar, "caption_entities" text, "audio" text, "document" text, "animation" text, "game" text, "photo" text, "sticker" text, "voice" text, "video_note" text, "video" text, "contact" text, "location" text, "venue" text, "new_group_title" varchar, "new_group_photo" text, "group_photo_deleted" boolean, "group_created" boolean, "supergroup_created" boolean, "channel_created" boolean, "forward_signature" varchar, "forward_date" datetime, "media_group_id" varchar, "author_signature" varchar, "invoice" text, "successful_payment" text, "connected_website" varchar, "passport_data" text, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "deleted_at" datetime, "sender_id" bigint, "reply_to_message_id" bigint, "chat_id" bigint NOT NULL, "original_sender_id" bigint, "original_chat_id" bigint, "user_joined_id" bigint, "user_left_id" bigint, "migrate_to_chat_id" bigint, "migrate_from_chat_id" bigint, "pinned_message_id" bigint, "pinned_message_chat" bigint, "forward_from_id" bigint, "forward_from_chat_id" bigint, "forward_from_message_id" bigint, "forward_from_message_chat" bigint, PRIMARY KEY ("id", "chat_id"))',
+      'CREATE TABLE "messages" ("id" bigint NOT NULL, "unixtime" bigint NOT NULL, "last_edit" datetime, "edit_history" text, "album_id" varchar, "signature" varchar, "text" varchar, "payload" varchar, "entities" text, "caption" varchar, "caption_entities" text, "audio" text, "document" text, "animation" text, "game" text, "photo" text, "sticker" text, "voice" text, "video_note" text, "video" text, "contact" text, "location" text, "venue" text, "new_group_title" varchar, "new_group_photo" text, "group_photo_deleted" boolean, "group_created" boolean, "supergroup_created" boolean, "channel_created" boolean, "forward_signature" varchar, "forward_date" datetime, "media_group_id" varchar, "author_signature" varchar, "invoice" text, "successful_payment" text, "connected_website" varchar, "passport_data" text, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "deleted_at" datetime, "sender_id" bigint, "reply_to_message_id" bigint, "chat_id" bigint NOT NULL, "user_joined_id" bigint, "user_left_id" bigint, "migrate_to_chat_id" bigint, "migrate_from_chat_id" bigint, "pinned_message_id" bigint, "pinned_message_chat" bigint, "forward_from_id" bigint, "forward_from_chat_id" bigint, "forward_from_message_id" bigint, "forward_from_message_chat" bigint, PRIMARY KEY ("id", "chat_id"))',
       undefined,
     );
     await queryRunner.query(
@@ -235,7 +235,6 @@ export class InitialMigration1583759709462 implements MigrationInterface {
       undefined,
     );
     await queryRunner.query('DROP TABLE "temporary_reputation"', undefined);
-    await queryRunner.query('DROP TABLE "messages"', undefined);
     await queryRunner.query('DROP INDEX "IDX_a97e76577c1cfb97f7efc663e5"', undefined);
     await queryRunner.query('ALTER TABLE "users_preferences" RENAME TO "temporary_users_preferences"', undefined);
     await queryRunner.query(

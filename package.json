@@ -40,7 +40,7 @@
       "tsc": "tsc --noEmit",
       "lint": "eslint src --max-warnings 0 --ext js,ts,tsx",
       "create-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
-      "test:create-migration": "TYPEORM_TYPE=sqlite POSTGRES_DATABASE=./migration.db TYPEORM_MIGRATION_DIR=src/testUtils/migration ts-node ./node_modules/typeorm/cli.js migration:generate -n",
+      "test:create-initial-migration": "rm -rf src/testUtils/migration/* && rm -rf migration.db && TYPEORM_TYPE=sqlite POSTGRES_DATABASE=./migration.db TYPEORM_MIGRATION_DIR=src/testUtils/migration ts-node ./node_modules/typeorm/cli.js migration:generate -n Migration",
       "create-entity": "ts-node ./node_modules/typeorm/cli.js entity:create -n",
       "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run",
       "test:migrate-test": "TYPEORM_TYPE=sqlite POSTGRES_DATABASE=./migration.db TYPEORM_MIGRATIONS=\"src/testUtils/migration/**/*.ts\" ts-node ./node_modules/typeorm/cli.js migration:run"

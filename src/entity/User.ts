@@ -49,12 +49,6 @@ export class User {
 
   @OneToMany(
     () => Message,
-    message => message.originalChat,
-  )
-  originalMessages: Message[];
-
-  @OneToMany(
-    () => Message,
     message => message.userJoined,
   )
   userJoinedMessages: Message[];

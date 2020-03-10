@@ -57,12 +57,6 @@ export class Chat {
 
   @OneToMany(
     () => Message,
-    message => message.originalChat,
-  )
-  originalMessages: Message[];
-
-  @OneToMany(
-    () => Message,
     message => message.migrateToChat,
   )
   migratedToMessages: Message[];

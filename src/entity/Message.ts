@@ -65,23 +65,6 @@ export class Message {
   )
   chat: Chat;
 
-  @ManyToOne(
-    () => User,
-    user => user.originalMessages,
-    { nullable: true },
-  )
-  originalSender: User | null;
-
-  @ManyToOne(
-    () => Chat,
-    chat => chat.originalMessages,
-    { nullable: true },
-  )
-  originalChat: Chat | null;
-
-  @Column({ type: 'bigint', nullable: true })
-  originalUnixtime: number | null;
-
   @Column({ nullable: true })
   lastEdit: Date | null;
 
