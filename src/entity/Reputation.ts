@@ -28,6 +28,7 @@ export class Reputation {
   @ManyToOne(
     () => User,
     user => user.reputations,
+    { nullable: false },
   )
   @JoinColumn({ name: 'from_user_id' })
   fromUser: User;
@@ -35,25 +36,26 @@ export class Reputation {
   @ManyToOne(
     () => User,
     user => user.reputations,
+    { nullable: false },
   )
   @JoinColumn({ name: 'to_user_id' })
   toUser: User;
 
-  @ManyToOne(() => Chat)
+  @ManyToOne(() => Chat, { nullable: false })
   @JoinColumn()
   chat: Chat;
 
-  @OneToOne(() => Message)
+  @OneToOne(() => Message, { nullable: false })
   @JoinColumn()
   message: Message;
 
   @Column({ default: 1, nullable: false })
   value: number;
 
-  @Column()
+  @Column({ nullable: false })
   createdAt: Date;
 
-  @Column()
+  @Column({ nullable: false })
   updatedAt: Date;
 
   @Column({ nullable: true })
