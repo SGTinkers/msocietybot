@@ -407,6 +407,43 @@ describe('Scriber', () => {
     expect(messages[1].updatedAt).not.toBeNull();
   });
 
+  it('insert pinned message into db if does not exists', async () => {
+    const telegramPinnedMessage = createTelegramMessage();
+    telegramPinnedMessage.message_id = 12345;
+    telegramPinnedMessage.text = 'some absurd thing here';
+    const telegramMessage = createTelegramMessage();
+    telegramMessage.text = 'hello world';
+    telegramMessage.pinned_message = telegramPinnedMessage;
+    await runBot([ScriberBot], ({ sendMessage }) => {
+      sendMessage(telegramMessage);
+    });
+
+    const messages = await entityManager.find(Message, { relations: ['pinnedMessage'] });
+
+    expect(messages.length).toEqual(2);
+    expect(messages[0]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramPinnedMessage.message_id,
+        unixtime: telegramPinnedMessage.date,
+        text: telegramPinnedMessage.text,
+      }),
+    );
+    expect(messages[0].createdAt).not.toBeNull();
+    expect(messages[0].updatedAt).not.toBeNull();
+    expect(messages[1]).toStrictEqual(
+      expect.objectContaining({
+        id: telegramMessage.message_id,
+        unixtime: telegramMessage.date,
+        text: telegramMessage.text,
+        pinnedMessage: expect.objectContaining({
+          id: telegramPinnedMessage.message_id,
+        }),
+      }),
+    );
+    expect(messages[1].createdAt).not.toBeNull();
+    expect(messages[1].updatedAt).not.toBeNull();
+  });
+
   it('insert message with all optional fields into db', async () => {
     const telegramMessage = createTelegramMessage();
     telegramMessage.text = 'hello world';
