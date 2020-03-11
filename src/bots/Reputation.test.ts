@@ -10,6 +10,19 @@ describe('ReputationBot', () => {
   const botUser = userGen.next().value;
   const thisChat = createTelegramChat();
 
+  const assertBotSaid = (messages: TelegramMessage[], match: RegExp | string) => {
+    expect(messages).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          from: expect.objectContaining({
+            is_bot: true,
+          }),
+          text: expect.stringMatching(match),
+        }),
+      ]),
+    );
+  };
+
   describe('increases reputation', () => {
     const mainMessage: TelegramMessage = createTelegramMessage(
       thisChat,
@@ -55,71 +68,84 @@ describe('ReputationBot', () => {
     it('when user replies "thank you" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thank you', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /increased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "thanks" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /increased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "👍" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /increased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "💯" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '💯', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /increased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "👆" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👆', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /increased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "🆙" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🆙', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /increased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "🔥" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔥', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /increased reputation/);
       await assert(triggerMessage);
     });
 
@@ -132,43 +158,48 @@ describe('ReputationBot', () => {
         mainMessage,
       );
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /increased reputation/);
       await assert(triggerMessage);
     });
     // Case insensitive should work
     it('when user replies "ThAnKs" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'ThAnKs', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /increased reputation/);
       await assert(triggerMessage);
     });
 
     it('when user replies "👍🏽" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏽', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /increased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "👍🏻" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏻', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /increased reputation/);
       await assert(triggerMessage);
     });
     // it('when user has enough votes in their quota', () => { });
@@ -219,51 +250,60 @@ describe('ReputationBot', () => {
     it('when user replies "👎" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👎', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /decreased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "👇" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👇', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /decreased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "🔽" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔽', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /decreased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "boo" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /decreased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "eww" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'eww', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /decreased reputation/);
       await assert(triggerMessage);
     });
 
@@ -271,20 +311,23 @@ describe('ReputationBot', () => {
     it('when user replies "👎🏾" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👎🏾', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /decreased reputation/);
       await assert(triggerMessage);
     });
+
     it('when user replies "👇🏾" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👇🏾', mainMessage);
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /decreased reputation/);
       await assert(triggerMessage);
     });
 
@@ -292,22 +335,28 @@ describe('ReputationBot', () => {
     it('when user replies "bOo" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'bOo', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
       });
 
+      assertBotSaid(messages, /.*?/);
       await assert(triggerMessage);
     });
 
     it('when user replies "boo" + other things to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boooo!', mainMessage);
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
-        sendMessage(mainMessage);
-        sendMessage(triggerMessage);
-      });
+      const messages = await runBot(
+        [ScriberBot, ReputationBot],
+        ({ sendMessage }) => {
+          sendMessage(mainMessage);
+          sendMessage(triggerMessage);
+        },
+        { timeout: 800 },
+      );
 
+      assertBotSaid(messages, /.*?/);
       await assert(triggerMessage);
     });
   });
@@ -322,20 +371,33 @@ describe('ReputationBot', () => {
       const mainMessage: TelegramMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
       const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
 
-      await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
-        sendMessage(mainMessage);
-        sendMessage(replyMessage);
-      });
+      const messages = await runBot(
+        [ScriberBot, Reputation],
+        ({ sendMessage }) => {
+          sendMessage(mainMessage);
+          sendMessage(replyMessage);
+        },
+        { timeout: 800 },
+      );
+
+      assertBotSaid(messages, /.*?/);
       await assert(0);
     });
+
     it('when a user sends "thanks" to the bot', async () => {
       const mainMessage: TelegramMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
       const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
 
-      await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
-        sendMessage(mainMessage);
-        sendMessage(replyMessage);
-      });
+      const messages = await runBot(
+        [ScriberBot, Reputation],
+        ({ sendMessage }) => {
+          sendMessage(mainMessage);
+          sendMessage(replyMessage);
+        },
+        { timeout: 800 },
+      );
+
+      assertBotSaid(messages, /.*?/);
       await assert(0);
     });
 
@@ -343,20 +405,29 @@ describe('ReputationBot', () => {
       const mainMessage: TelegramMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
       const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
 
-      await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
-        sendMessage(mainMessage);
-        sendMessage(replyMessage);
-      });
+      const messages = await runBot(
+        [ScriberBot, Reputation],
+        ({ sendMessage }) => {
+          sendMessage(mainMessage);
+          sendMessage(replyMessage);
+        },
+        { timeout: 800 },
+      );
+
+      assertBotSaid(messages, /.*?/);
       await assert(0);
     });
+
     it('when a user sends "boo" to the bot', async () => {
       const mainMessage: TelegramMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
       const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
 
-      await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(replyMessage);
       });
+
+      assertBotSaid(messages, /.*?/);
       await assert(0);
     });
 
@@ -370,11 +441,12 @@ describe('ReputationBot', () => {
         replies.push(createTelegramReply(thisChat, senderUser, 'thanks', mainMessage, idGen.next().value));
       }
 
-      await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         replies.forEach(sendMessage);
       });
 
+      assertBotSaid(messages, /.*?/);
       await assert(3);
     });
   });
