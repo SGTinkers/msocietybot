@@ -13,15 +13,15 @@ ScriberBot.on('message', async (ctx, next) => {
   await ctx.entityManager.transaction(async entityManager => {
     const message = await handleMessage(entityManager, ctx.message);
     debug('created message %s for chat %s', message.id, message.chat.id);
-    next();
   });
+  next();
 });
 ScriberBot.on('edited_message', async (ctx, next) => {
   await ctx.entityManager.transaction(async entityManager => {
     const message = await handleMessage(entityManager, ctx.update.edited_message);
     debug('edited message %s for chat: %s', message.id, message.chat.id);
-    next();
   });
+  next();
 });
 
 async function handleMessage(entityManager: EntityManager, message: TelegramMessage) {

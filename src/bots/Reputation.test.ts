@@ -371,14 +371,10 @@ describe('ReputationBot', () => {
       const mainMessage: TelegramMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
       const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
 
-      const messages = await runBot(
-        [ScriberBot, Reputation],
-        ({ sendMessage }) => {
-          sendMessage(mainMessage);
-          sendMessage(replyMessage);
-        },
-        { timeout: 800 },
-      );
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(replyMessage);
+      });
 
       assertBotSaid(messages, /.*?/);
       await assert(0);
@@ -388,14 +384,10 @@ describe('ReputationBot', () => {
       const mainMessage: TelegramMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
       const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
 
-      const messages = await runBot(
-        [ScriberBot, Reputation],
-        ({ sendMessage }) => {
-          sendMessage(mainMessage);
-          sendMessage(replyMessage);
-        },
-        { timeout: 800 },
-      );
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(replyMessage);
+      });
 
       assertBotSaid(messages, /.*?/);
       await assert(0);
@@ -405,14 +397,10 @@ describe('ReputationBot', () => {
       const mainMessage: TelegramMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
       const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
 
-      const messages = await runBot(
-        [ScriberBot, Reputation],
-        ({ sendMessage }) => {
-          sendMessage(mainMessage);
-          sendMessage(replyMessage);
-        },
-        { timeout: 800 },
-      );
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(replyMessage);
+      });
 
       assertBotSaid(messages, /.*?/);
       await assert(0);
@@ -422,7 +410,7 @@ describe('ReputationBot', () => {
       const mainMessage: TelegramMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
       const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
 
-      const messages = await runBot([ScriberBot, Reputation], ({ sendMessage }) => {
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(replyMessage);
       });
