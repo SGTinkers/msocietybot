@@ -249,6 +249,7 @@ function createUserMessage(m: Message | string): Message {
     return {
       ...m,
       message_id: m.message_id && m.message_id !== -1 ? m.message_id : globals.messageId++,
+      reply_to_message: m.reply_to_message ? createUserMessage(m.reply_to_message) : undefined,
     };
   }
 }
