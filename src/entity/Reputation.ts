@@ -8,7 +8,7 @@ import {
   BeforeInsert,
   BeforeUpdate,
   EntityManager,
-  LessThan,
+  MoreThan,
 } from 'typeorm';
 import { User } from './User';
 import { Message } from './Message';
@@ -79,11 +79,12 @@ export class Reputation {
   ) => {
     const now = new Date();
     const voteLimit = now.setHours(now.getHours() - hoursAgo);
+    const limitDate = new Date(voteLimit);
 
     return await entityManager.find(Reputation, {
       where: {
-        from_user_id: telegramUser.id,
-        created_at: LessThan(voteLimit),
+        fromUser: { id: telegramUser.id },
+        createdAt: MoreThan(limitDate),
       },
     });
   };
