@@ -93,7 +93,7 @@ bot.command('vote_quota', async ctx => {
     if (nextVote) {
       msg += `\nYou will receive a new vote in *${nextVote.hours} hours* and *${nextVote.minutes} minutes*`;
     }
-    await ctx.replyWithMarkdown(msg);
+    await ctx.replyWithMarkdown(msg, { reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null });
   }
 });
 
