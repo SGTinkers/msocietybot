@@ -28,7 +28,7 @@
       "pg": "^7.3.0",
       "reflect-metadata": "^0.1.10",
       "telegraf": "^3.36.0",
-      "typeorm": "0.2.22",
+      "typeorm": "0.2.24",
       "typeorm-naming-strategies": "^1.1.0",
       "telegram-typings": "^4.0.0-beta",
       "uuidv4": "^6.0.5"
