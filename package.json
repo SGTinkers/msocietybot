@@ -31,7 +31,7 @@
       "typeorm": "0.2.22",
       "typeorm-naming-strategies": "^1.1.0",
       "telegram-typings": "^4.0.0-beta",
-      "uuidv4": "^6.0.5"
+      "uuidv4": "^6.0.6"
    },
    "scripts": {
       "start": "ts-node src/index.ts",
