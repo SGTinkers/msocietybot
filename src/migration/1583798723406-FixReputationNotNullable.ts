@@ -16,10 +16,6 @@ export class FixReputationNotNullable1583798723406 implements MigrationInterface
     await queryRunner.query('ALTER TABLE "reputation" ALTER COLUMN "message_id" SET NOT NULL', undefined);
     await queryRunner.query('ALTER TABLE "reputation" ALTER COLUMN "message_chat" SET NOT NULL', undefined);
     await queryRunner.query(
-      'ALTER TABLE "reputation" ADD CONSTRAINT "REL_c89129a8dd16dc8a7afe4d4b4b" UNIQUE ("message_id", "message_chat")',
-      undefined,
-    );
-    await queryRunner.query(
       'ALTER TABLE "reputation" ADD CONSTRAINT "FK_6318e7cab1e73a7d58d4373c7a6" FOREIGN KEY ("from_user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION',
       undefined,
     );
@@ -38,7 +34,6 @@ export class FixReputationNotNullable1583798723406 implements MigrationInterface
   }
 
   public async down(queryRunner: QueryRunner): Promise<any> {
-    await queryRunner.query('ALTER TABLE "reputation" DROP CONSTRAINT "FK_c89129a8dd16dc8a7afe4d4b4bc"', undefined);
     await queryRunner.query('ALTER TABLE "reputation" DROP CONSTRAINT "FK_0ca5aaff74c6eadcf6cc0fdf9ff"', undefined);
     await queryRunner.query('ALTER TABLE "reputation" DROP CONSTRAINT "FK_092d6c747696d58b9e627565bda"', undefined);
     await queryRunner.query('ALTER TABLE "reputation" DROP CONSTRAINT "FK_6318e7cab1e73a7d58d4373c7a6"', undefined);

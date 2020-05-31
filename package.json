@@ -3,6 +3,7 @@
    "version": "0.0.1",
    "description": "Awesome project developed with TypeORM.",
    "devDependencies": {
+      "@types/mysql2": "github:types/mysql2",
       "@typescript-eslint/eslint-plugin": "^2.21.0",
       "@typescript-eslint/parser": "^2.21.0",
       "eslint": "^6.8.0",
@@ -21,16 +22,17 @@
       "@types/debug": "^4.1.5",
       "@types/jest": "^25.1.3",
       "@types/node": "^12.12.29",
-      "ts-node": "^8.6.2",
-      "typescript": "^3.8.3",
       "debug": "^4.1.1",
       "dotenv": "^8.2.0",
+      "mysql2": "^2.1.0",
       "pg": "^7.3.0",
       "reflect-metadata": "^0.1.10",
       "telegraf": "^3.36.0",
+      "telegram-typings": "^4.0.0-beta",
+      "ts-node": "^8.6.2",
       "typeorm": "0.2.22",
       "typeorm-naming-strategies": "^1.1.0",
-      "telegram-typings": "^4.0.0-beta",
+      "typescript": "^3.8.3",
       "uuidv4": "^6.0.5"
    },
    "scripts": {
@@ -43,7 +45,8 @@
       "test:create-initial-migration": "rm -rf src/testUtils/migration/* && rm -rf migration.db && TYPEORM_TYPE=sqlite POSTGRES_DATABASE=./migration.db TYPEORM_MIGRATION_DIR=src/testUtils/migration ts-node ./node_modules/typeorm/cli.js migration:generate -n Migration",
       "create-entity": "ts-node ./node_modules/typeorm/cli.js entity:create -n",
       "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run",
-      "test:migrate-test": "TYPEORM_TYPE=sqlite POSTGRES_DATABASE=./migration.db TYPEORM_MIGRATIONS=\"src/testUtils/migration/**/*.ts\" ts-node ./node_modules/typeorm/cli.js migration:run"
+      "test:migrate-test": "TYPEORM_TYPE=sqlite POSTGRES_DATABASE=./migration.db TYPEORM_MIGRATIONS=\"src/testUtils/migration/**/*.ts\" ts-node ./node_modules/typeorm/cli.js migration:run",
+      "migrate-from-mysql": "DEBUG=msocietybot-mysql-migrator ts-node src/mysqlToPostgresMigrator.ts"
    },
    "husky": {
       "hooks": {
