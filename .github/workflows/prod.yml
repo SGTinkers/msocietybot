@@ -1,0 +1,45 @@
+
+name: Deploy Production
+env:
+  CI: true
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  deploy:
+    if: startsWith(github.event.issue.title, 'DEPLOY production')
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Notify Push
+      uses: appleboy/telegram-action@0.0.7
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        format: markdown
+        message: Deploying to Production: [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
+    - uses: actions/checkout@v2
+    - name: Deploy Production
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USERNAME }}
+        key: ${{ secrets.DEPLOY_KEY }}
+        script: |
+          podman stop msocietybot || true
+          podman rm msocietybot || true
+          podman pull msociety/msocietybot
+          podman run -d --name msocietybot --env-file $HOME/production.env --pod msocietybot-pod msociety/msocietybot
+    - name: Notify Completed
+      uses: appleboy/telegram-action@0.0.7
+      if: success() || failure()
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        format: markdown
+        message: Deployment to production is ${{job.status}} for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
+
