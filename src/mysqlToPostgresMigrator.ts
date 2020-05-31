@@ -17,10 +17,10 @@ createConnection()
     debug('connected: %O', postgresConnection.isConnected);
 
     const mysqlConnection = mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: 'password',
-      database: 'msocietybot',
+      host: process.env.MYSQL_HOST,
+      user: process.env.MYSQL_USERNAME,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE,
     });
 
     migrate(postgresConnection, mysqlConnection);
