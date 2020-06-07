@@ -1,6 +1,4 @@
 import Composer from 'telegraf/composer';
-import { getRepository } from 'typeorm';
-import { User } from '../entity/User';
 
 const bot = new Composer();
 const WelcomeMessage = {
@@ -25,24 +23,12 @@ const WelcomeMessage = {
 };
 
 bot.on('new_chat_members', ctx => {
-  const userRepo = getRepository(User);
-
-  ctx.message.new_chat_members.forEach(async member => {
-    const user = await userRepo.findOne(member.id);
-    if (user === undefined && !member.is_bot) {
-      const newUser = userRepo.create({
-        id: member.id,
-        firstName: member.first_name,
-        lastName: member.last_name,
-        username: member.username,
-      });
-      await userRepo.save(newUser);
-      ctx.reply(`Let's welcome ${member.first_name}! \n Hi ${member.first_name} ${WelcomeMessage.newMember} `); // TODO: Set/get welcome message from db?
-    } else {
-      ctx.reply(`${WelcomeMessage.returningMember} ${member.first_name}!`);
+  ctx.message.new_chat_members.forEach(member => {
+    if (!member.is_bot) {
+      // TODO: Set/get welcome message from db?
+      ctx.reply(`Let's welcome ${member.first_name}! \n Hi ${member.first_name} ${WelcomeMessage.newMember} `);
     }
   });
 });
 
 export { bot as WelcomeBot };
-export { WelcomeMessage };
