@@ -1,4 +1,7 @@
 import Composer from 'telegraf/composer';
+import { EntityManager } from 'typeorm';
+import { Chat as TelegramChat, User as TelegramUser } from 'telegram-typings';
+import { Message } from '../entity/Message';
 
 const bot = new Composer();
 const WelcomeMessage = {
@@ -23,12 +26,29 @@ const WelcomeMessage = {
 };
 
 bot.on('new_chat_members', ctx => {
-  ctx.message.new_chat_members.forEach(member => {
+  ctx.message.new_chat_members.forEach(async (member: TelegramUser) => {
     if (!member.is_bot) {
       // TODO: Set/get welcome message from db?
-      ctx.reply(`Let's welcome ${member.first_name}! \n Hi ${member.first_name} ${WelcomeMessage.newMember} `);
+      if (await isUserRejoining(entityManager, member, ctx.message.chat)) {
+        ctx.reply(`${WelcomeMessage.returningMember} ${member.first_name}`);
+      } else {
+        ctx.reply(`Let's welcome ${member.first_name}! \n Hi ${member.first_name} ${WelcomeMessage.newMember} `);
+      }
     }
   });
 });
 
 export { bot as WelcomeBot };
+
+async function isUserRejoining(
+  entityManager: EntityManager,
+  telegramUser: TelegramUser,
+  telegramChat: TelegramChat,
+): Promise<boolean> {
+  const userJoinedChatMessageCount = await entityManager
+    .createQueryBuilder(Message, 'message')
+    .innerJoin('message.usersJoined', 'uj', 'uj.id = :uj_id', { uj_id: telegramUser.id })
+    .innerJoin('message.chat', 'c', 'c.id = :chat_id', { chat_id: telegramChat.id })
+    .getCount();
+  return userJoinedChatMessageCount > 1;
+}
