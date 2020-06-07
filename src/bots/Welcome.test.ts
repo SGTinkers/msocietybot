@@ -7,7 +7,6 @@ describe('WelcomeBot', () => {
   const userGen = telegramUserGenerator();
   const member_1 = userGen.next().value;
   const member_2 = userGen.next().value;
-  // const botUser = userGen.next().value;
 
   const assertBotSaid = (messages: TelegramMessage[], match: RegExp | string) => {
     expect(messages).toEqual(
@@ -50,11 +49,8 @@ describe('WelcomeBot', () => {
     assertBotSaid(messages, /Would you mind doing a short intro of yourself/);
   });
 
-  // it('when a bot is added', () => {});
-
+  // TODO: Do not show welcome message when rejoining a chat
   // it('when more than one members return', () => {});
-
-  // it('when a bot and a member joined', () => {});
 });
 
 function* telegramUserGenerator(): Generator {
