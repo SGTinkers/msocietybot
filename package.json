@@ -37,7 +37,7 @@
    },
    "scripts": {
       "start": "ts-node src/index.ts",
-      "test": "jest -i",
+      "test": "jest",
       "lint-staged": "lint-staged",
       "tsc": "tsc --noEmit",
       "lint": "eslint src --max-warnings 0 --ext js,ts,tsx",
