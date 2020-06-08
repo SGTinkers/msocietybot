@@ -29,7 +29,7 @@ bot.on('new_chat_members', ctx => {
   ctx.message.new_chat_members.forEach(async (member: TelegramUser) => {
     if (!member.is_bot) {
       // TODO: Set/get welcome message from db?
-      if (await isUserRejoining(entityManager, member, ctx.message.chat)) {
+      if (await isUserRejoining(ctx.entityManager, member, ctx.message.chat)) {
         ctx.reply(`${WelcomeMessage.returningMember} ${member.first_name}`);
       } else {
         ctx.reply(`Let's welcome ${member.first_name}! \n Hi ${member.first_name} ${WelcomeMessage.newMember} `);
