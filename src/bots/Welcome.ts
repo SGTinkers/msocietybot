@@ -30,9 +30,14 @@ bot.on('new_chat_members', ctx => {
     if (!member.is_bot) {
       // TODO: Set/get welcome message from db?
       if (await isUserRejoining(ctx.entityManager, member, ctx.message.chat)) {
-        ctx.reply(`${WelcomeMessage.returningMember} ${member.first_name}`);
+        ctx.reply(`${WelcomeMessage.returningMember} [${member.first_name}](tg://user?id=${member.id})`, {
+          parse_mode: 'Markdown',
+        });
       } else {
-        ctx.reply(`Let's welcome ${member.first_name}! \n Hi ${member.first_name} ${WelcomeMessage.newMember} `);
+        ctx.reply(
+          `Let's welcome [${member.first_name}](tg://user?id=${member.id})!\n Hi [${member.first_name}](tg://user?id=${member.id}) ${WelcomeMessage.newMember} `,
+          { parse_mode: 'Markdown' },
+        );
       }
     }
   });
