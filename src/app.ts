@@ -16,11 +16,15 @@ export async function createConnection(typeOrmConnectionOptions?: ConnectionOpti
   if (!connectionOptions.synchronize) {
     const migrations = await connection.runMigrations({ transaction: 'all' });
     migrations.forEach(migration => {
-      console.log('DB: Migrated ' + migration.name + ' (' + migration.timestamp + ').');
+      if (process.env.npm_lifecycle_event !== 'test') {
+        console.log('DB: Migrated ' + migration.name + ' (' + migration.timestamp + ').');
+      }
     });
 
     if (migrations.length === 0) {
-      console.log('DB: All good! Nothing to migrate.');
+      if (process.env.npm_lifecycle_event !== 'test') {
+        console.log('DB: All good! Nothing to migrate.');
+      }
     }
   }
 
