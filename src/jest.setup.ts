@@ -1,37 +1,35 @@
 import { config as dotenv } from 'dotenv';
 dotenv();
 import 'reflect-metadata';
-import { rmdirSync, mkdirSync } from 'fs';
 import { uuid } from 'uuidv4';
 import { createApp, createConnection } from './app';
 import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock';
 import { RunBot } from './types/testOnly';
 import { getManager } from 'typeorm';
+import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
 
-jest.retryTimes(3);
+jest.setTimeout(15000);
 
-const TESTDB_BASE_DIR = './.testdb';
-
-beforeAll(() => {
-  try {
-    rmdirSync(TESTDB_BASE_DIR, { recursive: true });
-    mkdirSync(TESTDB_BASE_DIR);
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
-});
+let postgresContainer: StartedTestContainer;
 
 beforeEach(async () => {
   process.env.BOT_TOKEN = undefined;
+  postgresContainer = await new GenericContainer('postgres')
+    .withEnv('POSTGRES_PASSWORD', 'postgres')
+    .withExposedPorts(5432)
+    .withWaitStrategy(Wait.forLogMessage('[1] LOG:  database system is ready to accept connections'))
+    .start();
 
   const name = uuid();
-  const database = `${TESTDB_BASE_DIR}/${name}.db`;
 
   const connection = await createConnection({
-    // NOTE: When creating migration for test, ensure to delete all lines related to temporary_messages
-    migrations: ['src/testUtils/migration/**/*.ts'],
-    type: 'sqlite',
     name: name,
-    database: database,
+    type: 'postgres',
+    host: postgresContainer.getContainerIpAddress(),
+    port: postgresContainer.getMappedPort(5432),
+    username: 'postgres',
+    password: 'postgres',
+    database: 'postgres',
   });
 
   const runBot: RunBot = async (bots, setupMock, options) => {
@@ -67,7 +65,9 @@ beforeEach(async () => {
 afterEach(async () => {
   if (global['app']) {
     await global['app'].stop();
+    await postgresContainer.stop();
   } else if (global['testSetupCompleted']) {
+    await postgresContainer.stop();
     // used when the test gets stuck, comment it out (if test behaves weird) to debug
     process.exit(1);
   }

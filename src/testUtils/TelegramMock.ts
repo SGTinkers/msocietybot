@@ -135,6 +135,7 @@ function setupNock(
 ) {
   const apiRoot = 'https://api.telegram.org';
   nock.disableNetConnect();
+  nock.enableNetConnect('localhost');
 
   nock(apiRoot)
     .post(/\/bot(.+?)\/getMe/)
