@@ -14,14 +14,14 @@ const WelcomeMessage = {
   If you found a message in this group helpful, reply to the message with a 👍🏻 or 💯 to upvote the author. The points accumulated does not have any value though but only for posterity sake! 😄
   
   Also, follow us on socmed:
-  - IG: @msociety.tech
-  - Twitter: @msociety_tech
+  IG: @msociety.tech
+  Twitter: @msociety_tech
   
   Related Channels/Chats:
-  - @MSOCIETYChannel - Up to date announcements on career opportunities and upcoming events
-  - @MSOCIETYIdeas - Idea dumping ground extracted from lobby discussions
-  - @MSOCIETYSoftwareDev - Discussions on Software Dev
-  - @MSOCIETYML - DIscussions on AI/ML`,
+  1) @MSOCIETYChannel : Up to date announcements on career opportunities and upcoming events
+  2) @MSOCIETYIdeas : Idea dumping ground extracted from lobby discussions
+  3) @MSOCIETYSoftwareDev : Discussions on Software Dev
+  4) @MSOCIETYML : DIscussions on AI/ML`,
   returningMember: 'Welcome back',
 };
 
@@ -35,8 +35,8 @@ bot.on('new_chat_members', ctx => {
         });
       } else {
         ctx.reply(
-          `Let's welcome [${member.first_name}](tg://user?id=${member.id})!\n Hi [${member.first_name}](tg://user?id=${member.id}) ${WelcomeMessage.newMember} `,
-          { parse_mode: 'Markdown' },
+          `Let's welcome <a href="tg://user?id=${member.id}">${member.first_name}</a>!\n Hi <a href="tg://user?id=${member.id}">${member.first_name}</a> ${WelcomeMessage.newMember} `,
+          { parse_mode: 'html' },
         );
       }
     }
