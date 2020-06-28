@@ -21,6 +21,19 @@ describe('WelcomeBot', () => {
     );
   };
 
+  const assertBotDidNotSay = (messages: TelegramMessage[], match: RegExp | string) => {
+    expect(messages).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          from: expect.objectContaining({
+            is_bot: true,
+          }),
+          text: expect.stringMatching(match),
+        }),
+      ]),
+    );
+  };
+
   it('when one new member joined', async () => {
     const messages = await runBot([ScriberBot, WelcomeBot], ({ sendMessage }) => {
       const message: TelegramMessage = {
@@ -33,6 +46,7 @@ describe('WelcomeBot', () => {
     });
 
     assertBotSaid(messages, /Would you mind doing a short intro of yourself/);
+    assertBotDidNotSay(messages, /Welcome back/);
   });
 
   it('when more than one member joined', async () => {
@@ -47,10 +61,23 @@ describe('WelcomeBot', () => {
     });
 
     assertBotSaid(messages, /Would you mind doing a short intro of yourself/);
+    assertBotDidNotSay(messages, /Welcome back/);
   });
 
-  // TODO: Do not show welcome message when rejoining a chat
-  // it('when more than one members return', () => {});
+  it('show a different message when rejoining', async () => {
+    const messages = await runBot([ScriberBot, WelcomeBot], ({ sendMessage }) => {
+      const message: TelegramMessage = {
+        message_id: -1,
+        chat: createTelegramChat(),
+        date: new Date().getTime(),
+        new_chat_members: [member_1],
+      };
+      sendMessage(message);
+      sendMessage(message);
+    });
+
+    assertBotSaid(messages, /Welcome back/);
+  });
 });
 
 function* telegramUserGenerator(): Generator {

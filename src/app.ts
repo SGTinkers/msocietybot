@@ -12,19 +12,24 @@ export async function createConnection(typeOrmConnectionOptions?: ConnectionOpti
   if (typeOrmConnectionOptions) {
     connectionOptions = Object.assign({}, connectionOptions, typeOrmConnectionOptions);
   }
-  const connection = await createTypeOrmConnection(connectionOptions);
   if (!connectionOptions.synchronize) {
+    const connection = await createTypeOrmConnection(connectionOptions);
     const migrations = await connection.runMigrations({ transaction: 'all' });
     migrations.forEach(migration => {
-      console.log('DB: Migrated ' + migration.name + ' (' + migration.timestamp + ').');
+      if (process.env.npm_lifecycle_event !== 'test') {
+        console.log('DB: Migrated ' + migration.name + ' (' + migration.timestamp + ').');
+      }
     });
 
     if (migrations.length === 0) {
-      console.log('DB: All good! Nothing to migrate.');
+      if (process.env.npm_lifecycle_event !== 'test') {
+        console.log('DB: All good! Nothing to migrate.');
+      }
     }
+    await connection.close();
   }
 
-  return connection;
+  return await createTypeOrmConnection(connectionOptions);
 }
 
 export function createApp(connection: Connection, middlewares: Array<Middleware<ContextMessageUpdate>>) {
