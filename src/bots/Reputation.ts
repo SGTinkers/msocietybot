@@ -42,7 +42,7 @@ bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/i, async ctx => {
   }
 });
 
-bot.hears(/👎|👇|🔽|boo|eww/i, async ctx => {
+bot.hears(/👎|👇|🔽|\bboo(o*)\b|\beww(w*)\b/i, async ctx => {
   if (ctx.message.reply_to_message !== undefined) {
     const sender = ctx.message.from;
     const recipient = ctx.message.reply_to_message.from;

@@ -23,6 +23,18 @@ describe('ReputationBot', () => {
     );
   };
 
+  const assertBotDidNotReply = (messages: TelegramMessage[]) => {
+    expect(messages).toEqual(
+      expect.not.arrayContaining([
+        expect.not.objectContaining({
+          from: expect.not.objectContaining({
+            is_bot: true,
+          }),
+        }),
+      ]),
+    );
+  };
+
   describe('increases reputation', () => {
     const mainMessage: TelegramMessage = createTelegramMessage(
       thisChat,
@@ -285,6 +297,27 @@ describe('ReputationBot', () => {
 
     it('when user replies "boo" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, /decreased reputation/);
+      await assert(triggerMessage);
+    });
+
+    it('when user replies "booooo" to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'booooo', mainMessage);
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+      assertBotSaid(messages, /decreased reputation/);
+      await assert(triggerMessage);
+    });
+
+    it('when user replies "eww" to another user message', async () => {
+      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'eww', mainMessage);
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -295,7 +328,7 @@ describe('ReputationBot', () => {
       await assert(triggerMessage);
     });
 
-    it('when user replies "eww" to another user message', async () => {
+    it('when user replies "ewwww" to another user message', async () => {
       const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'eww', mainMessage);
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
@@ -436,6 +469,50 @@ describe('ReputationBot', () => {
 
       assertBotSaid(messages, /.*?/);
       await assert(3);
+    });
+
+    it('when user replies "boot" to another user message', async () => {
+      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, recipientUser, 'Java framework');
+      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'springboot', mainMessage);
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(replyMessage);
+      });
+
+      assertBotDidNotReply(messages);
+      await assert(0);
+    });
+
+    it('when user replies "boooot" to another user message', async () => {
+      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, recipientUser, 'What happend?');
+      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'it wont boooot', mainMessage);
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(replyMessage);
+      });
+
+      assertBotDidNotReply(messages);
+      await assert(0);
+    });
+
+    it('when user replies "newww" to another user message', async () => {
+      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, recipientUser, 'Is it your new PC?');
+      const replyMessage: TelegramMessage = createTelegramReply(
+        thisChat,
+        senderUser,
+        'yes. It is so newww',
+        mainMessage,
+      );
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(replyMessage);
+      });
+
+      assertBotDidNotReply(messages);
+      await assert(0);
     });
   });
 });
