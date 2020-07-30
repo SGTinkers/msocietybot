@@ -1,7 +1,7 @@
 import { ReputationBot } from './Reputation';
 import { ScriberBot } from './Scriber';
 import { Message as TelegramMessage, User as TelegramUser, Chat as TelegramChat } from 'telegram-typings';
-import { Reputation } from '../entity/Reputation';
+import { Reputation, voteQuota } from '../entity/Reputation';
 
 describe('ReputationBot', () => {
   const userGen = telegramUserGenerator();
@@ -457,8 +457,8 @@ describe('ReputationBot', () => {
       const mainMessage: TelegramMessage = createTelegramMessage(thisChat, recipientUser, 'i am so cool');
       const replies: TelegramMessage[] = [];
 
-      // Assuming quota is 3. Voting 4 times would only allow 3 votes in.
-      for (let i = 0; i < 4; i++) {
+      // Assuming quota is 5. Voting 6 times would only allow 5 votes in.
+      for (let i = 0; i < voteQuota + 1; i++) {
         replies.push(createTelegramReply(thisChat, senderUser, 'thanks', mainMessage, idGen.next().value));
       }
 
@@ -468,7 +468,7 @@ describe('ReputationBot', () => {
       });
 
       assertBotSaid(messages, /.*?/);
-      await assert(3);
+      await assert(voteQuota);
     });
 
     it('when user replies "boot" to another user message', async () => {
