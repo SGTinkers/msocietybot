@@ -16,7 +16,7 @@ import { Chat } from './Chat';
 import { Chat as TelegramChat, User as TelegramUser } from 'telegram-typings';
 
 // TODO: Move this to some config file.
-export const voteQuota = 3;
+export const voteQuota = 5;
 export const voteQuotaDuration = 24;
 export const defaultVoteValue = 1;
 
