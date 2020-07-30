@@ -24,8 +24,10 @@ bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/i, async ctx => {
     }
     // Does user have enough votes in their quota to give out?
     else if (!canVote) {
-      await ctx.reply(
-        `You have already used up your vote quota of ${voteQuota} for the past ${voteQuotaDuration} hours. Please try again later!\nUse /vote_quota to check your quota.`,
+      const { nextVote } = await Reputation.getVoteQuota(ctx.entityManager, ctx.message.from);
+
+      await ctx.replyWithMarkdown(
+        `You have already used up your vote quota of ${voteQuota} for the past ${voteQuotaDuration} hours. Please try again later!\nYou will receive a new vote in *${nextVote.hours} hours* and *${nextVote.minutes} minutes*`,
         { reply_to_message_id: ctx.message.message_id },
       );
     }
@@ -61,8 +63,10 @@ bot.hears(/👎|👇|🔽|\bboo(o*)\b|\beww(w*)\b/i, async ctx => {
     }
     // Does user have enough votes in their quota to give out?
     else if (!canVote) {
-      await ctx.reply(
-        `You have already used up your vote quota of ${voteQuota} for the past ${voteQuotaDuration} hours. Please try again later!\nUse /vote_quota to check your quota.`,
+      const { nextVote } = await Reputation.getVoteQuota(ctx.entityManager, ctx.message.from);
+
+      await ctx.replyWithMarkdown(
+        `You have already used up your vote quota of ${voteQuota} for the past ${voteQuotaDuration} hours. Please try again later!\nYou will receive a new vote in *${nextVote.hours} hours* and *${nextVote.minutes} minutes*`,
         { reply_to_message_id: ctx.message.message_id },
       );
     }
