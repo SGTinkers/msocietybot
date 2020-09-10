@@ -12,16 +12,24 @@ jest.setTimeout(15000);
 
 let postgresContainer: StartedTestContainer;
 
-beforeEach(async () => {
-  process.env.BOT_TOKEN = undefined;
+beforeAll(async () => {
+  console.log('Starting container');
   postgresContainer = await new GenericContainer('postgres')
     .withEnv('POSTGRES_PASSWORD', 'postgres')
     .withExposedPorts(5432)
     .withWaitStrategy(Wait.forLogMessage('[1] LOG:  database system is ready to accept connections'))
     .start();
+  console.log('Started container');
+});
+
+beforeEach(async () => {
+  process.env.BOT_TOKEN = undefined;
 
   const name = uuid();
 
+  console.log(
+    `Connecting to db: ${postgresContainer.getContainerIpAddress()}:${postgresContainer.getMappedPort(5432)}`,
+  );
   const connection = await createConnection({
     name: name,
     type: 'postgres',
@@ -29,8 +37,11 @@ beforeEach(async () => {
     port: postgresContainer.getMappedPort(5432),
     username: 'postgres',
     password: 'postgres',
-    database: 'postgres',
+    database: `msociety_bot_test_${name}`,
+    synchronize: true,
   });
+
+  console.log('Connected to db');
 
   const runBot: RunBot = async (bots, setupMock, options) => {
     const { messages, sendMessage, sendEditedMessage, buildMocks, unconsumedMocks, whenBotSends } = initTelegramMock();
@@ -65,11 +76,14 @@ beforeEach(async () => {
 afterEach(async () => {
   if (global['app']) {
     await global['app'].stop();
-    await postgresContainer.stop();
   } else if (global['testSetupCompleted']) {
     await postgresContainer.stop();
     // used when the test gets stuck, comment it out (if test behaves weird) to debug
     process.exit(1);
   }
   cleanUpTelegramMock();
+});
+
+afterAll(async () => {
+  await postgresContainer.stop();
 });
