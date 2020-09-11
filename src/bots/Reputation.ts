@@ -123,10 +123,10 @@ const insertReputation = async (
   value,
 ) => {
   const newReputation = entityManager.create(Reputation, {
-    fromUser: { id: sender.id },
-    toUser: { id: recipient.id },
-    message: { id: telegramMessage.message_id, chat: { id: telegramChat.id } },
-    chat: { id: telegramChat.id },
+    fromUser: { id: sender.id.toString() },
+    toUser: { id: recipient.id.toString() },
+    message: { id: telegramMessage.message_id.toString(), chat: { id: telegramChat.id.toString() } },
+    chat: { id: telegramChat.id.toString() },
     value,
   });
   await entityManager.save(Reputation, newReputation);

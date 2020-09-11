@@ -6,30 +6,28 @@ import {
   Connection,
 } from 'typeorm';
 import Telegraf, { ContextMessageUpdate, Middleware } from 'telegraf';
+import createDebug from 'debug';
+
+const debugDb = createDebug('db');
 
 export async function createConnection(typeOrmConnectionOptions?: ConnectionOptions) {
   let connectionOptions = await getConnectionOptions();
   if (typeOrmConnectionOptions) {
     connectionOptions = Object.assign({}, connectionOptions, typeOrmConnectionOptions);
   }
+  const connection = await createTypeOrmConnection(connectionOptions);
   if (!connectionOptions.synchronize) {
-    const connection = await createTypeOrmConnection(connectionOptions);
     const migrations = await connection.runMigrations({ transaction: 'all' });
     migrations.forEach(migration => {
-      if (process.env.npm_lifecycle_event !== 'test') {
-        console.log('DB: Migrated ' + migration.name + ' (' + migration.timestamp + ').');
-      }
+      debugDb('DB: Migrated ' + migration.name + ' (' + migration.timestamp + ').');
     });
 
     if (migrations.length === 0) {
-      if (process.env.npm_lifecycle_event !== 'test') {
-        console.log('DB: All good! Nothing to migrate.');
-      }
+      debugDb('DB: All good! Nothing to migrate.');
     }
-    await connection.close();
   }
 
-  return await createTypeOrmConnection(connectionOptions);
+  return connection;
 }
 
 export function createApp(connection: Connection, middlewares: Array<Middleware<ContextMessageUpdate>>) {

@@ -62,8 +62,8 @@ async function handleMessage(entityManager: EntityManager, message: TelegramMess
     messageFields.forwardFromMessage = await entityManager.findOne(
       Message,
       {
-        id: message.forward_from_message_id,
-        chat: { id: message.forward_from_chat.id },
+        id: message.forward_from_message_id.toString(),
+        chat: { id: message.forward_from_chat.id.toString() },
       },
       { relations: ['chat'] },
     );
@@ -110,7 +110,7 @@ async function upsertMessage(
 
   if (telegramMessage.migrate_from_chat_id) {
     const chat = await entityManager.findOne(Chat, {
-      id: telegramMessage.migrate_from_chat_id,
+      id: telegramMessage.migrate_from_chat_id.toString(),
     } as FindConditions<Chat>);
     if (chat) {
       partialMessage.migrateFromChat = chat;
@@ -119,7 +119,7 @@ async function upsertMessage(
 
   if (telegramMessage.migrate_to_chat_id) {
     const chat = await entityManager.findOne(Chat, {
-      id: telegramMessage.migrate_to_chat_id,
+      id: telegramMessage.migrate_to_chat_id.toString(),
     } as FindConditions<Chat>);
     if (chat) {
       partialMessage.migrateToChat = chat;
@@ -127,14 +127,14 @@ async function upsertMessage(
   }
 
   const message = await entityManager.findOne(Message, {
-    id: telegramMessage.message_id,
-    chat: chat.id,
+    id: telegramMessage.message_id.toString(),
+    chat: chat.id.toString(),
   } as FindConditions<Message>);
 
   if (message === undefined) {
     const newMessage = entityManager.create(Message, {
-      id: telegramMessage.message_id,
-      unixtime: telegramMessage.date,
+      id: telegramMessage.message_id.toString(),
+      unixtime: telegramMessage.date.toString(),
       text: telegramMessage.text,
       chat: chat,
       ...partialMessage,
@@ -146,7 +146,7 @@ async function upsertMessage(
       message.editHistory.push(JSON.parse(JSON.stringify(message)));
       message.lastEdit = new Date(telegramMessage.edit_date);
     }
-    message.unixtime = telegramMessage.date;
+    message.unixtime = telegramMessage.date.toString();
     message.text = telegramMessage.text;
     message.chat = chat;
     Object.keys(partialMessage).forEach(k => (message[k] = partialMessage[k]));
@@ -158,7 +158,7 @@ async function upsertUser(entityManager: EntityManager, telegramUser: TelegramUs
   const user = await entityManager.findOne(User, telegramUser.id);
   if (user === undefined) {
     const newUser = entityManager.create(User, {
-      id: telegramUser.id,
+      id: telegramUser.id.toString(),
       firstName: telegramUser.first_name,
       lastName: telegramUser.last_name,
       username: telegramUser.username,
@@ -187,7 +187,7 @@ async function upsertChat(entityManager: EntityManager, telegramChat: TelegramCh
   const chat = await entityManager.findOne(Chat, telegramChat.id);
   if (chat === undefined) {
     const chat = entityManager.create(Chat, {
-      id: telegramChat.id,
+      id: telegramChat.id.toString(),
       type: telegramChat.type,
       title: telegramChat.title,
       ...partialChat,

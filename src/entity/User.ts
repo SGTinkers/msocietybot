@@ -7,7 +7,7 @@ import { Reputation } from './Reputation';
 @Entity('user')
 export class User {
   @PrimaryColumn('bigint')
-  id: number;
+  id: string;
 
   @Column({ nullable: true, unique: true })
   username: string | null;

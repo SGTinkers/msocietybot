@@ -10,7 +10,7 @@ describe('Scriber', () => {
     const messages = await entityManager.find(Message, { relations: relations ? relations : Object.keys(containing) });
 
     expect(messages.length).toEqual(1);
-    expect(messages[0]).toStrictEqual(expect.objectContaining(containing));
+    expect(messages[0]).toEqual(expect.objectContaining(containing));
   };
 
   describe('insert user into db if does not exists', () => {
@@ -20,9 +20,9 @@ describe('Scriber', () => {
       const users = await entityManager.find(User);
 
       expect(users.length).toEqual(1);
-      expect(users[0]).toStrictEqual(
+      expect(users[0]).toEqual(
         expect.objectContaining({
-          id: userAbu.id,
+          id: userAbu.id.toString(),
           firstName: userAbu.first_name,
           lastName: userAbu.last_name,
           username: userAbu.username,
@@ -44,7 +44,7 @@ describe('Scriber', () => {
       });
 
       await assert();
-      await assertMessageContains({ sender: expect.objectContaining({ id: userAbu.id }) });
+      await assertMessageContains({ sender: expect.objectContaining({ id: userAbu.id.toString() }) });
     });
 
     it('forward_from', async () => {
@@ -59,7 +59,7 @@ describe('Scriber', () => {
       });
 
       await assert();
-      await assertMessageContains({ forwardFrom: expect.objectContaining({ id: userAbu.id }) });
+      await assertMessageContains({ forwardFrom: expect.objectContaining({ id: userAbu.id.toString() }) });
     });
 
     it('new_chat_members', async () => {
@@ -74,7 +74,7 @@ describe('Scriber', () => {
       });
 
       await assert();
-      await assertMessageContains({ usersJoined: [expect.objectContaining({ id: userAbu.id })] });
+      await assertMessageContains({ usersJoined: [expect.objectContaining({ id: userAbu.id.toString() })] });
     });
 
     it('left_chat_member', async () => {
@@ -89,7 +89,7 @@ describe('Scriber', () => {
       });
 
       await assert();
-      await assertMessageContains({ userLeft: expect.objectContaining({ id: userAbu.id }) });
+      await assertMessageContains({ userLeft: expect.objectContaining({ id: userAbu.id.toString() }) });
     });
   });
 
@@ -113,9 +113,9 @@ describe('Scriber', () => {
     const users = await entityManager.find(User);
 
     expect(users.length).toEqual(1);
-    expect(users[0]).toStrictEqual(
+    expect(users[0]).toEqual(
       expect.objectContaining({
-        id: userAbu.id,
+        id: userAbu.id.toString(),
         firstName: userAbu.first_name,
         lastName: userAbu.last_name,
         username: userAbu.username,
@@ -132,9 +132,9 @@ describe('Scriber', () => {
       const chats = await entityManager.find(Chat);
 
       expect(chats.length).toEqual(totalChats);
-      expect(chats[totalChats - 1]).toStrictEqual(
+      expect(chats[totalChats - 1]).toEqual(
         expect.objectContaining({
-          id: chat.id,
+          id: chat.id.toString(),
           type: chat.type,
           title: chat.title,
         }),
@@ -154,7 +154,7 @@ describe('Scriber', () => {
       });
 
       await assert();
-      await assertMessageContains({ chat: expect.objectContaining({ id: telegramChat.id }) });
+      await assertMessageContains({ chat: expect.objectContaining({ id: telegramChat.id.toString() }) });
     });
 
     it('forward_from_chat', async () => {
@@ -172,7 +172,7 @@ describe('Scriber', () => {
       });
 
       await assert(2);
-      await assertMessageContains({ forwardFromChat: expect.objectContaining({ id: telegramChat.id }) });
+      await assertMessageContains({ forwardFromChat: expect.objectContaining({ id: telegramChat.id.toString() }) });
     });
 
     it('private', async () => {
@@ -189,7 +189,7 @@ describe('Scriber', () => {
 
       await assertMessageContains(
         {
-          chat: expect.objectContaining({ user: expect.objectContaining({ id: userAbu.id }) }),
+          chat: expect.objectContaining({ user: expect.objectContaining({ id: userAbu.id.toString() }) }),
         },
         ['chat', 'chat.user'],
       );
@@ -212,9 +212,9 @@ describe('Scriber', () => {
     const chats = await entityManager.find(Chat);
 
     expect(chats.length).toEqual(1);
-    expect(chats[0]).toStrictEqual(
+    expect(chats[0]).toEqual(
       expect.objectContaining({
-        id: existingChat.id,
+        id: existingChat.id.toString(),
         type: existingChat.type,
       }),
     );
@@ -236,9 +236,9 @@ describe('Scriber', () => {
     const chats = await entityManager.find(Chat);
 
     expect(chats.length).toEqual(1);
-    expect(chats[0]).toStrictEqual(
+    expect(chats[0]).toEqual(
       expect.objectContaining({
-        id: telegramChat.id,
+        id: telegramChat.id.toString(),
         type: telegramChat.type,
       }),
     );
@@ -248,9 +248,9 @@ describe('Scriber', () => {
     const users = await entityManager.find(User);
 
     expect(users.length).toEqual(1);
-    expect(users[0]).toStrictEqual(
+    expect(users[0]).toEqual(
       expect.objectContaining({
-        id: telegramChat.id,
+        id: telegramChat.id.toString(),
         firstName: telegramChat.first_name,
         lastName: telegramChat.last_name,
         username: telegramChat.username,
@@ -270,10 +270,10 @@ describe('Scriber', () => {
     const messages = await entityManager.find(Message);
 
     expect(messages.length).toEqual(1);
-    expect(messages[0]).toStrictEqual(
+    expect(messages[0]).toEqual(
       expect.objectContaining({
-        id: telegramMessage.message_id,
-        unixtime: telegramMessage.date,
+        id: telegramMessage.message_id.toString(),
+        unixtime: telegramMessage.date.toString(),
         text: telegramMessage.text,
       }),
     );
@@ -295,22 +295,22 @@ describe('Scriber', () => {
     const messages = await entityManager.find(Message, { relations: ['replyToMessage'] });
 
     expect(messages.length).toEqual(2);
-    expect(messages[0]).toStrictEqual(
+    expect(messages[0]).toEqual(
       expect.objectContaining({
-        id: telegramRepliedMessage.message_id,
-        unixtime: telegramRepliedMessage.date,
+        id: telegramRepliedMessage.message_id.toString(),
+        unixtime: telegramRepliedMessage.date.toString(),
         text: telegramRepliedMessage.text,
       }),
     );
     expect(messages[0].createdAt).not.toBeNull();
     expect(messages[0].updatedAt).not.toBeNull();
-    expect(messages[1]).toStrictEqual(
+    expect(messages[1]).toEqual(
       expect.objectContaining({
-        id: telegramMessage.message_id,
-        unixtime: telegramMessage.date,
+        id: telegramMessage.message_id.toString(),
+        unixtime: telegramMessage.date.toString(),
         text: telegramMessage.text,
         replyToMessage: expect.objectContaining({
-          id: telegramRepliedMessage.message_id,
+          id: telegramRepliedMessage.message_id.toString(),
         }),
       }),
     );
@@ -327,9 +327,9 @@ describe('Scriber', () => {
     telegramMessage.reply_to_message = telegramRepliedMessage;
     const chat = await createChatInDb(telegramMessage.chat.type);
     await createMessageInDb(chat, {
-      id: telegramRepliedMessage.message_id,
+      id: telegramRepliedMessage.message_id.toString(),
       text: telegramRepliedMessage.text,
-      unixtime: telegramRepliedMessage.date,
+      unixtime: telegramRepliedMessage.date.toString(),
     });
 
     await runBot([ScriberBot], ({ sendMessage }) => {
@@ -339,22 +339,22 @@ describe('Scriber', () => {
     const messages = await entityManager.find(Message, { relations: ['replyToMessage'] });
 
     expect(messages.length).toEqual(2);
-    expect(messages[0]).toStrictEqual(
+    expect(messages[0]).toEqual(
       expect.objectContaining({
-        id: telegramRepliedMessage.message_id,
-        unixtime: telegramRepliedMessage.date,
+        id: telegramRepliedMessage.message_id.toString(),
+        unixtime: telegramRepliedMessage.date.toString(),
         text: telegramRepliedMessage.text,
       }),
     );
     expect(messages[0].createdAt).not.toBeNull();
     expect(messages[0].updatedAt).not.toBeNull();
-    expect(messages[1]).toStrictEqual(
+    expect(messages[1]).toEqual(
       expect.objectContaining({
-        id: telegramMessage.message_id,
-        unixtime: telegramMessage.date,
+        id: telegramMessage.message_id.toString(),
+        unixtime: telegramMessage.date.toString(),
         text: telegramMessage.text,
         replyToMessage: expect.objectContaining({
-          id: telegramRepliedMessage.message_id,
+          id: telegramRepliedMessage.message_id.toString(),
         }),
       }),
     );
@@ -372,9 +372,9 @@ describe('Scriber', () => {
     telegramMessage.forward_from_chat = telegramMessage.chat;
     const chat = await createChatInDb(telegramMessage.chat.type);
     await createMessageInDb(chat, {
-      id: telegramForwardedFromMessage.message_id,
+      id: telegramForwardedFromMessage.message_id.toString(),
       text: telegramForwardedFromMessage.text,
-      unixtime: telegramForwardedFromMessage.date,
+      unixtime: telegramForwardedFromMessage.date.toString(),
     });
 
     await runBot([ScriberBot], ({ sendMessage }) => {
@@ -384,22 +384,22 @@ describe('Scriber', () => {
     const messages = await entityManager.find(Message, { relations: ['forwardFromMessage'] });
 
     expect(messages.length).toEqual(2);
-    expect(messages[0]).toStrictEqual(
+    expect(messages[0]).toEqual(
       expect.objectContaining({
-        id: telegramForwardedFromMessage.message_id,
-        unixtime: telegramForwardedFromMessage.date,
+        id: telegramForwardedFromMessage.message_id.toString(),
+        unixtime: telegramForwardedFromMessage.date.toString(),
         text: telegramForwardedFromMessage.text,
       }),
     );
     expect(messages[0].createdAt).not.toBeNull();
     expect(messages[0].updatedAt).not.toBeNull();
-    expect(messages[1]).toStrictEqual(
+    expect(messages[1]).toEqual(
       expect.objectContaining({
-        id: telegramMessage.message_id,
-        unixtime: telegramMessage.date,
+        id: telegramMessage.message_id.toString(),
+        unixtime: telegramMessage.date.toString(),
         text: telegramMessage.text,
         forwardFromMessage: expect.objectContaining({
-          id: telegramForwardedFromMessage.message_id,
+          id: telegramForwardedFromMessage.message_id.toString(),
         }),
       }),
     );
@@ -421,22 +421,22 @@ describe('Scriber', () => {
     const messages = await entityManager.find(Message, { relations: ['pinnedMessage'] });
 
     expect(messages.length).toEqual(2);
-    expect(messages[0]).toStrictEqual(
+    expect(messages[0]).toEqual(
       expect.objectContaining({
-        id: telegramPinnedMessage.message_id,
-        unixtime: telegramPinnedMessage.date,
+        id: telegramPinnedMessage.message_id.toString(),
+        unixtime: telegramPinnedMessage.date.toString(),
         text: telegramPinnedMessage.text,
       }),
     );
     expect(messages[0].createdAt).not.toBeNull();
     expect(messages[0].updatedAt).not.toBeNull();
-    expect(messages[1]).toStrictEqual(
+    expect(messages[1]).toEqual(
       expect.objectContaining({
-        id: telegramMessage.message_id,
-        unixtime: telegramMessage.date,
+        id: telegramMessage.message_id.toString(),
+        unixtime: telegramMessage.date.toString(),
         text: telegramMessage.text,
         pinnedMessage: expect.objectContaining({
-          id: telegramPinnedMessage.message_id,
+          id: telegramPinnedMessage.message_id.toString(),
         }),
       }),
     );
@@ -502,10 +502,10 @@ describe('Scriber', () => {
     const messages = await entityManager.find(Message);
 
     expect(messages.length).toEqual(1);
-    expect(messages[0]).toStrictEqual(
+    expect(messages[0]).toEqual(
       expect.objectContaining({
-        id: telegramMessage.message_id,
-        unixtime: telegramMessage.date,
+        id: telegramMessage.message_id.toString(),
+        unixtime: telegramMessage.date.toString(),
         text: telegramMessage.text,
         forwardDate: new Date(telegramMessage.forward_date),
         forwardSignature: telegramMessage.forward_signature,
@@ -547,7 +547,10 @@ describe('Scriber', () => {
     telegramMessage.text = 'hello world';
     telegramMessage.edit_date = new Date().getTime();
     const chat = await createChatInDb(telegramMessage.chat.type);
-    const originalMessage = await createMessageInDb(chat, { id: telegramMessage.message_id, text: 'original message' });
+    const originalMessage = await createMessageInDb(chat, {
+      id: telegramMessage.message_id.toString(),
+      text: 'original message',
+    });
 
     await runBot([ScriberBot], ({ sendEditedMessage }) => {
       sendEditedMessage(telegramMessage);
@@ -556,15 +559,15 @@ describe('Scriber', () => {
     const messages = await entityManager.find(Message);
 
     expect(messages.length).toEqual(1);
-    expect(messages[0]).toStrictEqual(
+    expect(messages[0]).toEqual(
       expect.objectContaining({
-        id: telegramMessage.message_id,
-        unixtime: telegramMessage.date,
+        id: telegramMessage.message_id.toString(),
+        unixtime: telegramMessage.date.toString(),
         text: telegramMessage.text,
         lastEdit: new Date(telegramMessage.edit_date),
         editHistory: expect.arrayContaining([
           expect.objectContaining({
-            id: telegramMessage.message_id,
+            id: telegramMessage.message_id.toString(),
             unixtime: originalMessage.unixtime,
             text: originalMessage.text,
           }),
@@ -581,7 +584,7 @@ describe('Scriber', () => {
     telegramChat.id = -2020;
     const telegramMessage = createTelegramMessage(telegramChat);
     telegramMessage.text = 'hello world';
-    telegramMessage.migrate_from_chat_id = chat.id;
+    telegramMessage.migrate_from_chat_id = parseInt(chat.id);
 
     await runBot([ScriberBot], ({ sendMessage }) => {
       sendMessage(telegramMessage);
@@ -590,13 +593,13 @@ describe('Scriber', () => {
     const messages = await entityManager.find(Message, { relations: ['migrateFromChat'] });
 
     expect(messages.length).toEqual(1);
-    expect(messages[0]).toStrictEqual(
+    expect(messages[0]).toEqual(
       expect.objectContaining({
-        id: telegramMessage.message_id,
-        unixtime: telegramMessage.date,
+        id: telegramMessage.message_id.toString(),
+        unixtime: telegramMessage.date.toString(),
         text: telegramMessage.text,
         migrateFromChat: expect.objectContaining({
-          id: chat.id,
+          id: chat.id.toString(),
         }),
       } as Partial<Message>),
     );
@@ -610,7 +613,7 @@ describe('Scriber', () => {
     telegramChat.id = -2020;
     const telegramMessage = createTelegramMessage(telegramChat);
     telegramMessage.text = 'hello world';
-    telegramMessage.migrate_to_chat_id = chat.id;
+    telegramMessage.migrate_to_chat_id = parseInt(chat.id);
 
     await runBot([ScriberBot], ({ sendMessage }) => {
       sendMessage(telegramMessage);
@@ -619,13 +622,13 @@ describe('Scriber', () => {
     const messages = await entityManager.find(Message, { relations: ['migrateToChat'] });
 
     expect(messages.length).toEqual(1);
-    expect(messages[0]).toStrictEqual(
+    expect(messages[0]).toEqual(
       expect.objectContaining({
-        id: telegramMessage.message_id,
-        unixtime: telegramMessage.date,
+        id: telegramMessage.message_id.toString(),
+        unixtime: telegramMessage.date.toString(),
         text: telegramMessage.text,
         migrateToChat: expect.objectContaining({
-          id: chat.id,
+          id: chat.id.toString(),
         }),
       } as Partial<Message>),
     );
@@ -637,7 +640,7 @@ describe('Scriber', () => {
 async function createUserInDb() {
   try {
     const user = entityManager.create(User, {
-      id: 2,
+      id: '2',
       firstName: 'AbuBakr',
       lastName: '',
       username: null,
@@ -651,7 +654,7 @@ async function createUserInDb() {
 async function createChatInDb(type: string) {
   try {
     const chat = entityManager.create(Chat, {
-      id: -10000,
+      id: '-10000',
       type,
     });
     return await entityManager.save(chat);
@@ -660,10 +663,10 @@ async function createChatInDb(type: string) {
   }
 }
 
-async function createMessageInDb(chat: Chat, partialMessage: DeepPartial<Message> = { id: 1 }) {
+async function createMessageInDb(chat: Chat, partialMessage: DeepPartial<Message> = { id: '1' }) {
   try {
     const message = entityManager.create(Message, {
-      unixtime: new Date().getTime(),
+      unixtime: new Date().getTime().toString(),
       text: 'Some text here',
       chat: chat,
       ...partialMessage,

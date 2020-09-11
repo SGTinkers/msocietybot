@@ -7,7 +7,7 @@ import { ChatPhoto } from 'telegram-typings';
 @Entity('chats')
 export class Chat {
   @PrimaryColumn('bigint')
-  id: number;
+  id: string;
 
   @Column({ nullable: false })
   type: string;

@@ -33,7 +33,7 @@ import {
 @Entity('messages')
 export class Message {
   @PrimaryColumn('bigint')
-  id: number;
+  id: string;
 
   @ManyToOne(
     () => User,
@@ -56,7 +56,7 @@ export class Message {
   replies: Message[];
 
   @Column({ type: 'bigint', nullable: false })
-  unixtime: number;
+  unixtime: string;
 
   @ManyToOne(
     () => Chat,

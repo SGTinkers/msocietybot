@@ -7,19 +7,23 @@ import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock'
 import { RunBot } from './types/testOnly';
 import { getManager } from 'typeorm';
 import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
+import { createDatabase } from 'pg-god';
+import createDebug from 'debug';
+
+const debugTestcontainers = createDebug('testcontainers');
 
 jest.setTimeout(15000);
 
 let postgresContainer: StartedTestContainer;
 
 beforeAll(async () => {
-  console.log('Starting container');
+  debugTestcontainers('Starting container...');
   postgresContainer = await new GenericContainer('postgres')
     .withEnv('POSTGRES_PASSWORD', 'postgres')
     .withExposedPorts(5432)
     .withWaitStrategy(Wait.forLogMessage('[1] LOG:  database system is ready to accept connections'))
     .start();
-  console.log('Started container');
+  debugTestcontainers('Started container.');
 });
 
 beforeEach(async () => {
@@ -27,8 +31,15 @@ beforeEach(async () => {
 
   const name = uuid();
 
-  console.log(
-    `Connecting to db: ${postgresContainer.getContainerIpAddress()}:${postgresContainer.getMappedPort(5432)}`,
+  const databaseName = `msociety_bot_test_${name}`;
+  await createDatabase(
+    { databaseName: databaseName },
+    {
+      host: postgresContainer.getContainerIpAddress(),
+      port: postgresContainer.getMappedPort(5432),
+      user: 'postgres',
+      password: 'postgres',
+    },
   );
   const connection = await createConnection({
     name: name,
@@ -37,11 +48,8 @@ beforeEach(async () => {
     port: postgresContainer.getMappedPort(5432),
     username: 'postgres',
     password: 'postgres',
-    database: `msociety_bot_test_${name}`,
-    synchronize: true,
+    database: databaseName,
   });
-
-  console.log('Connected to db');
 
   const runBot: RunBot = async (bots, setupMock, options) => {
     const { messages, sendMessage, sendEditedMessage, buildMocks, unconsumedMocks, whenBotSends } = initTelegramMock();
