@@ -30,7 +30,7 @@
       "telegraf": "^3.36.0",
       "telegram-typings": "^4.0.0-beta",
       "ts-node": "^8.6.2",
-      "typeorm": "^0.2.25",
+      "typeorm": "^0.2.27",
       "typeorm-naming-strategies": "^1.1.0",
       "typescript": "^3.8.3",
       "uuidv4": "^6.0.5"
