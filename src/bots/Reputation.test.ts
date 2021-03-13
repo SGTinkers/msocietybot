@@ -48,7 +48,7 @@ describe('ReputationBot', () => {
       });
 
       expect(reputations.length).toEqual(1);
-      expect(reputations[0]).toStrictEqual(
+      expect(reputations[0]).toEqual(
         expect.objectContaining({
           value: 1,
           // Vote recipient
@@ -230,7 +230,7 @@ describe('ReputationBot', () => {
       });
 
       expect(reputations.length).toEqual(1);
-      expect(reputations[0]).toStrictEqual(
+      expect(reputations[0]).toEqual(
         expect.objectContaining({
           value: -1,
           // Vote recipient
