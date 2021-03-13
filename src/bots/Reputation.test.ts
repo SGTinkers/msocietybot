@@ -48,26 +48,26 @@ describe('ReputationBot', () => {
       });
 
       expect(reputations.length).toEqual(1);
-      expect(reputations[0]).toEqual(
+      expect(reputations[0]).toStrictEqual(
         expect.objectContaining({
           value: 1,
           // Vote recipient
           toUser: expect.objectContaining({
-            id: msg.reply_to_message.from.id,
+            id: `${msg.reply_to_message.from.id}`,
             username: msg.reply_to_message.from.username,
           }),
           // Vote sender
           fromUser: expect.objectContaining({
-            id: msg.from.id,
+            id: `${msg.from.id}`,
             username: msg.from.username,
           }),
           // Where it happened
           chat: expect.objectContaining({
-            id: msg.chat.id,
+            id: `${msg.chat.id}`,
           }),
           // The message that created the vote.
           message: expect.objectContaining({
-            id: msg.message_id,
+            id: `${msg.message_id}`,
           }),
         }),
       );
@@ -230,26 +230,26 @@ describe('ReputationBot', () => {
       });
 
       expect(reputations.length).toEqual(1);
-      expect(reputations[0]).toEqual(
+      expect(reputations[0]).toStrictEqual(
         expect.objectContaining({
           value: -1,
           // Vote recipient
           toUser: expect.objectContaining({
-            id: msg.reply_to_message.from.id,
+            id: `${msg.reply_to_message.from.id}`,
             username: msg.reply_to_message.from.username,
           }),
           // Vote sender
           fromUser: expect.objectContaining({
-            id: msg.from.id,
+            id: `${msg.from.id}`,
             username: msg.from.username,
           }),
           // Where it happened
           chat: expect.objectContaining({
-            id: msg.chat.id,
+            id: `${msg.chat.id}`,
           }),
           // The message that created the vote.
           message: expect.objectContaining({
-            id: msg.message_id,
+            id: `${msg.message_id}`,
           }),
         }),
       );
