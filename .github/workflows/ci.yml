@@ -11,6 +11,19 @@ jobs:
     strategy:
       fail-fast: false
 
+    services:
+      postgres:
+        image: postgres:9.6
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - name: Notify Push
       uses: appleboy/telegram-action@0.0.7
@@ -33,6 +46,9 @@ jobs:
       run: npm run lint
     - name: Test & Coverage
       if: success()
+      env:
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
       run: npm run test -- --collect-coverage
     - name: Archive code coverage results
       uses: actions/upload-artifact@v1

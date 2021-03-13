@@ -1,37 +1,65 @@
 import { config as dotenv } from 'dotenv';
 dotenv();
 import 'reflect-metadata';
-import { rmdirSync, mkdirSync } from 'fs';
 import { uuid } from 'uuidv4';
 import { createApp, createConnection } from './app';
 import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock';
 import { RunBot } from './types/testOnly';
-import { getManager } from 'typeorm';
+import { Connection, getManager } from 'typeorm';
+import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
+import { createDatabase } from 'pg-god';
+import createDebug from 'debug';
 
+const debugTestcontainers = createDebug('testcontainers');
+
+jest.setTimeout(15000);
 jest.retryTimes(3);
 
-const TESTDB_BASE_DIR = './.testdb';
+let postgresContainer: StartedTestContainer | undefined = undefined;
+let connection: Connection | undefined = undefined;
 
-beforeAll(() => {
-  try {
-    rmdirSync(TESTDB_BASE_DIR, { recursive: true });
-    mkdirSync(TESTDB_BASE_DIR);
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
+beforeAll(async () => {
+  if (process.env.TEST_USE_DOCKER) {
+    debugTestcontainers('Starting container...');
+    postgresContainer = await new GenericContainer('postgres')
+      .withEnv('POSTGRES_PASSWORD', 'postgres')
+      .withExposedPorts(5432)
+      .withWaitStrategy(Wait.forLogMessage('[1] LOG:  database system is ready to accept connections'))
+      .start();
+    debugTestcontainers('Started container.');
+  }
 });
 
 beforeEach(async () => {
   process.env.BOT_TOKEN = undefined;
 
   const name = uuid();
-  const database = `${TESTDB_BASE_DIR}/${name}.db`;
+  let host = process.env.POSTGRES_HOST || 'localhost';
+  let port: number = parseInt(process.env.POSTGRES_PORT) || 5432;
 
-  const connection = await createConnection({
-    // NOTE: When creating migration for test, ensure to delete all lines related to temporary_messages
-    migrations: ['src/testUtils/migration/**/*.ts'],
-    type: 'sqlite',
+  if (process.env.TEST_USE_DOCKER) {
+    host = postgresContainer.getContainerIpAddress();
+    port = postgresContainer.getMappedPort(5432);
+  }
+
+  const databaseName = `msociety_bot_test_${name}`;
+  await createDatabase(
+    { databaseName: databaseName },
+    {
+      host,
+      port,
+      user: process.env.POSTGRES_USERNAME || 'postgres',
+      password: process.env.POSTGRES_PASSWORD || 'postgres',
+    },
+  );
+  connection = await createConnection({
     name: name,
-    database: database,
+    type: 'postgres',
+    host: host,
+    port: port,
+    username: process.env.POSTGRES_USERNAME || 'postgres',
+    password: process.env.POSTGRES_PASSWORD || 'postgres',
+    database: databaseName,
   });
 
   const runBot: RunBot = async (bots, setupMock, options) => {
@@ -65,11 +93,18 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+  await connection?.dropDatabase();
+  await connection?.close();
   if (global['app']) {
     await global['app'].stop();
   } else if (global['testSetupCompleted']) {
+    await postgresContainer?.stop();
     // used when the test gets stuck, comment it out (if test behaves weird) to debug
     process.exit(1);
   }
   cleanUpTelegramMock();
+});
+
+afterAll(async () => {
+  await postgresContainer?.stop();
 });
