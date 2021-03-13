@@ -16,6 +16,8 @@ jobs:
         image: postgres:9.6
         env:
           POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -44,10 +46,10 @@ jobs:
       run: npm run lint
     - name: Test & Coverage
       if: success()
-      run: npm run test -- --collect-coverage
       env:
         POSTGRES_HOST: postgres
-        POSTGRES_PORT: 5432
+        POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
+      run: npm run test -- --collect-coverage
     - name: Archive code coverage results
       uses: actions/upload-artifact@v1
       with:
