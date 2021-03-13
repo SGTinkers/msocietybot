@@ -11,6 +11,17 @@ jobs:
     strategy:
       fail-fast: false
 
+    services:
+      postgres:
+        image: postgres:9.6
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - name: Notify Push
       uses: appleboy/telegram-action@0.0.7
@@ -34,6 +45,9 @@ jobs:
     - name: Test & Coverage
       if: success()
       run: npm run test -- --collect-coverage
+      env:
+        POSTGRES_HOST: postgres
+        POSTGRES_PORT: 5432
     - name: Archive code coverage results
       uses: actions/upload-artifact@v1
       with:
