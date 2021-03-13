@@ -47,7 +47,7 @@ jobs:
     - name: Test & Coverage
       if: success()
       env:
-        POSTGRES_HOST: postgres
+        POSTGRES_HOST: localhost
         POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
       run: npm run test -- --collect-coverage
     - name: Archive code coverage results
