@@ -13,6 +13,7 @@ import createDebug from 'debug';
 const debugTestcontainers = createDebug('testcontainers');
 
 jest.setTimeout(15000);
+jest.retryTimes(3);
 
 let postgresContainer: StartedTestContainer | undefined = undefined;
 let connection: Connection | undefined = undefined;
