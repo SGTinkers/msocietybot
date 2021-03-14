@@ -82,7 +82,7 @@ jobs:
         message: CI completed with status ${{job.status}} for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
 
   deploy-staging:
-
+    needs: build 
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
