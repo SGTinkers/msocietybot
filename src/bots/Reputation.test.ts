@@ -462,10 +462,14 @@ describe('ReputationBot', () => {
         replies.push(createTelegramReply(thisChat, senderUser, 'thanks', mainMessage, idGen.next().value));
       }
 
-      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
-        sendMessage(mainMessage);
-        replies.forEach(sendMessage);
-      });
+      const messages = await runBot(
+        [ScriberBot, ReputationBot],
+        ({ sendMessage }) => {
+          sendMessage(mainMessage);
+          replies.forEach(sendMessage);
+        },
+        { timeout: 500 },
+      );
 
       assertBotSaid(messages, /.*?/);
       await assert(voteQuota);

@@ -17,17 +17,21 @@ export async function createConnection(typeOrmConnectionOptions?: ConnectionOpti
   }
   const connection = await createTypeOrmConnection(connectionOptions);
   if (!connectionOptions.synchronize) {
-    const migrations = await connection.runMigrations({ transaction: 'all' });
-    migrations.forEach(migration => {
-      debugDb('DB: Migrated ' + migration.name + ' (' + migration.timestamp + ').');
-    });
-
-    if (migrations.length === 0) {
-      debugDb('DB: All good! Nothing to migrate.');
-    }
+    await migrate(connection);
   }
 
   return connection;
+}
+
+export async function migrate(connection: Connection) {
+  const migrations = await connection.runMigrations({ transaction: 'all' });
+  migrations.forEach(migration => {
+    debugDb('DB: Migrated ' + migration.name + ' (' + migration.timestamp + ').');
+  });
+
+  if (migrations.length === 0) {
+    debugDb('DB: All good! Nothing to migrate.');
+  }
 }
 
 export function createApp(connection: Connection, middlewares: Array<Middleware<ContextMessageUpdate>>) {

@@ -2,21 +2,26 @@ import { config as dotenv } from 'dotenv';
 dotenv();
 import 'reflect-metadata';
 import { uuid } from 'uuidv4';
-import { createApp, createConnection } from './app';
+import { createApp, createConnection, migrate } from './app';
 import { cleanUpTelegramMock, initTelegramMock } from './testUtils/TelegramMock';
 import { RunBot } from './types/testOnly';
 import { Connection, getManager } from 'typeorm';
 import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers';
-import { createDatabase } from 'pg-god';
 import createDebug from 'debug';
+import { Client } from 'pg';
 
 const debugTestcontainers = createDebug('testcontainers');
 
 jest.setTimeout(15000);
-jest.retryTimes(3);
 
+let host = process.env.POSTGRES_HOST || 'localhost';
+let port: number = parseInt(process.env.POSTGRES_PORT) || 5432;
+const username = process.env.POSTGRES_USER || 'postgres';
+const password = process.env.POSTGRES_PASSWORD || 'postgres';
+const templateDbName = `msocietybot_test_template_${uuid().replace(/-/g, '_')}`;
 let postgresContainer: StartedTestContainer | undefined = undefined;
 let connection: Connection | undefined = undefined;
+let pgClient: Client | undefined = undefined;
 
 beforeAll(async () => {
   if (process.env.TEST_USE_DOCKER) {
@@ -27,38 +32,39 @@ beforeAll(async () => {
       .withWaitStrategy(Wait.forLogMessage('[1] LOG:  database system is ready to accept connections'))
       .start();
     debugTestcontainers('Started container.');
+
+    host = postgresContainer.getContainerIpAddress();
+    port = postgresContainer.getMappedPort(5432);
   }
+
+  await connectToPg();
+  await createDb(templateDbName);
+  const templateConnection = await createConnection({
+    name: templateDbName,
+    type: 'postgres',
+    host: host,
+    port: port,
+    username: username,
+    password: password,
+    database: templateDbName,
+  });
+  await migrate(templateConnection);
+  await templateConnection.close();
 });
 
 beforeEach(async () => {
   process.env.BOT_TOKEN = undefined;
 
   const name = uuid();
-  let host = process.env.POSTGRES_HOST || 'localhost';
-  let port: number = parseInt(process.env.POSTGRES_PORT) || 5432;
-
-  if (process.env.TEST_USE_DOCKER) {
-    host = postgresContainer.getContainerIpAddress();
-    port = postgresContainer.getMappedPort(5432);
-  }
-
-  const databaseName = `msociety_bot_test_${name}`;
-  await createDatabase(
-    { databaseName: databaseName },
-    {
-      host,
-      port,
-      user: process.env.POSTGRES_USERNAME || 'postgres',
-      password: process.env.POSTGRES_PASSWORD || 'postgres',
-    },
-  );
+  const databaseName = `msociety_bot_test_${name.replace(/-/g, '_')}`;
+  await createDbFromTemplate(databaseName);
   connection = await createConnection({
     name: name,
     type: 'postgres',
     host: host,
     port: port,
-    username: process.env.POSTGRES_USERNAME || 'postgres',
-    password: process.env.POSTGRES_PASSWORD || 'postgres',
+    username: username,
+    password: password,
     database: databaseName,
   });
 
@@ -106,5 +112,34 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
+  await dropDbIfExists(templateDbName);
+  await pgClient?.end();
   await postgresContainer?.stop();
 });
+
+async function connectToPg() {
+  pgClient = new Client({
+    host: host,
+    port: port,
+    user: username,
+    password: password,
+    database: 'postgres',
+  });
+  await pgClient.connect();
+}
+
+async function createDb(databaseName: string) {
+  await dropDbIfExists(databaseName);
+  await pgClient.query(`CREATE DATABASE ${databaseName};`);
+}
+
+async function dropDbIfExists(databaseName: string) {
+  try {
+    await pgClient?.query(`DROP DATABASE ${databaseName};`);
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+}
+
+async function createDbFromTemplate(databaseName: string) {
+  await pgClient.query(`CREATE DATABASE ${databaseName} WITH TEMPLATE ${templateDbName};`);
+}
