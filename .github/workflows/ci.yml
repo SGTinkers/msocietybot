@@ -72,17 +72,6 @@ jobs:
         tags: latest
         tag_names: true
         tag_semver: true
-    - name: Deploy Staging
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.DEPLOY_HOST }}
-        username: ${{ secrets.DEPLOY_USERNAME }}
-        key: ${{ secrets.DEPLOY_KEY }}
-        script: |
-          podman stop msocietybot-staging || true
-          podman rm msocietybot-staging || true
-          podman pull msociety/msocietybot
-          podman run -d --name msocietybot-staging --env-file $HOME/staging.env --pod msocietybot-pod msociety/msocietybot
     - name: Notify Completed
       uses: appleboy/telegram-action@0.0.7
       if: success() || failure()
@@ -92,3 +81,36 @@ jobs:
         format: markdown
         message: CI completed with status ${{job.status}} for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
 
+  deploy-staging:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Notify Push
+        uses: appleboy/telegram-action@0.0.7
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: Deploying to staging [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
+      - name: Deploy Staging
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            podman stop msocietybot-staging || true
+            podman rm msocietybot-staging || true
+            podman pull msociety/msocietybot
+            podman run -d --name msocietybot-staging --env-file $HOME/staging.env --pod msocietybot-pod msociety/msocietybot
+      - name: Notify Completed
+        uses: appleboy/telegram-action@0.0.7
+        if: success() || failure()
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: Deploying to staging completed with status ${{job.status}} for [this commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by [${{github.actor}}](https://github.com/${{github.actor}}).
