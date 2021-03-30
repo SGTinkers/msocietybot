@@ -26,7 +26,6 @@ const WelcomeMessage = {
   4) @MSOCIETYML : DIscussions on AI/ML,
   5) @MSOCIETYFinance : DIscussions on anything finance
   6) @MSOCIETYgaming`,
-  
   returningMember: 'Welcome back',
 };
 
