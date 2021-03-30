@@ -1,4 +1,4 @@
-import Composer from 'telegraf/composer';
+import { Composer } from 'telegraf';
 
 const testBot = new Composer();
 testBot.hears('hello', ctx => ctx.reply('world'));
