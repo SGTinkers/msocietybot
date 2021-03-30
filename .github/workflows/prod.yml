@@ -3,13 +3,10 @@ name: Deploy Production
 env:
   CI: true
 
-on:
-  issues:
-    types: [opened]
+on: workflow_dispatch
 
 jobs:
   deploy:
-    if: startsWith(github.event.issue.title, 'DEPLOY production')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
