@@ -43,7 +43,7 @@ bot.on('new_chat_members', async (ctx: MsocietyBotContext) => {
           } else {
             ctx.reply(
               `Let's welcome <a href="tg://user?id=${member.id}">${member.first_name}</a>!\n Hi <a href="tg://user?id=${member.id}">${member.first_name}</a> ${WelcomeMessage.newMember} `,
-              { parse_mode: 'html' },
+              { parse_mode: 'HTML' },
             );
           }
         }
