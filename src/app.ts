@@ -5,7 +5,7 @@ import {
   getManager,
   Connection,
 } from 'typeorm';
-import Telegraf, { ContextMessageUpdate, Middleware } from 'telegraf';
+import { Telegraf, Middleware, Context } from 'telegraf';
 import createDebug from 'debug';
 
 const debugDb = createDebug('db');
@@ -34,7 +34,7 @@ export async function migrate(connection: Connection) {
   }
 }
 
-export function createApp(connection: Connection, middlewares: Array<Middleware<ContextMessageUpdate>>) {
+export function createApp(connection: Connection, middlewares: Array<Middleware<Context>>) {
   const bot = new Telegraf(process.env.BOT_TOKEN);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (bot.context as Record<string, any>).entityManager = getManager(connection.name);

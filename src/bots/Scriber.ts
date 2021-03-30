@@ -1,14 +1,15 @@
 import createDebug from 'debug';
-import Composer from 'telegraf/composer';
+import { Composer } from 'telegraf';
 import { EntityManager, FindConditions } from 'typeorm';
 import { User } from '../entity/User';
 import { Chat as TelegramChat, Message as TelegramMessage, User as TelegramUser } from 'telegram-typings';
 import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
+import { MsocietyBotContext } from '../context';
 
 const debug = createDebug('msocietybot:scriber');
 
-export const ScriberBot = new Composer();
+export const ScriberBot = new Composer<MsocietyBotContext>();
 ScriberBot.on('message', async (ctx, next) => {
   await ctx.entityManager.transaction(async entityManager => {
     const message = await handleMessage(entityManager, ctx.message);

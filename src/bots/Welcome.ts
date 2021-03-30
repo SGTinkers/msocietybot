@@ -1,9 +1,10 @@
-import Composer from 'telegraf/composer';
+import { Composer } from 'telegraf';
 import { EntityManager } from 'typeorm';
 import { Chat as TelegramChat, User as TelegramUser } from 'telegram-typings';
 import { Message } from '../entity/Message';
+import { MsocietyBotContext } from '../context';
 
-const bot = new Composer();
+const bot = new Composer<MsocietyBotContext>();
 const WelcomeMessage = {
   newMember: `Would you mind doing a short intro of yourself? :) The members would be interested to know the following:
 
@@ -29,22 +30,26 @@ const WelcomeMessage = {
   returningMember: 'Welcome back',
 };
 
-bot.on('new_chat_members', ctx => {
-  ctx.message.new_chat_members.forEach(async (member: TelegramUser) => {
-    if (!member.is_bot) {
-      // TODO: Set/get welcome message from db?
-      if (await isUserRejoining(ctx.entityManager, member, ctx.message.chat)) {
-        ctx.reply(`${WelcomeMessage.returningMember} [${member.first_name}](tg://user?id=${member.id})`, {
-          parse_mode: 'Markdown',
-        });
-      } else {
-        ctx.reply(
-          `Let's welcome <a href="tg://user?id=${member.id}">${member.first_name}</a>!\n Hi <a href="tg://user?id=${member.id}">${member.first_name}</a> ${WelcomeMessage.newMember} `,
-          { parse_mode: 'html' },
-        );
-      }
-    }
-  });
+bot.on('new_chat_members', async (ctx: MsocietyBotContext) => {
+  if ('new_chat_members' in ctx.message) {
+    await Promise.all(
+      ctx.message.new_chat_members.map(async (member: TelegramUser) => {
+        if (!member.is_bot) {
+          // TODO: Set/get welcome message from db?
+          if (await isUserRejoining(ctx.entityManager, member, ctx.message.chat)) {
+            ctx.reply(`${WelcomeMessage.returningMember} [${member.first_name}](tg://user?id=${member.id})`, {
+              parse_mode: 'Markdown',
+            });
+          } else {
+            ctx.reply(
+              `Let's welcome <a href="tg://user?id=${member.id}">${member.first_name}</a>!\n Hi <a href="tg://user?id=${member.id}">${member.first_name}</a> ${WelcomeMessage.newMember} `,
+              { parse_mode: 'html' },
+            );
+          }
+        }
+      }),
+    );
+  }
 });
 
 export { bot as WelcomeBot };
