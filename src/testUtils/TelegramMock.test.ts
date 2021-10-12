@@ -1,5 +1,5 @@
 import { Composer } from 'telegraf';
-import { Message } from 'telegraf/node_modules/typegram';
+import { Message } from 'telegraf/typings/core/types/typegram';
 
 const testBot = new Composer();
 testBot.hears('hello', ctx => ctx.reply('world'));

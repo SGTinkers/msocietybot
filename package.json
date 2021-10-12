@@ -30,7 +30,6 @@
     "pg": "^8.5.1",
     "reflect-metadata": "^0.1.10",
     "telegraf": "^4.4.2",
-    "telegram-typings": "^4.0.0-beta",
     "ts-node": "^10.2.1",
     "typegram": "^3.2.3",
     "typeorm": "^0.2.37",
