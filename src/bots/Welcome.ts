@@ -1,6 +1,6 @@
 import { Composer } from 'telegraf';
 import { EntityManager } from 'typeorm';
-import { Chat as TelegramChat, User as TelegramUser } from 'telegram-typings';
+import { Chat as TelegramChat, User as TelegramUser } from 'telegraf/typings/core/types/typegram';
 import { Message } from '../entity/Message';
 import { MsocietyBotContext } from '../context';
 
@@ -11,15 +11,15 @@ const WelcomeMessage = {
   1. Some background of your academics
   2. Your current job/situation
   3. Your tech interest/aspirations
-  
+
   If you found a message in this group helpful, reply to the message with a 👍🏻 or 💯 to upvote the author. The points accumulated does not have any value though but only for posterity sake! 😄
-  
+
   Also, follow us on socmed:
   IG: @msociety.tech
   Twitter: @msociety_tech
 
   We have a website: https://msociety.dev
-  
+
   Related Channels/Chats:
   1) @MSOCIETYChannel : Up to date announcements on career opportunities and upcoming events
   2) @MSOCIETYIdeas : Idea dumping ground extracted from lobby discussions

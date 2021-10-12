@@ -1,14 +1,19 @@
 import { ReputationBot } from './Reputation';
 import { ScriberBot } from './Scriber';
-import { Message as TelegramMessage, User as TelegramUser, Chat as TelegramChat } from 'telegram-typings';
+import {
+  Chat as TelegramChat,
+  User as TelegramUser,
+  Message as TelegramMessage,
+} from 'telegraf/typings/core/types/typegram';
 import { Reputation, voteQuota } from '../entity/Reputation';
+import { createTgGroupChat, createTgMessage } from '../testUtils/test-data-factory';
 
 describe('ReputationBot', () => {
   const userGen = telegramUserGenerator();
   const senderUser = userGen.next().value;
   const recipientUser = userGen.next().value;
   const botUser = userGen.next().value;
-  const thisChat = createTelegramChat();
+  const thisChat = createTgGroupChat();
 
   const assertBotSaid = (messages: TelegramMessage[], match: RegExp | string) => {
     expect(messages).toEqual(
@@ -36,11 +41,7 @@ describe('ReputationBot', () => {
   };
 
   describe('increases reputation', () => {
-    const mainMessage: TelegramMessage = createTelegramMessage(
-      thisChat,
-      recipientUser,
-      'amazingly interesting message sent by me!',
-    );
+    const mainMessage = createTelegramMessage(thisChat, recipientUser, 'amazingly interesting message sent by me!');
 
     const assert = async msg => {
       const reputations = await entityManager.find(Reputation, {
@@ -218,11 +219,7 @@ describe('ReputationBot', () => {
   });
 
   describe('decreases reputation', () => {
-    const mainMessage: TelegramMessage = createTelegramMessage(
-      thisChat,
-      recipientUser,
-      'terribly bad message shared by me',
-    );
+    const mainMessage = createTelegramMessage(thisChat, recipientUser, 'terribly bad message shared by me');
 
     const assert = async msg => {
       const reputations = await entityManager.find(Reputation, {
@@ -260,7 +257,7 @@ describe('ReputationBot', () => {
     // Testing main tokens:
     // /👎|👇|🔽|boo|eww/
     it('when user replies "👎" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👎', mainMessage);
+      const triggerMessage = createTelegramReply(thisChat, senderUser, '👎', mainMessage);
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -401,8 +398,8 @@ describe('ReputationBot', () => {
     };
 
     it('when a user sends "thanks" to themselves', async () => {
-      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
-      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
+      const mainMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
+      const replyMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -414,8 +411,8 @@ describe('ReputationBot', () => {
     });
 
     it('when a user sends "thanks" to the bot', async () => {
-      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
-      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
+      const mainMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
+      const replyMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -427,8 +424,8 @@ describe('ReputationBot', () => {
     });
 
     it('when a user sends "boo" to themselves', async () => {
-      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
-      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
+      const mainMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
+      const replyMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -440,8 +437,8 @@ describe('ReputationBot', () => {
     });
 
     it('when a user sends "boo" to the bot', async () => {
-      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
-      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
+      const mainMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
+      const replyMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -454,7 +451,7 @@ describe('ReputationBot', () => {
 
     it('when a user exceeds quota', async () => {
       const idGen = idGenerator();
-      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, recipientUser, 'i am so cool');
+      const mainMessage = createTelegramMessage(thisChat, recipientUser, 'i am so cool');
       const replies: TelegramMessage[] = [];
 
       // Assuming quota is 5. Voting 6 times would only allow 5 votes in.
@@ -476,8 +473,8 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "boot" to another user message', async () => {
-      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, recipientUser, 'Java framework');
-      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'springboot', mainMessage);
+      const mainMessage = createTelegramMessage(thisChat, recipientUser, 'Java framework');
+      const replyMessage = createTelegramReply(thisChat, senderUser, 'springboot', mainMessage);
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -489,8 +486,8 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "boooot" to another user message', async () => {
-      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, recipientUser, 'What happend?');
-      const replyMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'it wont boooot', mainMessage);
+      const mainMessage = createTelegramMessage(thisChat, recipientUser, 'What happend?');
+      const replyMessage = createTelegramReply(thisChat, senderUser, 'it wont boooot', mainMessage);
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -502,13 +499,8 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "newww" to another user message', async () => {
-      const mainMessage: TelegramMessage = createTelegramMessage(thisChat, recipientUser, 'Is it your new PC?');
-      const replyMessage: TelegramMessage = createTelegramReply(
-        thisChat,
-        senderUser,
-        'yes. It is so newww',
-        mainMessage,
-      );
+      const mainMessage = createTelegramMessage(thisChat, recipientUser, 'Is it your new PC?');
+      const replyMessage = createTelegramReply(thisChat, senderUser, 'yes. It is so newww', mainMessage);
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -545,29 +537,6 @@ function* telegramUserGenerator(): Generator {
   };
 }
 
-function createTelegramChat(typeOrUser?: string | TelegramUser): TelegramChat {
-  const fields: Record<string, string | number> = {};
-  if (typeof typeOrUser === 'string') {
-    fields['type'] = typeOrUser;
-  } else if (typeOrUser) {
-    fields['id'] = typeOrUser.id;
-    fields['first_name'] = typeOrUser.first_name;
-    fields['last_name'] = typeOrUser.last_name;
-    fields['username'] = typeOrUser.username;
-    fields['type'] = 'private';
-  }
-
-  if (fields['type'] !== 'private') {
-    fields['title'] = 'Some chat title';
-  }
-
-  return {
-    id: -10000,
-    type: 'group',
-    ...fields,
-  };
-}
-
 // For use when chaining replies.
 function* idGenerator(): Generator<number> {
   let index = 2;
@@ -575,31 +544,28 @@ function* idGenerator(): Generator<number> {
 }
 
 function createTelegramMessage(
-  chat: TelegramChat = createTelegramChat(),
+  chat: TelegramChat = createTgGroupChat(),
   user: TelegramUser,
   text: string,
-): TelegramMessage {
+): TelegramMessage.TextMessage & { reply_to_message: undefined } {
   return {
+    ...createTgMessage(chat, user),
     message_id: 1,
-    date: new Date().getTime(),
-    chat: chat,
-    from: user,
     text,
+    reply_to_message: undefined,
   };
 }
 
 function createTelegramReply(
-  chat: TelegramChat = createTelegramChat(),
+  chat: TelegramChat = createTgGroupChat(),
   user: TelegramUser,
   text: string,
-  reply_to_message: TelegramMessage,
+  reply_to_message: TelegramMessage.TextMessage & { reply_to_message: undefined },
   id = 2,
-): TelegramMessage {
+): TelegramMessage.TextMessage {
   return {
+    ...createTgMessage(chat, user),
     message_id: id,
-    date: new Date().getTime(),
-    chat: chat,
-    from: user,
     reply_to_message,
     text,
   };

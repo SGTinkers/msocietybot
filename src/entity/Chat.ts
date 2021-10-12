@@ -2,7 +2,7 @@ import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToOne, PrimaryColumn, O
 import { User } from './User';
 import { ChatPreference } from './ChatPreference';
 import { Message } from './Message';
-import { ChatPhoto } from 'telegram-typings';
+import { ChatPhoto } from 'telegraf/typings/core/types/typegram';
 
 @Entity('chats')
 export class Chat {

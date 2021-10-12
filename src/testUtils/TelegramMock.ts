@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import nock, { ReplyFnResult } from 'nock';
-import { Update, Message, User, Chat } from 'telegram-typings';
 import { NockResponse } from '../types/testOnly';
 import { isRegExp } from 'util';
+import { Chat, CommonMessageBundle, Message, Update, User } from 'telegraf/typings/core/types/typegram';
 
 type Predicate = (uri: string, requestBody: Record<string, any>) => boolean;
 interface ResponseGenerator {
@@ -29,9 +29,10 @@ const USER_USER: User = {
   first_name: 'User',
 };
 
-const CHAT: Chat = {
+const CHAT: Chat.GroupChat = {
   id: -2,
   type: 'group',
+  title: '',
 };
 
 export function initTelegramMock() {
@@ -59,7 +60,7 @@ export function initTelegramMock() {
       return [200, { ok: true, result: [] }];
     }
 
-    const results = (response[1] as any).result as Update[];
+    const results = (response[1] as any).result as Update.MessageUpdate[];
     results.forEach(result => {
       if (result.message) {
         messages.push(result.message);
@@ -76,20 +77,20 @@ export function initTelegramMock() {
       updateReplyResult([
         {
           update_id: globals.updateId++,
-          message: message,
+          message: message as Message & Update.NonChannel & Update.New,
         },
       ]),
     );
   };
 
   const sendEditedMessage = (m: Message | string) => {
-    const message: Message = createUserMessage(m);
+    const message = createUserMessage(m);
 
     getUpdatesResponses.push(
       updateReplyResult([
         {
           update_id: globals.updateId++,
-          edited_message: message,
+          edited_message: (message as unknown) as Update.Edited & Update.NonChannel & CommonMessageBundle,
         },
       ]),
     );
@@ -169,7 +170,7 @@ export function cleanUpTelegramMock() {
 class WhenBuilder {
   private predicateMessage: Message | RegExp;
 
-  private thenReply?: Message;
+  private thenReply?: Message & Update.NonChannel & Update.New;
 
   private thenReplyFn?: NockResponse;
 
@@ -189,7 +190,7 @@ class WhenBuilder {
     } else if (typeof message === 'function') {
       this.thenReplyFn = message;
     } else {
-      this.thenReply = message;
+      this.thenReply = message as Message & Update.NonChannel & Update.New;
     }
 
     return this;
@@ -209,7 +210,11 @@ class WhenBuilder {
       return this.predicateMessage.test(requestBody.text);
     }
 
-    return requestBody.text === this.predicateMessage.text;
+    if ('text' in this.predicateMessage) {
+      return requestBody.text === this.predicateMessage.text;
+    }
+
+    return false;
   };
 
   public buildResponseGenerator(): ResponseGenerator {
@@ -236,7 +241,7 @@ function updateReplyResult(result: Update[]): ReplyFnResult {
   ];
 }
 
-function createUserMessage(m: Message | string): Message {
+function createUserMessage(m: Message | string): Message & Update.New & Update.NonChannel {
   if (typeof m === 'string') {
     return {
       message_id: globals.messageId++,
@@ -250,8 +255,9 @@ function createUserMessage(m: Message | string): Message {
     return {
       ...m,
       message_id: m.message_id && m.message_id !== -1 ? m.message_id : globals.messageId++,
-      reply_to_message: m.reply_to_message ? createUserMessage(m.reply_to_message) : undefined,
-    };
+      reply_to_message:
+        'reply_to_message' in m && m.reply_to_message ? createUserMessage(m.reply_to_message) : undefined,
+    } as any;
   }
 }
 

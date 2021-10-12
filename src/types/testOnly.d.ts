@@ -1,6 +1,6 @@
-import { Message } from 'telegram-typings';
 import { ReplyFnResult } from 'nock';
 import { Middleware, Context } from 'telegraf';
+import { Message } from 'telegraf/typings/core/types/typegram';
 import { EntityManager } from 'typeorm';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

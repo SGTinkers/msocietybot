@@ -28,7 +28,7 @@ import {
   Video,
   VideoNote,
   Voice,
-} from 'telegram-typings';
+} from 'telegraf/typings/core/types/typegram';
 
 @Entity('messages')
 export class Message {

@@ -1,7 +1,11 @@
 import { Composer } from 'telegraf';
 import { EntityManager } from 'typeorm';
 import { Reputation, voteQuota, voteQuotaDuration, defaultVoteValue } from '../entity/Reputation';
-import { Chat as TelegramChat, Message as TelegramMessage, User as TelegramUser } from 'telegram-typings';
+import {
+  Chat as TelegramChat,
+  User as TelegramUser,
+  Message as TelegramMessage,
+} from 'telegraf/typings/core/types/typegram';
 import { MsocietyBotContext } from '../context';
 
 const bot = new Composer<MsocietyBotContext>();

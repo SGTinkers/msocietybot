@@ -1,7 +1,7 @@
 import { WelcomeBot } from './Welcome';
 import { ScriberBot } from './Scriber';
-
-import { Message as TelegramMessage, User as TelegramUser, Chat as TelegramChat } from 'telegram-typings';
+import { Message as TelegramMessage } from 'telegraf/typings/core/types/typegram';
+import { createTgGroupChat } from '../testUtils/test-data-factory';
 
 describe('WelcomeBot', () => {
   const userGen = telegramUserGenerator();
@@ -38,7 +38,7 @@ describe('WelcomeBot', () => {
     const messages = await runBot([ScriberBot, WelcomeBot], ({ sendMessage }) => {
       const message: TelegramMessage = {
         message_id: -1,
-        chat: createTelegramChat(),
+        chat: createTgGroupChat(),
         date: new Date().getTime(),
         new_chat_members: [member_1],
       };
@@ -53,7 +53,7 @@ describe('WelcomeBot', () => {
     const messages = await runBot([ScriberBot, WelcomeBot], ({ sendMessage }) => {
       const message: TelegramMessage = {
         message_id: -1,
-        chat: createTelegramChat(),
+        chat: createTgGroupChat(),
         date: new Date().getTime(),
         new_chat_members: [member_1, member_2],
       };
@@ -68,7 +68,7 @@ describe('WelcomeBot', () => {
     const messages = await runBot([ScriberBot, WelcomeBot], ({ sendMessage }) => {
       const message: TelegramMessage = {
         message_id: -1,
-        chat: createTelegramChat(),
+        chat: createTgGroupChat(),
         date: new Date().getTime(),
         new_chat_members: [member_1],
       };
@@ -101,28 +101,5 @@ function* telegramUserGenerator(): Generator {
     first_name: 'Uthman',
     last_name: 'Ibn Affan',
     username: 'uthman_affan_bot',
-  };
-}
-
-function createTelegramChat(typeOrUser?: string | TelegramUser): TelegramChat {
-  const fields: Record<string, string | number> = {};
-  if (typeof typeOrUser === 'string') {
-    fields['type'] = typeOrUser;
-  } else if (typeOrUser) {
-    fields['id'] = typeOrUser.id;
-    fields['first_name'] = typeOrUser.first_name;
-    fields['last_name'] = typeOrUser.last_name;
-    fields['username'] = typeOrUser.username;
-    fields['type'] = 'private';
-  }
-
-  if (fields['type'] !== 'private') {
-    fields['title'] = 'Some chat title';
-  }
-
-  return {
-    id: -10000,
-    type: 'group',
-    ...fields,
   };
 }

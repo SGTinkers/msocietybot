@@ -1,9 +1,16 @@
 import { ScriberBot } from './Scriber';
-import { Message as TelegramMessage, User as TelegramUser, Chat as TelegramChat } from 'telegram-typings';
+import { Chat as TelegramChat, Message as TelegramMessage } from 'telegraf/typings/core/types/typegram';
 import { User } from '../entity/User';
 import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
 import { DeepPartial } from 'typeorm';
+import {
+  createTgUser,
+  createTgGroupChat,
+  createTgMessage,
+  createTgPrivateChat,
+  createTgTextMessage,
+} from '../testUtils/test-data-factory';
 
 describe('Scriber', () => {
   const assertMessageContains = async <E = {}>(containing: E, relations?: string[]) => {
@@ -14,7 +21,7 @@ describe('Scriber', () => {
   };
 
   describe('insert user into db if does not exists', () => {
-    const userAbu = createTelegramUser();
+    const userAbu = createTgUser();
 
     const assert = async () => {
       const users = await entityManager.find(User);
@@ -34,11 +41,12 @@ describe('Scriber', () => {
 
     it('from', async () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
-        const message: TelegramMessage = {
+        const message: TelegramMessage.TextMessage = {
           message_id: -1,
-          chat: createTelegramChat(),
+          chat: createTgGroupChat(),
           date: new Date().getTime(),
           from: userAbu,
+          text: '',
         };
         sendMessage(message);
       });
@@ -49,11 +57,12 @@ describe('Scriber', () => {
 
     it('forward_from', async () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
-        const message: TelegramMessage = {
+        const message: TelegramMessage.TextMessage = {
           message_id: -1,
-          chat: createTelegramChat(),
+          chat: createTgGroupChat(),
           date: new Date().getTime(),
           forward_from: userAbu,
+          text: '',
         };
         sendMessage(message);
       });
@@ -66,7 +75,7 @@ describe('Scriber', () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
         const message: TelegramMessage = {
           message_id: -1,
-          chat: createTelegramChat(),
+          chat: createTgGroupChat(),
           date: new Date().getTime(),
           new_chat_members: [userAbu],
         };
@@ -81,7 +90,7 @@ describe('Scriber', () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
         const message: TelegramMessage = {
           message_id: -1,
-          chat: createTelegramChat(),
+          chat: createTgGroupChat(),
           date: new Date().getTime(),
           left_chat_member: userAbu,
         };
@@ -96,14 +105,14 @@ describe('Scriber', () => {
   it('update user in db if exists', async () => {
     const existingUser = await createUserInDb();
 
-    const userAbu = createTelegramUser();
+    const userAbu = createTgUser();
     await runBot([ScriberBot], ({ sendMessage }) => {
-      const newMemberMessage: TelegramMessage = {
+      const newMemberMessage: TelegramMessage.NewChatMembersMessage = {
         message_id: -1,
         chat: {
           id: -100000,
           type: 'group',
-        },
+        } as TelegramChat.GroupChat,
         date: new Date().getTime(),
         new_chat_members: [userAbu],
       };
@@ -126,9 +135,9 @@ describe('Scriber', () => {
   });
 
   describe('insert chat into db if does not exists', () => {
-    const telegramChat = createTelegramChat();
+    const telegramChat = createTgGroupChat();
 
-    const assert = async (totalChats = 1, chat: TelegramChat = telegramChat) => {
+    const assert = async (totalChats = 1, chat = telegramChat) => {
       const chats = await entityManager.find(Chat);
 
       expect(chats.length).toEqual(totalChats);
@@ -145,10 +154,11 @@ describe('Scriber', () => {
 
     it('chat', async () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
-        const message: TelegramMessage = {
+        const message: TelegramMessage.TextMessage = {
           message_id: -1,
           chat: telegramChat,
           date: new Date().getTime(),
+          text: '',
         };
         sendMessage(message);
       });
@@ -159,14 +169,15 @@ describe('Scriber', () => {
 
     it('forward_from_chat', async () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
-        const chat = createTelegramChat();
+        const chat = createTgGroupChat();
         chat.id = -100;
         chat.title = 'Some old chat title';
-        const message: TelegramMessage = {
+        const message: TelegramMessage.TextMessage = {
           message_id: -1,
           chat: chat,
           forward_from_chat: telegramChat,
           date: new Date().getTime(),
+          text: '',
         };
         sendMessage(message);
       });
@@ -176,13 +187,14 @@ describe('Scriber', () => {
     });
 
     it('private', async () => {
-      const userAbu = createTelegramUser();
-      const privateChat = createTelegramChat(userAbu);
+      const userAbu = createTgUser();
+      const privateChat = createTgPrivateChat(userAbu);
       await runBot([ScriberBot], ({ sendMessage }) => {
-        const message: TelegramMessage = {
+        const message: TelegramMessage.TextMessage = {
           message_id: -1,
           chat: privateChat,
           date: new Date().getTime(),
+          text: '',
         };
         sendMessage(message);
       });
@@ -199,12 +211,13 @@ describe('Scriber', () => {
   it('update chat in db if exists', async () => {
     const existingChat = await createChatInDb('group');
 
-    const telegramChat = createTelegramChat();
+    const telegramChat = createTgGroupChat();
     await runBot([ScriberBot], ({ sendMessage }) => {
-      const message: TelegramMessage = {
+      const message: TelegramMessage.TextMessage = {
         message_id: -1,
         chat: telegramChat,
         date: new Date().getTime(),
+        text: '',
       };
       sendMessage(message);
     });
@@ -223,12 +236,13 @@ describe('Scriber', () => {
   });
 
   it('insert chat and user into db if does not exists', async () => {
-    const telegramChat = createTelegramChat(createTelegramUser());
+    const telegramChat = createTgPrivateChat(createTgUser());
     await runBot([ScriberBot], ({ sendMessage }) => {
-      const message: TelegramMessage = {
+      const message: TelegramMessage.TextMessage = {
         message_id: -1,
         chat: telegramChat,
         date: new Date().getTime(),
+        text: '',
       };
       sendMessage(message);
     });
@@ -261,8 +275,7 @@ describe('Scriber', () => {
   });
 
   it('insert message into db if does not exists', async () => {
-    const telegramMessage = createTelegramMessage();
-    telegramMessage.text = 'hello world';
+    const telegramMessage = createTgTextMessage('hello world');
     await runBot([ScriberBot], ({ sendMessage }) => {
       sendMessage(telegramMessage);
     });
@@ -282,12 +295,13 @@ describe('Scriber', () => {
   });
 
   it('insert reply message into db if does not exists', async () => {
-    const telegramRepliedMessage = createTelegramMessage();
+    const telegramRepliedMessage = createTgTextMessage('some absurd thing here');
     telegramRepliedMessage.message_id = 12345;
-    telegramRepliedMessage.text = 'some absurd thing here';
-    const telegramMessage = createTelegramMessage();
-    telegramMessage.text = 'hello world';
-    telegramMessage.reply_to_message = telegramRepliedMessage;
+    const telegramMessage = createTgTextMessage('hello world');
+    telegramMessage.reply_to_message = {
+      ...telegramRepliedMessage,
+      reply_to_message: undefined,
+    };
     await runBot([ScriberBot], ({ sendMessage }) => {
       sendMessage(telegramMessage);
     });
@@ -319,12 +333,13 @@ describe('Scriber', () => {
   });
 
   it('insert reply message into db if does not exists but original message exists', async () => {
-    const telegramRepliedMessage = createTelegramMessage();
+    const telegramRepliedMessage = createTgTextMessage('some absurd thing here');
     telegramRepliedMessage.message_id = 12345;
-    telegramRepliedMessage.text = 'some absurd thing here';
-    const telegramMessage = createTelegramMessage();
-    telegramMessage.text = 'hello world';
-    telegramMessage.reply_to_message = telegramRepliedMessage;
+    const telegramMessage = createTgTextMessage('hello world');
+    telegramMessage.reply_to_message = {
+      ...telegramRepliedMessage,
+      reply_to_message: undefined,
+    };
     const chat = await createChatInDb(telegramMessage.chat.type);
     await createMessageInDb(chat, {
       id: telegramRepliedMessage.message_id.toString(),
@@ -363,11 +378,9 @@ describe('Scriber', () => {
   });
 
   it('insert forwardFromMessage relation into db', async () => {
-    const telegramForwardedFromMessage = createTelegramMessage();
+    const telegramForwardedFromMessage = createTgTextMessage('some absurd thing here');
     telegramForwardedFromMessage.message_id = 12345;
-    telegramForwardedFromMessage.text = 'some absurd thing here';
-    const telegramMessage = createTelegramMessage();
-    telegramMessage.text = 'hello world';
+    const telegramMessage = createTgTextMessage('hello world');
     telegramMessage.forward_from_message_id = telegramForwardedFromMessage.message_id;
     telegramMessage.forward_from_chat = telegramMessage.chat;
     const chat = await createChatInDb(telegramMessage.chat.type);
@@ -408,12 +421,13 @@ describe('Scriber', () => {
   });
 
   it('insert pinned message into db if does not exists', async () => {
-    const telegramPinnedMessage = createTelegramMessage();
+    const telegramPinnedMessage = createTgTextMessage('some absurd thing here');
     telegramPinnedMessage.message_id = 12345;
-    telegramPinnedMessage.text = 'some absurd thing here';
-    const telegramMessage = createTelegramMessage();
-    telegramMessage.text = 'hello world';
-    telegramMessage.pinned_message = telegramPinnedMessage;
+    const telegramMessage = createTgMessage() as TelegramMessage.PinnedMessageMessage;
+    telegramMessage.pinned_message = {
+      ...telegramPinnedMessage,
+      reply_to_message: undefined,
+    };
     await runBot([ScriberBot], ({ sendMessage }) => {
       sendMessage(telegramMessage);
     });
@@ -434,7 +448,6 @@ describe('Scriber', () => {
       expect.objectContaining({
         id: telegramMessage.message_id.toString(),
         unixtime: telegramMessage.date.toString(),
-        text: telegramMessage.text,
         pinnedMessage: expect.objectContaining({
           id: telegramPinnedMessage.message_id.toString(),
         }),
@@ -445,7 +458,8 @@ describe('Scriber', () => {
   });
 
   it('insert message with all optional fields into db', async () => {
-    const telegramMessage = createTelegramMessage();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const telegramMessage: any = createTgMessage();
     telegramMessage.text = 'hello world';
     telegramMessage.forward_date = new Date().getTime();
     telegramMessage.forward_signature = 'forward_signature';
@@ -543,8 +557,7 @@ describe('Scriber', () => {
   });
 
   it('handle editing of message', async () => {
-    const telegramMessage = createTelegramMessage();
-    telegramMessage.text = 'hello world';
+    const telegramMessage = createTgTextMessage('hello world');
     telegramMessage.edit_date = new Date().getTime();
     const chat = await createChatInDb(telegramMessage.chat.type);
     const originalMessage = await createMessageInDb(chat, {
@@ -580,10 +593,9 @@ describe('Scriber', () => {
 
   it('handle migration from', async () => {
     const chat = await createChatInDb('group');
-    const telegramChat = createTelegramChat();
+    const telegramChat = createTgGroupChat();
     telegramChat.id = -2020;
-    const telegramMessage = createTelegramMessage(telegramChat);
-    telegramMessage.text = 'hello world';
+    const telegramMessage = createTgMessage(telegramChat) as TelegramMessage.MigrateFromChatIdMessage;
     telegramMessage.migrate_from_chat_id = parseInt(chat.id);
 
     await runBot([ScriberBot], ({ sendMessage }) => {
@@ -597,7 +609,6 @@ describe('Scriber', () => {
       expect.objectContaining({
         id: telegramMessage.message_id.toString(),
         unixtime: telegramMessage.date.toString(),
-        text: telegramMessage.text,
         migrateFromChat: expect.objectContaining({
           id: chat.id.toString(),
         }),
@@ -609,10 +620,9 @@ describe('Scriber', () => {
 
   it('handle migration to', async () => {
     const chat = await createChatInDb('supergroup');
-    const telegramChat = createTelegramChat();
+    const telegramChat = createTgGroupChat();
     telegramChat.id = -2020;
-    const telegramMessage = createTelegramMessage(telegramChat);
-    telegramMessage.text = 'hello world';
+    const telegramMessage = createTgMessage(telegramChat) as TelegramMessage.MigrateToChatIdMessage;
     telegramMessage.migrate_to_chat_id = parseInt(chat.id);
 
     await runBot([ScriberBot], ({ sendMessage }) => {
@@ -626,7 +636,6 @@ describe('Scriber', () => {
       expect.objectContaining({
         id: telegramMessage.message_id.toString(),
         unixtime: telegramMessage.date.toString(),
-        text: telegramMessage.text,
         migrateToChat: expect.objectContaining({
           id: chat.id.toString(),
         }),
@@ -675,49 +684,4 @@ async function createMessageInDb(chat: Chat, partialMessage: DeepPartial<Message
   } catch (e) {
     console.error(e);
   }
-}
-
-function createTelegramUser(): TelegramUser {
-  return {
-    id: 2,
-    is_bot: false,
-    first_name: 'Abu',
-    last_name: 'Bakr',
-    username: 'abu_bakr',
-  };
-}
-
-function createTelegramChat(typeOrUser?: string | TelegramUser): TelegramChat {
-  const fields: Record<string, string | number> = {};
-  if (typeof typeOrUser === 'string') {
-    fields['type'] = typeOrUser;
-  } else if (typeOrUser) {
-    fields['id'] = typeOrUser.id;
-    fields['first_name'] = typeOrUser.first_name;
-    fields['last_name'] = typeOrUser.last_name;
-    fields['username'] = typeOrUser.username;
-    fields['type'] = 'private';
-  }
-
-  if (fields['type'] !== 'private') {
-    fields['title'] = 'Some chat title';
-  }
-
-  return {
-    id: -10000,
-    type: 'group',
-    ...fields,
-  };
-}
-
-function createTelegramMessage(
-  chat: TelegramChat = createTelegramChat(),
-  user: TelegramUser = createTelegramUser(),
-): TelegramMessage {
-  return {
-    message_id: 10,
-    date: new Date().getTime(),
-    chat: chat,
-    from: user,
-  };
 }

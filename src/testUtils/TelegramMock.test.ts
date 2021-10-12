@@ -1,4 +1,5 @@
 import { Composer } from 'telegraf';
+import { Message } from 'telegraf/node_modules/typegram';
 
 const testBot = new Composer();
 testBot.hears('hello', ctx => ctx.reply('world'));
@@ -11,7 +12,7 @@ describe('TelegramMock', () => {
     });
 
     expect(messages.length).toEqual(2);
-    expect(messages[1].text).toBe('world');
+    expect((messages[1] as Message.TextMessage).text).toBe('world');
   });
 
   it('bot should reply with holla when hi is received', async () => {
@@ -21,7 +22,7 @@ describe('TelegramMock', () => {
     });
 
     expect(messages.length).toEqual(2);
-    expect(messages[1].text).toBe('holla');
+    expect((messages[1] as Message.TextMessage).text).toBe('holla');
   });
 
   it('bot should reply with world and holla when hello and hi is received', async () => {
@@ -31,8 +32,8 @@ describe('TelegramMock', () => {
     });
 
     expect(messages.length).toEqual(4);
-    expect(messages[1].text).toBe('world');
-    expect(messages[3].text).toBe('holla');
+    expect((messages[1] as Message.TextMessage).text).toBe('world');
+    expect((messages[3] as Message.TextMessage).text).toBe('holla');
   });
 
   it('bot should reply with world (regex matched) and holla when hello and hi is received', async () => {
@@ -42,8 +43,8 @@ describe('TelegramMock', () => {
     });
 
     expect(messages.length).toEqual(4);
-    expect(messages[1].text).toBe('world');
-    expect(messages[3].text).toBe('holla');
+    expect((messages[1] as Message.TextMessage).text).toBe('world');
+    expect((messages[3] as Message.TextMessage).text).toBe('holla');
   });
 
   it('send message without waiting for bot', async () => {
@@ -53,8 +54,8 @@ describe('TelegramMock', () => {
     });
 
     expect(messages.length).toEqual(3);
-    expect(messages[0].text).toBe('greetings');
-    expect(messages[1].text).toBe('hi');
-    expect(messages[2].text).toBe('holla');
+    expect((messages[0] as Message.TextMessage).text).toBe('greetings');
+    expect((messages[1] as Message.TextMessage).text).toBe('hi');
+    expect((messages[2] as Message.TextMessage).text).toBe('holla');
   });
 });
