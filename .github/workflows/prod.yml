@@ -31,7 +31,7 @@ jobs:
           podman rm msocietybot || true
           podman pull msociety/msocietybot
           podman run -d --name msocietybot --env-file $HOME/production.env --pod msocietybot-pod msociety/msocietybot
-          podman system prune
+          yes | podman system prune
     - name: Notify Completed
       uses: appleboy/telegram-action@0.0.7
       if: success() || failure()
