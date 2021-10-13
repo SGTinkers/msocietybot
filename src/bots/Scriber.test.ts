@@ -1,5 +1,4 @@
 import { ScriberBot } from './Scriber';
-import { Chat as TelegramChat, Message as TelegramMessage } from 'telegraf/typings/core/types/typegram';
 import { User } from '../entity/User';
 import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
@@ -41,13 +40,10 @@ describe('Scriber', () => {
 
     it('from', async () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
-        const message: TelegramMessage.TextMessage = {
+        const message = createTgTextMessage('', {
           message_id: -1,
-          chat: createTgGroupChat(),
-          date: new Date().getTime(),
           from: userAbu,
-          text: '',
-        };
+        });
         sendMessage(message);
       });
 
@@ -57,13 +53,10 @@ describe('Scriber', () => {
 
     it('forward_from', async () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
-        const message: TelegramMessage.TextMessage = {
+        const message = createTgTextMessage('', {
           message_id: -1,
-          chat: createTgGroupChat(),
-          date: new Date().getTime(),
           forward_from: userAbu,
-          text: '',
-        };
+        });
         sendMessage(message);
       });
 
@@ -73,12 +66,11 @@ describe('Scriber', () => {
 
     it('new_chat_members', async () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
-        const message: TelegramMessage = {
+        const message = createTgMessage({
           message_id: -1,
-          chat: createTgGroupChat(),
-          date: new Date().getTime(),
+          from: undefined,
           new_chat_members: [userAbu],
-        };
+        });
         sendMessage(message);
       });
 
@@ -88,12 +80,11 @@ describe('Scriber', () => {
 
     it('left_chat_member', async () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
-        const message: TelegramMessage = {
+        const message = createTgMessage({
           message_id: -1,
-          chat: createTgGroupChat(),
-          date: new Date().getTime(),
+          from: undefined,
           left_chat_member: userAbu,
-        };
+        });
         sendMessage(message);
       });
 
@@ -107,15 +98,11 @@ describe('Scriber', () => {
 
     const userAbu = createTgUser();
     await runBot([ScriberBot], ({ sendMessage }) => {
-      const newMemberMessage: TelegramMessage.NewChatMembersMessage = {
+      const newMemberMessage = createTgMessage({
         message_id: -1,
-        chat: {
-          id: -100000,
-          type: 'group',
-        } as TelegramChat.GroupChat,
-        date: new Date().getTime(),
+        from: undefined,
         new_chat_members: [userAbu],
-      };
+      });
       sendMessage(newMemberMessage);
     });
 
@@ -154,12 +141,10 @@ describe('Scriber', () => {
 
     it('chat', async () => {
       await runBot([ScriberBot], ({ sendMessage }) => {
-        const message: TelegramMessage.TextMessage = {
+        const message = createTgTextMessage('', {
           message_id: -1,
           chat: telegramChat,
-          date: new Date().getTime(),
-          text: '',
-        };
+        });
         sendMessage(message);
       });
 
@@ -172,13 +157,11 @@ describe('Scriber', () => {
         const chat = createTgGroupChat();
         chat.id = -100;
         chat.title = 'Some old chat title';
-        const message: TelegramMessage.TextMessage = {
+        const message = createTgTextMessage('', {
           message_id: -1,
           chat: chat,
           forward_from_chat: telegramChat,
-          date: new Date().getTime(),
-          text: '',
-        };
+        });
         sendMessage(message);
       });
 
@@ -190,12 +173,10 @@ describe('Scriber', () => {
       const userAbu = createTgUser();
       const privateChat = createTgPrivateChat(userAbu);
       await runBot([ScriberBot], ({ sendMessage }) => {
-        const message: TelegramMessage.TextMessage = {
+        const message = createTgTextMessage('', {
           message_id: -1,
           chat: privateChat,
-          date: new Date().getTime(),
-          text: '',
-        };
+        });
         sendMessage(message);
       });
 
@@ -213,12 +194,10 @@ describe('Scriber', () => {
 
     const telegramChat = createTgGroupChat();
     await runBot([ScriberBot], ({ sendMessage }) => {
-      const message: TelegramMessage.TextMessage = {
+      const message = createTgTextMessage('', {
         message_id: -1,
         chat: telegramChat,
-        date: new Date().getTime(),
-        text: '',
-      };
+      });
       sendMessage(message);
     });
 
@@ -238,12 +217,10 @@ describe('Scriber', () => {
   it('insert chat and user into db if does not exists', async () => {
     const telegramChat = createTgPrivateChat(createTgUser());
     await runBot([ScriberBot], ({ sendMessage }) => {
-      const message: TelegramMessage.TextMessage = {
+      const message = createTgTextMessage('', {
         message_id: -1,
         chat: telegramChat,
-        date: new Date().getTime(),
-        text: '',
-      };
+      });
       sendMessage(message);
     });
 
