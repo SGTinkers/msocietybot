@@ -28,22 +28,32 @@ export function createTgPrivateChat(user: User): Chat.PrivateChat {
   };
 }
 
-export function createTgTextMessage(
+export function createTgTextMessage<T extends Partial<Message.TextMessage> & Record<string, unknown>>(
   text: string,
-  chat: Chat = createTgGroupChat(),
-  user: User = createTgUser(),
-): Message.TextMessage {
+  overrides?: T,
+): Message.TextMessage & T {
   return {
-    ...createTgMessage(chat, user),
+    ...createTgMessage({ chat: overrides?.chat, from: overrides?.from }),
     text,
+    ...overrides,
   };
 }
 
-export function createTgMessage(chat: Chat = createTgGroupChat(), user: User = createTgUser()): Message.ServiceMessage {
+export function createTgMessage<T extends Partial<Message.ServiceMessage> & Record<string, unknown>>(
+  overrides?: T,
+): Message.ServiceMessage & T {
   return {
-    message_id: 10,
     date: new Date().getTime(),
-    chat: chat,
-    from: user,
+    ...overrides,
+    message_id: overrides?.message_id ?? defaultIdGen.next().value,
+    chat: overrides?.chat ?? createTgGroupChat(),
+    from: overrides?.from ?? createTgUser(),
   };
+}
+
+const defaultIdGen = idGenerator();
+
+export function* idGenerator(): Generator<number> {
+  let index = 2;
+  while (true) yield index++;
 }

@@ -1,12 +1,8 @@
 import { ReputationBot } from './Reputation';
 import { ScriberBot } from './Scriber';
-import {
-  Chat as TelegramChat,
-  User as TelegramUser,
-  Message as TelegramMessage,
-} from 'telegraf/typings/core/types/typegram';
+import { Message as TelegramMessage } from 'telegraf/typings/core/types/typegram';
 import { Reputation, voteQuota } from '../entity/Reputation';
-import { createTgGroupChat, createTgMessage } from '../testUtils/test-data-factory';
+import { createTgGroupChat, createTgTextMessage, idGenerator } from '../testUtils/test-data-factory';
 
 describe('ReputationBot', () => {
   const userGen = telegramUserGenerator();
@@ -41,7 +37,11 @@ describe('ReputationBot', () => {
   };
 
   describe('increases reputation', () => {
-    const mainMessage = createTelegramMessage(thisChat, recipientUser, 'amazingly interesting message sent by me!');
+    const mainMessage = createTgTextMessage('amazingly interesting message sent by me!', {
+      chat: thisChat,
+      from: recipientUser,
+      reply_to_message: undefined,
+    });
 
     const assert = async msg => {
       const reputations = await entityManager.find(Reputation, {
@@ -79,7 +79,11 @@ describe('ReputationBot', () => {
     // Testing main tokens:
     // /thank you|thanks|👍|💯|👆|🆙|🔥/
     it('when user replies "thank you" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thank you', mainMessage);
+      const triggerMessage = createTgTextMessage('thank you', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -91,7 +95,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "thanks" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
+      const triggerMessage = createTgTextMessage('thanks', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -103,7 +111,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "👍" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍', mainMessage);
+      const triggerMessage = createTgTextMessage('👍', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -115,7 +127,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "💯" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '💯', mainMessage);
+      const triggerMessage = createTgTextMessage('💯', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -127,7 +143,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "👆" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👆', mainMessage);
+      const triggerMessage = createTgTextMessage('👆', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -139,7 +159,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "🆙" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🆙', mainMessage);
+      const triggerMessage = createTgTextMessage('🆙', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -151,7 +175,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "🔥" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔥', mainMessage);
+      const triggerMessage = createTgTextMessage('🔥', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -164,12 +192,11 @@ describe('ReputationBot', () => {
 
     // Testing other edge cases
     it('when user replies "thanks" + other things to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(
-        thisChat,
-        senderUser,
-        '123zxcthanksas-flj',
-        mainMessage,
-      );
+      const triggerMessage = createTgTextMessage('123zxcthanksas-flj', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -181,7 +208,11 @@ describe('ReputationBot', () => {
     });
     // Case insensitive should work
     it('when user replies "ThAnKs" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'ThAnKs', mainMessage);
+      const triggerMessage = createTgTextMessage('ThAnKs', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -193,7 +224,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "👍🏽" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏽', mainMessage);
+      const triggerMessage = createTgTextMessage('👍🏽', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -205,7 +240,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "👍🏻" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👍🏻', mainMessage);
+      const triggerMessage = createTgTextMessage('👍🏻', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -219,7 +258,11 @@ describe('ReputationBot', () => {
   });
 
   describe('decreases reputation', () => {
-    const mainMessage = createTelegramMessage(thisChat, recipientUser, 'terribly bad message shared by me');
+    const mainMessage = createTgTextMessage('terribly bad message shared by me', {
+      chat: thisChat,
+      from: recipientUser,
+      reply_to_message: undefined,
+    });
 
     const assert = async msg => {
       const reputations = await entityManager.find(Reputation, {
@@ -257,7 +300,11 @@ describe('ReputationBot', () => {
     // Testing main tokens:
     // /👎|👇|🔽|boo|eww/
     it('when user replies "👎" to another user message', async () => {
-      const triggerMessage = createTelegramReply(thisChat, senderUser, '👎', mainMessage);
+      const triggerMessage = createTgTextMessage('👎', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -269,7 +316,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "👇" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👇', mainMessage);
+      const triggerMessage = createTgTextMessage('👇', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -281,7 +332,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "🔽" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '🔽', mainMessage);
+      const triggerMessage = createTgTextMessage('🔽', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -293,7 +348,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "boo" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
+      const triggerMessage = createTgTextMessage('boo', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
@@ -304,7 +363,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "booooo" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'booooo', mainMessage);
+      const triggerMessage = createTgTextMessage('booooo', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
@@ -314,7 +377,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "eww" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'eww', mainMessage);
+      const triggerMessage = createTgTextMessage('eww', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -326,7 +393,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "ewwww" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'eww', mainMessage);
+      const triggerMessage = createTgTextMessage('eww', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -339,7 +410,11 @@ describe('ReputationBot', () => {
 
     // Testing other edge cases
     it('when user replies "👎🏾" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👎🏾', mainMessage);
+      const triggerMessage = createTgTextMessage('👎🏾', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -351,7 +426,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "👇🏾" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, '👇🏾', mainMessage);
+      const triggerMessage = createTgTextMessage('👇🏾', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
@@ -363,7 +442,11 @@ describe('ReputationBot', () => {
 
     // Case insensitive should work
     it('when user replies "bOo" to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'bOo', mainMessage);
+      const triggerMessage = createTgTextMessage('bOo', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -375,7 +458,11 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "boo" + other things to another user message', async () => {
-      const triggerMessage: TelegramMessage = createTelegramReply(thisChat, senderUser, 'boooo!', mainMessage);
+      const triggerMessage = createTgTextMessage('boooo!', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot(
         [ScriberBot, ReputationBot],
@@ -398,8 +485,16 @@ describe('ReputationBot', () => {
     };
 
     it('when a user sends "thanks" to themselves', async () => {
-      const mainMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
-      const replyMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
+      const mainMessage = createTgTextMessage('i am so cool', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: undefined,
+      });
+      const replyMessage = createTgTextMessage('thanks', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -411,8 +506,16 @@ describe('ReputationBot', () => {
     });
 
     it('when a user sends "thanks" to the bot', async () => {
-      const mainMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
-      const replyMessage = createTelegramReply(thisChat, senderUser, 'thanks', mainMessage);
+      const mainMessage = createTgTextMessage('i am so cool', {
+        chat: thisChat,
+        from: botUser,
+        reply_to_message: undefined,
+      });
+      const replyMessage = createTgTextMessage('thanks', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -424,8 +527,16 @@ describe('ReputationBot', () => {
     });
 
     it('when a user sends "boo" to themselves', async () => {
-      const mainMessage = createTelegramMessage(thisChat, senderUser, 'i am so cool');
-      const replyMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
+      const mainMessage = createTgTextMessage('i am so cool', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: undefined,
+      });
+      const replyMessage = createTgTextMessage('boo', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -437,8 +548,16 @@ describe('ReputationBot', () => {
     });
 
     it('when a user sends "boo" to the bot', async () => {
-      const mainMessage = createTelegramMessage(thisChat, botUser, 'i am so cool');
-      const replyMessage = createTelegramReply(thisChat, senderUser, 'boo', mainMessage);
+      const mainMessage = createTgTextMessage('i am so cool', {
+        chat: thisChat,
+        from: botUser,
+        reply_to_message: undefined,
+      });
+      const replyMessage = createTgTextMessage('boo', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -451,12 +570,23 @@ describe('ReputationBot', () => {
 
     it('when a user exceeds quota', async () => {
       const idGen = idGenerator();
-      const mainMessage = createTelegramMessage(thisChat, recipientUser, 'i am so cool');
+      const mainMessage = createTgTextMessage('i am so cool', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
       const replies: TelegramMessage[] = [];
 
       // Assuming quota is 5. Voting 6 times would only allow 5 votes in.
       for (let i = 0; i < voteQuota + 1; i++) {
-        replies.push(createTelegramReply(thisChat, senderUser, 'thanks', mainMessage, idGen.next().value));
+        replies.push(
+          createTgTextMessage('thanks', {
+            chat: thisChat,
+            from: senderUser,
+            reply_to_message: mainMessage,
+            id: idGen.next().value,
+          }),
+        );
       }
 
       const messages = await runBot(
@@ -473,8 +603,16 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "boot" to another user message', async () => {
-      const mainMessage = createTelegramMessage(thisChat, recipientUser, 'Java framework');
-      const replyMessage = createTelegramReply(thisChat, senderUser, 'springboot', mainMessage);
+      const mainMessage = createTgTextMessage('Java framework', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const replyMessage = createTgTextMessage('springboot', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -486,8 +624,16 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "boooot" to another user message', async () => {
-      const mainMessage = createTelegramMessage(thisChat, recipientUser, 'What happend?');
-      const replyMessage = createTelegramReply(thisChat, senderUser, 'it wont boooot', mainMessage);
+      const mainMessage = createTgTextMessage('What happend?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const replyMessage = createTgTextMessage('it wont boooot', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -499,8 +645,16 @@ describe('ReputationBot', () => {
     });
 
     it('when user replies "newww" to another user message', async () => {
-      const mainMessage = createTelegramMessage(thisChat, recipientUser, 'Is it your new PC?');
-      const replyMessage = createTelegramReply(thisChat, senderUser, 'yes. It is so newww', mainMessage);
+      const mainMessage = createTgTextMessage('Is it your new PC?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const replyMessage = createTgTextMessage('yes. It is so newww', {
+        chat: thisChat,
+        from: senderUser,
+        reply_to_message: mainMessage,
+      });
 
       const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
         sendMessage(mainMessage);
@@ -534,39 +688,5 @@ function* telegramUserGenerator(): Generator {
     first_name: 'Uthman',
     last_name: 'Ibn Affan',
     username: 'uthman_affan_bot',
-  };
-}
-
-// For use when chaining replies.
-function* idGenerator(): Generator<number> {
-  let index = 2;
-  while (true) yield index++;
-}
-
-function createTelegramMessage(
-  chat: TelegramChat = createTgGroupChat(),
-  user: TelegramUser,
-  text: string,
-): TelegramMessage.TextMessage & { reply_to_message: undefined } {
-  return {
-    ...createTgMessage(chat, user),
-    message_id: 1,
-    text,
-    reply_to_message: undefined,
-  };
-}
-
-function createTelegramReply(
-  chat: TelegramChat = createTgGroupChat(),
-  user: TelegramUser,
-  text: string,
-  reply_to_message: TelegramMessage.TextMessage & { reply_to_message: undefined },
-  id = 2,
-): TelegramMessage.TextMessage {
-  return {
-    ...createTgMessage(chat, user),
-    message_id: id,
-    reply_to_message,
-    text,
   };
 }

@@ -295,13 +295,11 @@ describe('Scriber', () => {
   });
 
   it('insert reply message into db if does not exists', async () => {
-    const telegramRepliedMessage = createTgTextMessage('some absurd thing here');
-    telegramRepliedMessage.message_id = 12345;
-    const telegramMessage = createTgTextMessage('hello world');
-    telegramMessage.reply_to_message = {
-      ...telegramRepliedMessage,
+    const telegramRepliedMessage = createTgTextMessage('some absurd thing here', {
+      message_id: 12345,
       reply_to_message: undefined,
-    };
+    });
+    const telegramMessage = createTgTextMessage('hello world', { reply_to_message: telegramRepliedMessage });
     await runBot([ScriberBot], ({ sendMessage }) => {
       sendMessage(telegramMessage);
     });
@@ -333,13 +331,11 @@ describe('Scriber', () => {
   });
 
   it('insert reply message into db if does not exists but original message exists', async () => {
-    const telegramRepliedMessage = createTgTextMessage('some absurd thing here');
-    telegramRepliedMessage.message_id = 12345;
-    const telegramMessage = createTgTextMessage('hello world');
-    telegramMessage.reply_to_message = {
-      ...telegramRepliedMessage,
+    const telegramRepliedMessage = createTgTextMessage('some absurd thing here', {
+      message_id: 12345,
       reply_to_message: undefined,
-    };
+    });
+    const telegramMessage = createTgTextMessage('hello world', { reply_to_message: telegramRepliedMessage });
     const chat = await createChatInDb(telegramMessage.chat.type);
     await createMessageInDb(chat, {
       id: telegramRepliedMessage.message_id.toString(),
@@ -378,11 +374,11 @@ describe('Scriber', () => {
   });
 
   it('insert forwardFromMessage relation into db', async () => {
-    const telegramForwardedFromMessage = createTgTextMessage('some absurd thing here');
-    telegramForwardedFromMessage.message_id = 12345;
-    const telegramMessage = createTgTextMessage('hello world');
-    telegramMessage.forward_from_message_id = telegramForwardedFromMessage.message_id;
-    telegramMessage.forward_from_chat = telegramMessage.chat;
+    const telegramForwardedFromMessage = createTgTextMessage('some absurd thing here', { message_id: 12345 });
+    const telegramMessage = createTgTextMessage('hello world', {
+      forward_from_message_id: telegramForwardedFromMessage.message_id,
+      forward_from_chat: telegramForwardedFromMessage.chat,
+    });
     const chat = await createChatInDb(telegramMessage.chat.type);
     await createMessageInDb(chat, {
       id: telegramForwardedFromMessage.message_id.toString(),
@@ -421,13 +417,14 @@ describe('Scriber', () => {
   });
 
   it('insert pinned message into db if does not exists', async () => {
-    const telegramPinnedMessage = createTgTextMessage('some absurd thing here');
-    telegramPinnedMessage.message_id = 12345;
-    const telegramMessage = createTgMessage() as TelegramMessage.PinnedMessageMessage;
-    telegramMessage.pinned_message = {
-      ...telegramPinnedMessage,
+    const telegramPinnedMessage = createTgTextMessage('some absurd thing here', {
+      message_id: 12345,
       reply_to_message: undefined,
-    };
+    });
+    telegramPinnedMessage.message_id = 12345;
+    const telegramMessage = createTgMessage({
+      pinned_message: telegramPinnedMessage,
+    });
     await runBot([ScriberBot], ({ sendMessage }) => {
       sendMessage(telegramMessage);
     });
@@ -595,8 +592,7 @@ describe('Scriber', () => {
     const chat = await createChatInDb('group');
     const telegramChat = createTgGroupChat();
     telegramChat.id = -2020;
-    const telegramMessage = createTgMessage(telegramChat) as TelegramMessage.MigrateFromChatIdMessage;
-    telegramMessage.migrate_from_chat_id = parseInt(chat.id);
+    const telegramMessage = createTgMessage({ chat: telegramChat, migrate_from_chat_id: parseInt(chat.id) });
 
     await runBot([ScriberBot], ({ sendMessage }) => {
       sendMessage(telegramMessage);
@@ -622,8 +618,7 @@ describe('Scriber', () => {
     const chat = await createChatInDb('supergroup');
     const telegramChat = createTgGroupChat();
     telegramChat.id = -2020;
-    const telegramMessage = createTgMessage(telegramChat) as TelegramMessage.MigrateToChatIdMessage;
-    telegramMessage.migrate_to_chat_id = parseInt(chat.id);
+    const telegramMessage = createTgMessage({ chat: telegramChat, migrate_to_chat_id: parseInt(chat.id) });
 
     await runBot([ScriberBot], ({ sendMessage }) => {
       sendMessage(telegramMessage);
