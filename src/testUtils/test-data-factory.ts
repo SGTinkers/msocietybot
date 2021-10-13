@@ -28,26 +28,25 @@ export function createTgPrivateChat(user: User): Chat.PrivateChat {
   };
 }
 
-export function createTgTextMessage<T extends Partial<Message.TextMessage> & Record<string, unknown>>(
+export function createTgTextMessage<T extends Partial<Omit<Message.TextMessage, 'text'>>>(
   text: string,
   overrides?: T,
 ): Message.TextMessage & T {
-  return {
-    ...createTgMessage({ chat: overrides?.chat, from: overrides?.from }),
+  return createTgMessage({
     text,
     ...overrides,
-  };
+  });
 }
 
-export function createTgMessage<T extends Partial<Message.ServiceMessage> & Record<string, unknown>>(
+export function createTgMessage<T extends Partial<UnionToIntersection<Message>>>(
   overrides?: T,
 ): Message.ServiceMessage & T {
   return {
     date: new Date().getTime(),
-    ...overrides,
-    message_id: overrides?.message_id ?? defaultIdGen.next().value,
     chat: overrides?.chat ?? createTgGroupChat(),
-    from: overrides?.from ?? createTgUser(),
+    from: overrides && 'from' in overrides ? overrides?.from : createTgUser(),
+    message_id: overrides?.message_id ?? defaultIdGen.next().value,
+    ...overrides,
   };
 }
 
@@ -57,3 +56,7 @@ export function* idGenerator(): Generator<number> {
   let index = 2;
   while (true) yield index++;
 }
+
+// dark arts of TS
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;

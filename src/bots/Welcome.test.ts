@@ -1,7 +1,7 @@
 import { WelcomeBot } from './Welcome';
 import { ScriberBot } from './Scriber';
 import { Message as TelegramMessage } from 'telegraf/typings/core/types/typegram';
-import { createTgGroupChat } from '../testUtils/test-data-factory';
+import { createTgMessage } from '../testUtils/test-data-factory';
 
 describe('WelcomeBot', () => {
   const userGen = telegramUserGenerator();
@@ -36,12 +36,11 @@ describe('WelcomeBot', () => {
 
   it('when one new member joined', async () => {
     const messages = await runBot([ScriberBot, WelcomeBot], ({ sendMessage }) => {
-      const message: TelegramMessage = {
+      const message = createTgMessage({
         message_id: -1,
-        chat: createTgGroupChat(),
-        date: new Date().getTime(),
+        from: undefined,
         new_chat_members: [member_1],
-      };
+      });
       sendMessage(message);
     });
 
@@ -51,12 +50,11 @@ describe('WelcomeBot', () => {
 
   it('when more than one member joined', async () => {
     const messages = await runBot([ScriberBot, WelcomeBot], ({ sendMessage }) => {
-      const message: TelegramMessage = {
+      const message = createTgMessage({
         message_id: -1,
-        chat: createTgGroupChat(),
-        date: new Date().getTime(),
+        from: undefined,
         new_chat_members: [member_1, member_2],
-      };
+      });
       sendMessage(message);
     });
 
@@ -66,12 +64,11 @@ describe('WelcomeBot', () => {
 
   it('show a different message when rejoining', async () => {
     const messages = await runBot([ScriberBot, WelcomeBot], ({ sendMessage }) => {
-      const message: TelegramMessage = {
+      const message = createTgMessage({
         message_id: -1,
-        chat: createTgGroupChat(),
-        date: new Date().getTime(),
+        from: undefined,
         new_chat_members: [member_1],
-      };
+      });
       sendMessage(message);
       sendMessage(message);
     });
