@@ -81,7 +81,8 @@ beforeEach(async () => {
 
     await new Promise(r =>
       setTimeout(() => {
-        app.stop(() => r(undefined));
+        app.stop();
+        r(undefined);
       }, options?.timeout ?? 200),
     );
 

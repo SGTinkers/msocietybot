@@ -13,7 +13,7 @@ import {
 import { User } from './User';
 import { Message } from './Message';
 import { Chat } from './Chat';
-import { Chat as TelegramChat, User as TelegramUser } from 'telegram-typings';
+import { Chat as TelegramChat, User as TelegramUser } from 'telegraf/typings/core/types/typegram';
 
 // TODO: Move this to some config file.
 export const voteQuota = 5;

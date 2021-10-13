@@ -1,14 +1,19 @@
 import createDebug from 'debug';
-import Composer from 'telegraf/composer';
+import { Composer } from 'telegraf';
 import { EntityManager, FindConditions } from 'typeorm';
 import { User } from '../entity/User';
-import { Chat as TelegramChat, Message as TelegramMessage, User as TelegramUser } from 'telegram-typings';
+import {
+  Chat as TelegramChat,
+  Message as TelegramMessage,
+  User as TelegramUser,
+} from 'telegraf/typings/core/types/typegram';
 import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
+import { MsocietyBotContext } from '../context';
 
 const debug = createDebug('msocietybot:scriber');
 
-export const ScriberBot = new Composer();
+export const ScriberBot = new Composer<MsocietyBotContext>();
 ScriberBot.on('message', async (ctx, next) => {
   await ctx.entityManager.transaction(async entityManager => {
     const message = await handleMessage(entityManager, ctx.message);
@@ -28,7 +33,7 @@ async function handleMessage(entityManager: EntityManager, message: TelegramMess
   const messageFields: Partial<Message> = {};
   const chat = await upsertChat(entityManager, message.chat);
 
-  if (message.forward_from_chat) {
+  if ('forward_from_chat' in message && message.forward_from_chat) {
     messageFields.forwardFromChat = await upsertChat(entityManager, message.forward_from_chat);
   }
 
@@ -36,29 +41,29 @@ async function handleMessage(entityManager: EntityManager, message: TelegramMess
     messageFields.sender = await upsertUser(entityManager, message.from);
   }
 
-  if (message.forward_from) {
+  if ('forward_from' in message && message.forward_from) {
     messageFields.forwardFrom = await upsertUser(entityManager, message.forward_from);
   }
 
-  if (message.left_chat_member) {
+  if ('left_chat_member' in message && message.left_chat_member) {
     messageFields.userLeft = await upsertUser(entityManager, message.left_chat_member);
   }
 
-  if (message.new_chat_members && message.new_chat_members.length > 0) {
+  if ('new_chat_members' in message && message.new_chat_members && message.new_chat_members.length > 0) {
     messageFields.usersJoined = [];
     const users = await Promise.all(message.new_chat_members.map(member => upsertUser(entityManager, member)));
     users.forEach((user: User) => messageFields.usersJoined.push(user));
   }
 
-  if (message.reply_to_message) {
+  if ('reply_to_message' in message && message.reply_to_message) {
     messageFields.replyToMessage = await handleMessage(entityManager, message.reply_to_message);
   }
 
-  if (message.pinned_message) {
+  if ('pinned_message' in message && message.pinned_message) {
     messageFields.pinnedMessage = await handleMessage(entityManager, message.pinned_message);
   }
 
-  if (message.forward_from_message_id) {
+  if ('forward_from_message_id' in message && message.forward_from_message_id) {
     messageFields.forwardFromMessage = await entityManager.findOne(
       Message,
       {
@@ -78,48 +83,50 @@ async function upsertMessage(
   telegramMessage: TelegramMessage,
   partialMessage: Partial<Message> = {},
 ) {
-  partialMessage.forwardDate = telegramMessage.forward_date ? new Date(telegramMessage.forward_date) : null;
-  partialMessage.forwardSignature = telegramMessage.forward_signature;
-  partialMessage.mediaGroupId = telegramMessage.media_group_id;
-  partialMessage.authorSignature = telegramMessage.author_signature;
-  partialMessage.entities = telegramMessage.entities;
-  partialMessage.captionEntities = telegramMessage.caption_entities;
-  partialMessage.audio = telegramMessage.audio;
-  partialMessage.document = telegramMessage.document;
-  partialMessage.animation = telegramMessage.animation;
-  partialMessage.game = telegramMessage.game;
-  partialMessage.photo = telegramMessage.photo;
-  partialMessage.sticker = telegramMessage.sticker;
-  partialMessage.video = telegramMessage.video;
-  partialMessage.voice = telegramMessage.voice;
-  partialMessage.videoNote = telegramMessage.video_note;
-  partialMessage.caption = telegramMessage.caption;
-  partialMessage.contact = telegramMessage.contact;
-  partialMessage.location = telegramMessage.location;
-  partialMessage.venue = telegramMessage.venue;
-  partialMessage.newGroupTitle = telegramMessage.new_chat_title;
-  partialMessage.newGroupPhoto = telegramMessage.new_chat_photo;
-  partialMessage.groupPhotoDeleted = telegramMessage.delete_chat_photo;
-  partialMessage.groupCreated = telegramMessage.group_chat_created;
-  partialMessage.supergroupCreated = telegramMessage.supergroup_chat_created;
-  partialMessage.channelCreated = telegramMessage.channel_chat_created;
-  partialMessage.invoice = telegramMessage.invoice;
-  partialMessage.successfulPayment = telegramMessage.successful_payment;
-  partialMessage.connectedWebsite = telegramMessage.connected_website;
-  partialMessage.passportData = telegramMessage.passport_data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tgMsg: any = telegramMessage;
+  partialMessage.forwardDate = tgMsg.forward_date ? new Date(tgMsg.forward_date) : null;
+  partialMessage.forwardSignature = tgMsg.forward_signature;
+  partialMessage.mediaGroupId = tgMsg.media_group_id;
+  partialMessage.authorSignature = tgMsg.author_signature;
+  partialMessage.entities = tgMsg.entities;
+  partialMessage.captionEntities = tgMsg.caption_entities;
+  partialMessage.audio = tgMsg.audio;
+  partialMessage.document = tgMsg.document;
+  partialMessage.animation = tgMsg.animation;
+  partialMessage.game = tgMsg.game;
+  partialMessage.photo = tgMsg.photo;
+  partialMessage.sticker = tgMsg.sticker;
+  partialMessage.video = tgMsg.video;
+  partialMessage.voice = tgMsg.voice;
+  partialMessage.videoNote = tgMsg.video_note;
+  partialMessage.caption = tgMsg.caption;
+  partialMessage.contact = tgMsg.contact;
+  partialMessage.location = tgMsg.location;
+  partialMessage.venue = tgMsg.venue;
+  partialMessage.newGroupTitle = tgMsg.new_chat_title;
+  partialMessage.newGroupPhoto = tgMsg.new_chat_photo;
+  partialMessage.groupPhotoDeleted = tgMsg.delete_chat_photo;
+  partialMessage.groupCreated = tgMsg.group_chat_created;
+  partialMessage.supergroupCreated = tgMsg.supergroup_chat_created;
+  partialMessage.channelCreated = tgMsg.channel_chat_created;
+  partialMessage.invoice = tgMsg.invoice;
+  partialMessage.successfulPayment = tgMsg.successful_payment;
+  partialMessage.connectedWebsite = tgMsg.connected_website;
+  partialMessage.passportData = tgMsg.passport_data;
 
-  if (telegramMessage.migrate_from_chat_id) {
+  if ('migrate_from_chat_id' in tgMsg && tgMsg.migrate_from_chat_id) {
     const chat = await entityManager.findOne(Chat, {
-      id: telegramMessage.migrate_from_chat_id.toString(),
+      id: tgMsg.migrate_from_chat_id.toString(),
     } as FindConditions<Chat>);
     if (chat) {
       partialMessage.migrateFromChat = chat;
     }
   }
 
-  if (telegramMessage.migrate_to_chat_id) {
+  if ('migrate_to_chat_id' in tgMsg && tgMsg.migrate_to_chat_id) {
     const chat = await entityManager.findOne(Chat, {
-      id: telegramMessage.migrate_to_chat_id.toString(),
+      id: tgMsg.migrate_to_chat_id.toString(),
     } as FindConditions<Chat>);
     if (chat) {
       partialMessage.migrateToChat = chat;
@@ -127,27 +134,27 @@ async function upsertMessage(
   }
 
   const message = await entityManager.findOne(Message, {
-    id: telegramMessage.message_id.toString(),
+    id: tgMsg.message_id.toString(),
     chat: chat.id.toString(),
   } as FindConditions<Message>);
 
   if (message === undefined) {
     const newMessage = entityManager.create(Message, {
-      id: telegramMessage.message_id.toString(),
-      unixtime: telegramMessage.date.toString(),
-      text: telegramMessage.text,
+      id: tgMsg.message_id.toString(),
+      unixtime: tgMsg.date.toString(),
+      text: 'text' in tgMsg ? tgMsg.text : undefined,
       chat: chat,
       ...partialMessage,
     });
     return await entityManager.save(newMessage);
   } else {
-    if (telegramMessage.edit_date) {
+    if ('edit_date' in tgMsg && tgMsg.edit_date) {
       message.editHistory = message.editHistory ? message.editHistory : [];
       message.editHistory.push(JSON.parse(JSON.stringify(message)));
-      message.lastEdit = new Date(telegramMessage.edit_date);
+      message.lastEdit = new Date(tgMsg.edit_date);
     }
-    message.unixtime = telegramMessage.date.toString();
-    message.text = telegramMessage.text;
+    message.unixtime = tgMsg.date.toString();
+    message.text = 'text' in tgMsg ? tgMsg.text : undefined;
     message.chat = chat;
     Object.keys(partialMessage).forEach(k => (message[k] = partialMessage[k]));
     return await entityManager.save(message);
@@ -189,13 +196,13 @@ async function upsertChat(entityManager: EntityManager, telegramChat: TelegramCh
     const chat = entityManager.create(Chat, {
       id: telegramChat.id.toString(),
       type: telegramChat.type,
-      title: telegramChat.title,
+      title: 'title' in telegramChat ? telegramChat.title : undefined,
       ...partialChat,
     });
     return await entityManager.save(chat);
   } else {
     chat.type = telegramChat.type;
-    chat.title = telegramChat.title;
+    chat.title = 'title' in telegramChat ? telegramChat.title : undefined;
     Object.keys(partialChat).forEach(k => (chat[k] = partialChat[k]));
     return await entityManager.save(chat);
   }

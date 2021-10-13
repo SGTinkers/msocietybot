@@ -1,7 +1,7 @@
 import { WelcomeBot } from './Welcome';
 import { ScriberBot } from './Scriber';
-
-import { Message as TelegramMessage, User as TelegramUser, Chat as TelegramChat } from 'telegram-typings';
+import { Message as TelegramMessage } from 'telegraf/typings/core/types/typegram';
+import { createTgMessage } from '../testUtils/test-data-factory';
 
 describe('WelcomeBot', () => {
   const userGen = telegramUserGenerator();
@@ -36,12 +36,11 @@ describe('WelcomeBot', () => {
 
   it('when one new member joined', async () => {
     const messages = await runBot([ScriberBot, WelcomeBot], ({ sendMessage }) => {
-      const message: TelegramMessage = {
+      const message = createTgMessage({
         message_id: -1,
-        chat: createTelegramChat(),
-        date: new Date().getTime(),
+        from: undefined,
         new_chat_members: [member_1],
-      };
+      });
       sendMessage(message);
     });
 
@@ -51,12 +50,11 @@ describe('WelcomeBot', () => {
 
   it('when more than one member joined', async () => {
     const messages = await runBot([ScriberBot, WelcomeBot], ({ sendMessage }) => {
-      const message: TelegramMessage = {
+      const message = createTgMessage({
         message_id: -1,
-        chat: createTelegramChat(),
-        date: new Date().getTime(),
+        from: undefined,
         new_chat_members: [member_1, member_2],
-      };
+      });
       sendMessage(message);
     });
 
@@ -66,12 +64,11 @@ describe('WelcomeBot', () => {
 
   it('show a different message when rejoining', async () => {
     const messages = await runBot([ScriberBot, WelcomeBot], ({ sendMessage }) => {
-      const message: TelegramMessage = {
+      const message = createTgMessage({
         message_id: -1,
-        chat: createTelegramChat(),
-        date: new Date().getTime(),
+        from: undefined,
         new_chat_members: [member_1],
-      };
+      });
       sendMessage(message);
       sendMessage(message);
     });
@@ -101,28 +98,5 @@ function* telegramUserGenerator(): Generator {
     first_name: 'Uthman',
     last_name: 'Ibn Affan',
     username: 'uthman_affan_bot',
-  };
-}
-
-function createTelegramChat(typeOrUser?: string | TelegramUser): TelegramChat {
-  const fields: Record<string, string | number> = {};
-  if (typeof typeOrUser === 'string') {
-    fields['type'] = typeOrUser;
-  } else if (typeOrUser) {
-    fields['id'] = typeOrUser.id;
-    fields['first_name'] = typeOrUser.first_name;
-    fields['last_name'] = typeOrUser.last_name;
-    fields['username'] = typeOrUser.username;
-    fields['type'] = 'private';
-  }
-
-  if (fields['type'] !== 'private') {
-    fields['title'] = 'Some chat title';
-  }
-
-  return {
-    id: -10000,
-    type: 'group',
-    ...fields,
   };
 }

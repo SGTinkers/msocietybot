@@ -1,9 +1,14 @@
-import Composer from 'telegraf/composer';
+import { Composer } from 'telegraf';
 import { EntityManager } from 'typeorm';
 import { Reputation, voteQuota, voteQuotaDuration, defaultVoteValue } from '../entity/Reputation';
-import { Chat as TelegramChat, Message as TelegramMessage, User as TelegramUser } from 'telegram-typings';
+import {
+  Chat as TelegramChat,
+  User as TelegramUser,
+  Message as TelegramMessage,
+} from 'telegraf/typings/core/types/typegram';
+import { MsocietyBotContext } from '../context';
 
-const bot = new Composer();
+const bot = new Composer<MsocietyBotContext>();
 
 bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/i, async ctx => {
   if (ctx.message.reply_to_message !== undefined) {
@@ -86,31 +91,33 @@ bot.hears(/👎|👇|🔽|\bboo(o*)\b|\beww(w*)\b/i, async ctx => {
 bot.command('vote_quota', async ctx => {
   const { nextVote, votesGiven } = await Reputation.getVoteQuota(ctx.entityManager, ctx.message.from);
 
-  if (votesGiven >= voteQuota) {
-    await ctx.replyWithMarkdown(
-      `You have used your *${voteQuota}* votes in the last *${voteQuotaDuration}* hour window. \nYou will receive a new vote in *${nextVote.hours} hours* and *${nextVote.minutes} minutes*`,
-      { reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null },
-    );
-  } else {
-    const remainingQuota = voteQuota - votesGiven;
-    let msg = `You have ${remainingQuota} out of ${voteQuota} votes remaining.`;
-    if (nextVote) {
-      msg += `\nYou will receive a new vote in *${nextVote.hours} hours* and *${nextVote.minutes} minutes*`;
+  if (ctx.chat && (ctx.chat.type === 'group' || ctx.chat.type === 'supergroup')) {
+    if (votesGiven >= voteQuota) {
+      await ctx.replyWithMarkdown(
+        `You have used your *${voteQuota}* votes in the last *${voteQuotaDuration}* hour window. \nYou will receive a new vote in *${nextVote.hours} hours* and *${nextVote.minutes} minutes*`,
+        { reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null },
+      );
+    } else {
+      const remainingQuota = voteQuota - votesGiven;
+      let msg = `You have ${remainingQuota} out of ${voteQuota} votes remaining.`;
+      if (nextVote) {
+        msg += `\nYou will receive a new vote in *${nextVote.hours} hours* and *${nextVote.minutes} minutes*`;
+      }
+      await ctx.replyWithMarkdown(msg, { reply_to_message_id: ctx.chat?.title ? ctx.message.message_id : null });
     }
-    await ctx.replyWithMarkdown(msg, { reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null });
   }
 });
 
 bot.command('reputation', async ctx => {
   const globalScore = await Reputation.getGlobalReputation(ctx.entityManager, ctx.message.from);
   let msg = `*${ctx.message.from.first_name}*, `;
-  if (ctx.chat.title) {
+  if ((ctx.chat.type === 'group' || ctx.chat.type === 'supergroup') && ctx.chat.title) {
     const localScore = await Reputation.getLocalReputation(ctx.entityManager, ctx.message.from, ctx.chat);
-    msg += `your reputation in this chat *(${ctx.chat.title})* is: *(${localScore})*\n`;
+    msg += `your reputation in this chat *(${ctx.chat?.title})* is: *(${localScore})*\n`;
   }
   msg += `Your total reputation is *(${globalScore})*.`;
   await ctx.replyWithMarkdown(msg, {
-    reply_to_message_id: ctx.chat.title ? ctx.message.message_id : null,
+    reply_to_message_id: ctx.chat.type === 'group' || ctx.chat.type === 'supergroup' ? ctx.message.message_id : null,
   });
 });
 
@@ -120,7 +127,7 @@ const insertReputation = async (
   recipient: TelegramUser,
   telegramChat: TelegramChat,
   telegramMessage: TelegramMessage,
-  value,
+  value: number,
 ) => {
   const newReputation = entityManager.create(Reputation, {
     fromUser: { id: sender.id.toString() },
