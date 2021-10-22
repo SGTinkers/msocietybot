@@ -1,6 +1,7 @@
 import { Composer } from 'telegraf';
 import { EntityManager } from 'typeorm';
 import { Reputation, voteQuota, voteQuotaDuration, defaultVoteValue } from '../entity/Reputation';
+import { User } from '../entity/User';
 import {
   Chat as TelegramChat,
   User as TelegramUser,
@@ -10,41 +11,78 @@ import { MsocietyBotContext } from '../context';
 
 const bot = new Composer<MsocietyBotContext>();
 
-bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/i, async ctx => {
-  if (ctx.message.reply_to_message !== undefined) {
-    const sender = ctx.message.from;
-    const recipient = ctx.message.reply_to_message.from;
-    const canVote = await Reputation.isAllowedToVote(ctx.entityManager, sender);
+async function vote(ctx: MsocietyBotContext, sender: TelegramUser, recipient: TelegramUser) {
+  const canVote = await Reputation.isAllowedToVote(ctx.entityManager, sender);
 
-    // Can't vote for yourself :)
-    if (recipient.id === sender.id) {
-      await ctx.reply('Good try there but nope. 🙃', { reply_to_message_id: ctx.message.message_id });
-    }
-    // Can't vote for the bot.
-    else if (recipient.id === ctx.botInfo.id) {
-      // eslint-disable-next-line quotes
-      await ctx.reply("🙂 I'm flattered but there's no point in licking my boots.", {
+  // Can't vote for yourself :)
+  if (recipient.id === sender.id) {
+    await ctx.reply('Good try there but nope. 🙃', { reply_to_message_id: ctx.message.message_id });
+  }
+
+  // Can't vote for the bot.
+  else if (recipient.id === ctx.botInfo.id) {
+    // eslint-disable-next-line quotes
+    await ctx.reply("🙂 I'm flattered but there's no point in licking my boots.", {
+      reply_to_message_id: ctx.message.message_id,
+    });
+  }
+
+  // Does user have enough votes in their quota to give out?
+  else if (!canVote) {
+    const { nextVote } = await Reputation.getVoteQuota(ctx.entityManager, ctx.message.from);
+
+    await ctx.replyWithMarkdown(
+      `You have already used up your vote quota of ${voteQuota} for the past ${voteQuotaDuration} hours. Please try again later!\nYou will receive a new vote in *${nextVote.hours} hours* and *${nextVote.minutes} minutes*`,
+      { reply_to_message_id: ctx.message.message_id },
+    );
+  }
+
+  // Can't vote for bots
+  else if (!recipient.is_bot && canVote) {
+    await insertReputation(ctx.entityManager, sender, recipient, ctx.chat, ctx.message, defaultVoteValue);
+    const senderRep = await Reputation.getLocalReputation(ctx.entityManager, sender, ctx.chat);
+    const recipientRep = await Reputation.getLocalReputation(ctx.entityManager, recipient, ctx.chat);
+    await ctx.replyWithMarkdown(
+      `*${sender.first_name}* (${senderRep}) has increased reputation of *${recipient.first_name}* (${recipientRep})`,
+      { reply_to_message_id: ctx.message.message_id },
+    );
+  }
+}
+
+bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/i, async ctx => {
+  const mentionEntities =
+    ctx.message?.entities?.filter(entity => ['mention', 'text_mention'].includes(entity.type)) || [];
+  if (ctx.message.reply_to_message !== undefined) {
+    await vote(ctx, ctx.from, ctx.message.reply_to_message.from);
+  } else if (
+    // check if there is a mention
+    mentionEntities.length
+  ) {
+    if (mentionEntities.length > 1) {
+      await ctx.reply('Tag only one user at a time to increase rep!', {
         reply_to_message_id: ctx.message.message_id,
       });
+      return;
     }
-    // Does user have enough votes in their quota to give out?
-    else if (!canVote) {
-      const { nextVote } = await Reputation.getVoteQuota(ctx.entityManager, ctx.message.from);
+    // get the mention metadata
+    const entity = mentionEntities[0];
 
-      await ctx.replyWithMarkdown(
-        `You have already used up your vote quota of ${voteQuota} for the past ${voteQuotaDuration} hours. Please try again later!\nYou will receive a new vote in *${nextVote.hours} hours* and *${nextVote.minutes} minutes*`,
-        { reply_to_message_id: ctx.message.message_id },
-      );
-    }
-    // Can't vote for bots
-    else if (!recipient.is_bot && canVote) {
-      await insertReputation(ctx.entityManager, sender, recipient, ctx.chat, ctx.message, defaultVoteValue);
-      const senderRep = await Reputation.getLocalReputation(ctx.entityManager, sender, ctx.chat);
-      const recipientRep = await Reputation.getLocalReputation(ctx.entityManager, recipient, ctx.chat);
-      await ctx.replyWithMarkdown(
-        `*${sender.first_name}* (${senderRep}) has increased reputation of *${recipient.first_name}* (${recipientRep})`,
-        { reply_to_message_id: ctx.message.message_id },
-      );
+    if (entity.type === 'mention') {
+      //get username from text using metadata
+      const username = ctx.message.text.substr(entity.offset + 1, entity.length - 1);
+      // telegram api doesn't provide resolving user by username so we depend on our db to get userID
+      const recipientId = (await User.getUserByUsername(ctx.entityManager, username))?.id;
+      if (!recipientId) {
+        // eslint-disable-next-line quotes
+        await ctx.reply("Can't find user in DB. Did they change their username?", {
+          reply_to_message_id: ctx.message.message_id,
+        });
+        return;
+      }
+      const recipient = await ctx.getChatMember(+recipientId);
+      await vote(ctx, ctx.message.from, recipient.user);
+    } else if (entity.type === 'text_mention') {
+      await vote(ctx, ctx.message.from, entity.user);
     }
   }
 });

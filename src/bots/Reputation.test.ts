@@ -3,6 +3,7 @@ import { ScriberBot } from './Scriber';
 import { Message as TelegramMessage } from 'telegraf/typings/core/types/typegram';
 import { Reputation, voteQuota } from '../entity/Reputation';
 import { createTgGroupChat, createTgTextMessage, idGenerator } from '../testUtils/test-data-factory';
+import { User } from '../entity/User';
 
 describe('ReputationBot', () => {
   const userGen = telegramUserGenerator();
@@ -255,6 +256,78 @@ describe('ReputationBot', () => {
       await assert(triggerMessage);
     });
     // it('when user has enough votes in their quota', () => { });
+
+    // Testing when user is mention
+    it('when user mentions another user with "thank you"', async () => {
+      await createUserInDb();
+      const triggerMessage = createTgTextMessage('@omar_alfaruq thank you', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'mention',
+            offset: 0,
+            length: 13,
+          },
+        ],
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, /increased reputation/);
+      await assert({
+        ...triggerMessage,
+        reply_to_message: {
+          from: {
+            id: 2,
+            username: 'omar_alfaruq',
+          },
+        },
+      });
+    });
+
+    // Testing when user is mention (text_mention -> when user has no username)
+    // https://core.telegram.org/bots/api#messageentity
+    it('when user mentions another user with "thank you"', async () => {
+      await createUserInDb();
+      const triggerMessage = createTgTextMessage('@omar_alfaruq thank you', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'text_mention',
+            offset: 0,
+            length: 13,
+            user: {
+              id: 2,
+              is_bot: false,
+              first_name: 'Omar',
+              last_name: 'Al-Faruq',
+              username: 'omar_alfaruq',
+            },
+          },
+        ],
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, /increased reputation/);
+      await assert({
+        ...triggerMessage,
+        reply_to_message: {
+          from: {
+            id: 2,
+            username: 'omar_alfaruq',
+          },
+        },
+      });
+    });
   });
 
   describe('decreases reputation', () => {
@@ -664,6 +737,38 @@ describe('ReputationBot', () => {
       assertBotDidNotReply(messages);
       await assert(0);
     });
+
+    it('when user mentions multiple users with "thank you"', async () => {
+      const mainMessage = createTgTextMessage('Is it your new PC?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const triggerMessage = createTgTextMessage('@omar_alfaruq @abu_bakr thank you', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'mention',
+            offset: 0,
+            length: 13,
+          },
+          {
+            type: 'mention',
+            offset: 0,
+            length: 9,
+          },
+        ],
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, /.*?/);
+      await assert(0);
+    });
   });
 });
 
@@ -689,4 +794,18 @@ function* telegramUserGenerator(): Generator {
     last_name: 'Ibn Affan',
     username: 'uthman_affan_bot',
   };
+}
+
+async function createUserInDb() {
+  try {
+    const user = entityManager.create(User, {
+      id: '2',
+      firstName: 'Omar',
+      lastName: 'Al-Faruq',
+      username: 'omar_alfaruq',
+    });
+    return await entityManager.save(user);
+  } catch (e) {
+    console.error(e);
+  }
 }
