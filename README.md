@@ -9,6 +9,9 @@ A unified platform to manage MSOCIETY community.
 
 This project is rewritten to Typescript from Go: https://gitlab.com/msociety/msocietybot
 
+## Prerequisites
+Node.js 14. Install nvm (https://github.com/nvm-sh/nvm) then run `nvm install`.
+
 ## Running
 
 1. Run `npm i` command
