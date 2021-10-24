@@ -328,6 +328,46 @@ describe('ReputationBot', () => {
         },
       });
     });
+
+    // TODO Testing when user is mention, but the username is changed after
+    // user was added to db
+    it.skip('when user mentions another user with "thank you"', async () => {
+      // Scriber adds user (omar_alfaruq) after he joins
+      await createUserInDb();
+      const mainMessage = createTgTextMessage('Is it your new PC?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      // lets say omar_alfaruq changes username to omar_new
+      const triggerMessage = createTgTextMessage('@omar_new thank you', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'mention',
+            offset: 0,
+            length: 13,
+          },
+        ],
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, /increased reputation/);
+      await assert({
+        ...triggerMessage,
+        reply_to_message: {
+          from: {
+            id: 2,
+            username: 'omar_new',
+          },
+        },
+      });
+    });
   });
 
   describe('decreases reputation', () => {
