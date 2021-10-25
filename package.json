@@ -44,7 +44,9 @@
     "create-migration": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
     "create-entity": "ts-node ./node_modules/typeorm/cli.js entity:create -n",
     "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run",
-    "migrate-from-mysql": "DEBUG=msocietybot-mysql-migrator ts-node src/mysqlToPostgresMigrator.ts"
+    "migrate-from-mysql": "DEBUG=msocietybot-mysql-migrator ts-node src/mysqlToPostgresMigrator.ts",
+    "preinstall": "node bin/check-nvmrc.js",
+    "prestart": "node bin/check-nvmrc.js"
   },
   "husky": {
     "hooks": {
