@@ -806,7 +806,7 @@ describe('ReputationBot', () => {
         sendMessage(triggerMessage);
       });
 
-      assertBotSaid(messages, /.*?/);
+      assertBotSaid(messages, 'Tag only one user at a time to increase rep!');
       await assert(0);
     });
   });
