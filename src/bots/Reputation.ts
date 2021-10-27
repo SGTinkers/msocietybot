@@ -159,6 +159,23 @@ bot.command('reputation', async ctx => {
   });
 });
 
+bot.command('update_my_username', async ctx => {
+  const newUsername = ctx.from.username;
+  const current = await User.getUserByUserID(ctx.entityManager, ctx.from.id.toString());
+  await User.updateUserByID(
+    ctx.entityManager,
+    {
+      ...current,
+      username: newUsername,
+      updatedAt: new Date(),
+    },
+    current.id,
+  );
+  await ctx.reply('Username updated!', {
+    reply_to_message_id: ctx.message.message_id,
+  });
+});
+
 const insertReputation = async (
   entityManager: EntityManager,
   sender: TelegramUser,

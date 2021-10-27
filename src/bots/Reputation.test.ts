@@ -329,10 +329,11 @@ describe('ReputationBot', () => {
       });
     });
 
-    // TODO Testing when user is mention, but the username is changed after
+    // Testing when user is mention, but the username is changed after
     // user was added to db
-    it.skip('when user mentions another user with "thank you"', async () => {
+    it('when user mentions another user with "thank you"', async () => {
       // Scriber adds user (omar_alfaruq) after he joins
+      await clearUserDb();
       await createUserInDb();
       const mainMessage = createTgTextMessage('Is it your new PC?', {
         chat: thisChat,
@@ -352,11 +353,33 @@ describe('ReputationBot', () => {
         ],
       });
 
-      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+      const updateUsernameMessage = createTgTextMessage('/update_my_username', {
+        chat: thisChat,
+        from: {
+          id: 2,
+          is_bot: false,
+          first_name: 'Omar',
+          last_name: 'Al-Faruq',
+          username: 'omar_new',
+        },
+        entities: [
+          {
+            type: 'bot_command',
+            offset: 0,
+            length: 19,
+          },
+        ],
+      });
+      const messages = await runBot([ScriberBot, ReputationBot], ({ whenBotSends, sendMessage }) => {
         sendMessage(mainMessage);
         sendMessage(triggerMessage);
+        sendMessage(updateUsernameMessage);
+        whenBotSends('Username updated!').thenSendBot(triggerMessage);
       });
 
+      // eslint-disable-next-line quotes
+      assertBotSaid(messages, "Can't find user in DB. Did they change their username?");
+      assertBotSaid(messages, 'Username updated!');
       assertBotSaid(messages, /increased reputation/);
       await assert({
         ...triggerMessage,
@@ -367,6 +390,7 @@ describe('ReputationBot', () => {
           },
         },
       });
+      await clearUserDb();
     });
   });
 
@@ -845,6 +869,14 @@ async function createUserInDb() {
       username: 'omar_alfaruq',
     });
     return await entityManager.save(user);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function clearUserDb() {
+  try {
+    return await entityManager.query('truncate table "user" CASCADE');
   } catch (e) {
     console.error(e);
   }
