@@ -2,7 +2,7 @@ name: Build & Deploy Staging
 env:
   CI: true
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -65,6 +65,7 @@ jobs:
         fail_ci_if_error: false
     - name: Publish to Docker Hub
       uses: elgohr/Publish-Docker-Github-Action@master
+      if: ${{ github.ref == 'refs/heads/master' }}
       with:
         name: msociety/msocietybot
         username: ${{ secrets.DOCKER_USERNAME }}
@@ -83,6 +84,7 @@ jobs:
 
   deploy-staging:
     needs: build
+    if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
