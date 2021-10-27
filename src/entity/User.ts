@@ -1,4 +1,14 @@
-import { Entity, Column, BeforeInsert, BeforeUpdate, ManyToMany, JoinTable, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  BeforeInsert,
+  BeforeUpdate,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
+  PrimaryColumn,
+  EntityManager,
+} from 'typeorm';
 import { Role } from './Role';
 import { UserPreference } from './UserPreference';
 import { Chat } from './Chat';
@@ -90,4 +100,12 @@ export class User {
   onBeforeUpdateHook(): void {
     this.updatedAt = new Date();
   }
+
+  static getUserByUsername = async (entityManager: EntityManager, username: string): Promise<User> => {
+    return await entityManager.findOne(User, {
+      where: {
+        username: username,
+      },
+    });
+  };
 }

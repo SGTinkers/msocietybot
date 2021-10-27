@@ -2,7 +2,7 @@
 import nock, { ReplyFnResult } from 'nock';
 import { NockResponse } from '../types/testOnly';
 import { isRegExp } from 'util';
-import { Chat, CommonMessageBundle, Message, Update, User } from 'telegraf/typings/core/types/typegram';
+import { Chat, ChatMember, CommonMessageBundle, Message, Update, User } from 'telegraf/typings/core/types/typegram';
 
 type Predicate = (uri: string, requestBody: Record<string, any>) => boolean;
 interface ResponseGenerator {
@@ -27,6 +27,17 @@ const USER_USER: User = {
   id: 1,
   is_bot: false,
   first_name: 'User',
+};
+
+const CHATUSER_USER: ChatMember = {
+  status: 'member',
+  user: {
+    id: 2,
+    first_name: 'Omar',
+    last_name: 'Al-Faruq',
+    username: 'omar_alfaruq',
+    is_bot: false,
+  },
 };
 
 const CHAT: Chat.GroupChat = {
@@ -143,6 +154,14 @@ function setupNock(
     .reply(200, {
       ok: true,
       result: BOT_USER,
+    })
+    .persist();
+
+  nock(apiRoot)
+    .post(/\/bot(.+?)\/getChatMember/)
+    .reply(200, {
+      ok: true,
+      result: CHATUSER_USER,
     })
     .persist();
 
