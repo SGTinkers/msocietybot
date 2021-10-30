@@ -86,7 +86,37 @@ async function downvote(ctx: MsocietyBotContext, sender: TelegramUser, recipient
 bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/i, async ctx => {
   const mentionEntities =
     ctx.message?.entities?.filter(entity => ['mention', 'text_mention'].includes(entity.type)) || [];
-  if (ctx.message.reply_to_message !== undefined) {
+  if (ctx.message.reply_to_message !== undefined && mentionEntities.length) {
+    if (mentionEntities.length > 1) {
+      await ctx.reply('Tag only one user at a time to increase rep!', {
+        reply_to_message_id: ctx.message.message_id,
+      });
+      return;
+    }
+    // get the mention metadata
+    const entity = mentionEntities[0];
+    if (entity.type === 'mention') {
+      //get username from text using metadata
+      const username = ctx.message.text.substr(entity.offset + 1, entity.length - 1);
+
+      // check if mentioned user is same as user being replied to
+      if (username !== ctx.message.reply_to_message.from.username) {
+        await ctx.reply('Reply or Tag only one user at a time to increase rep!', {
+          reply_to_message_id: ctx.message.message_id,
+        });
+        return;
+      }
+      await upvote(ctx, ctx.message.from, ctx.message.reply_to_message.from);
+    } else if (entity.type === 'text_mention') {
+      if (entity.user.username !== ctx.message.reply_to_message.from.username) {
+        await ctx.reply('Reply or Tag only one user at a time to increase rep!', {
+          reply_to_message_id: ctx.message.message_id,
+        });
+        return;
+      }
+      await upvote(ctx, ctx.message.from, entity.user);
+    }
+  } else if (ctx.message.reply_to_message !== undefined) {
     await upvote(ctx, ctx.from, ctx.message.reply_to_message.from);
   } else if (
     // check if there is a mention
@@ -124,7 +154,37 @@ bot.hears(/thank you|thanks|👍|💯|👆|🆙|🔥/i, async ctx => {
 bot.hears(/👎|👇|🔽|\bboo(o*)\b|\beww(w*)\b/i, async ctx => {
   const mentionEntities =
     ctx.message?.entities?.filter(entity => ['mention', 'text_mention'].includes(entity.type)) || [];
-  if (ctx.message.reply_to_message !== undefined) {
+  if (ctx.message.reply_to_message !== undefined && mentionEntities.length) {
+    if (mentionEntities.length > 1) {
+      await ctx.reply('Tag only one user at a time to increase rep!', {
+        reply_to_message_id: ctx.message.message_id,
+      });
+      return;
+    }
+    // get the mention metadata
+    const entity = mentionEntities[0];
+    if (entity.type === 'mention') {
+      //get username from text using metadata
+      const username = ctx.message.text.substr(entity.offset + 1, entity.length - 1);
+
+      // check if mentioned user is same as user being replied to
+      if (username !== ctx.message.reply_to_message.from.username) {
+        await ctx.reply('Reply or Tag only one user at a time to increase rep!', {
+          reply_to_message_id: ctx.message.message_id,
+        });
+        return;
+      }
+      await downvote(ctx, ctx.message.from, ctx.message.reply_to_message.from);
+    } else if (entity.type === 'text_mention') {
+      if (entity.user.username !== ctx.message.reply_to_message.from.username) {
+        await ctx.reply('Reply or Tag only one user at a time to increase rep!', {
+          reply_to_message_id: ctx.message.message_id,
+        });
+        return;
+      }
+      await downvote(ctx, ctx.message.from, entity.user);
+    }
+  } else if (ctx.message.reply_to_message !== undefined) {
     await downvote(ctx, ctx.from, ctx.message.reply_to_message.from);
   } else if (
     // check if there is a mention

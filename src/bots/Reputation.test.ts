@@ -368,6 +368,85 @@ describe('ReputationBot', () => {
         },
       });
     });
+
+    it('when user replies with "thank you" and also mentions the same user', async () => {
+      await createUserInDb();
+      const mainMessage = createTgTextMessage('Is it your new PC?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const triggerMessage = createTgTextMessage('@omar_alfaruq thank you', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'mention',
+            offset: 0,
+            length: 13,
+          },
+        ],
+        reply_to_message: mainMessage,
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, /increased reputation/);
+      await assert({
+        ...triggerMessage,
+        reply_to_message: {
+          from: {
+            id: 2,
+            username: 'omar_alfaruq',
+          },
+        },
+      });
+    });
+
+    it('when user replies with "thank you" and also mentions the same user (text_mention)', async () => {
+      const mainMessage = createTgTextMessage('Is it your new PC?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const triggerMessage = createTgTextMessage('@omar_alfaruq thank you', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'text_mention',
+            offset: 0,
+            length: 13,
+            user: {
+              username: 'omar_alfaruq',
+              id: 2,
+              is_bot: false,
+              first_name: 'Omar Alfaruq',
+            },
+          },
+        ],
+        reply_to_message: mainMessage,
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, /increased reputation/);
+      await assert({
+        ...triggerMessage,
+        reply_to_message: {
+          from: {
+            id: 2,
+            username: 'omar_alfaruq',
+          },
+        },
+      });
+    });
   });
 
   describe('decreases reputation', () => {
@@ -661,6 +740,85 @@ describe('ReputationBot', () => {
         },
       });
     });
+
+    it('when user replies with "boo" and also mentions the same user', async () => {
+      await createUserInDb();
+      const mainMessage = createTgTextMessage('Is it your new PC?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const triggerMessage = createTgTextMessage('@omar_alfaruq boo', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'mention',
+            offset: 0,
+            length: 13,
+          },
+        ],
+        reply_to_message: mainMessage,
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, /decreased reputation/);
+      await assert({
+        ...triggerMessage,
+        reply_to_message: {
+          from: {
+            id: 2,
+            username: 'omar_alfaruq',
+          },
+        },
+      });
+    });
+
+    it('when user replies with "boo" and also mentions the same user (text_mention)', async () => {
+      const mainMessage = createTgTextMessage('Is it your new PC?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const triggerMessage = createTgTextMessage('@omar_alfaruq boo', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'text_mention',
+            offset: 0,
+            length: 13,
+            user: {
+              username: 'omar_alfaruq',
+              id: 2,
+              is_bot: false,
+              first_name: 'Omar Alfaruq',
+            },
+          },
+        ],
+        reply_to_message: mainMessage,
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, /decreased reputation/);
+      await assert({
+        ...triggerMessage,
+        reply_to_message: {
+          from: {
+            id: 2,
+            username: 'omar_alfaruq',
+          },
+        },
+      });
+    });
   });
 
   describe('does not change reputation', () => {
@@ -911,6 +1069,129 @@ describe('ReputationBot', () => {
       });
 
       assertBotSaid(messages, 'Tag only one user at a time to increase rep!');
+      await assert(0);
+    });
+    it('when user replies with "thank you" and also mentions a different user', async () => {
+      const mainMessage = createTgTextMessage('Is it your new PC?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const triggerMessage = createTgTextMessage('@abu_bakr thank you', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'mention',
+            offset: 0,
+            length: 9,
+          },
+        ],
+        reply_to_message: mainMessage,
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, 'Reply or Tag only one user at a time to increase rep!');
+      await assert(0);
+    });
+
+    it('when user replies with "thank you" and also mentions a different user (text_mention)', async () => {
+      const mainMessage = createTgTextMessage('Is it your new PC?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const triggerMessage = createTgTextMessage('@abu_bakr thank you', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'text_mention',
+            offset: 0,
+            length: 9,
+            user: {
+              username: 'abu_bakr',
+              id: 3,
+              is_bot: false,
+              first_name: 'Abu Bakr',
+            },
+          },
+        ],
+        reply_to_message: mainMessage,
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, 'Reply or Tag only one user at a time to increase rep!');
+      await assert(0);
+    });
+
+    it('when user replies with "boo" and also mentions a different user', async () => {
+      const mainMessage = createTgTextMessage('Is it your new PC?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const triggerMessage = createTgTextMessage('@abu_bakr boo', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'mention',
+            offset: 0,
+            length: 9,
+          },
+        ],
+        reply_to_message: mainMessage,
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, 'Reply or Tag only one user at a time to increase rep!');
+      await assert(0);
+    });
+
+    it('when user replies with "boo" and also mentions a different user (text_mention)', async () => {
+      const mainMessage = createTgTextMessage('Is it your new PC?', {
+        chat: thisChat,
+        from: recipientUser,
+        reply_to_message: undefined,
+      });
+      const triggerMessage = createTgTextMessage('@abu_bakr boo', {
+        chat: thisChat,
+        from: senderUser,
+        entities: [
+          {
+            type: 'text_mention',
+            offset: 0,
+            length: 9,
+            user: {
+              username: 'abu_bakr',
+              id: 3,
+              is_bot: false,
+              first_name: 'Abu Bakr',
+            },
+          },
+        ],
+        reply_to_message: mainMessage,
+      });
+
+      const messages = await runBot([ScriberBot, ReputationBot], ({ sendMessage }) => {
+        sendMessage(mainMessage);
+        sendMessage(triggerMessage);
+      });
+
+      assertBotSaid(messages, 'Reply or Tag only one user at a time to increase rep!');
       await assert(0);
     });
   });
