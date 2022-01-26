@@ -8,6 +8,7 @@ import {
   OneToMany,
   PrimaryColumn,
   EntityManager,
+  UpdateResult,
 } from 'typeorm';
 import { Role } from './Role';
 import { UserPreference } from './UserPreference';
@@ -107,5 +108,21 @@ export class User {
         username: username,
       },
     });
+  };
+
+  static getUserByUserID = async (entityManager: EntityManager, userID: string): Promise<User> => {
+    return await entityManager.findOne(User, {
+      where: {
+        id: userID,
+      },
+    });
+  };
+
+  static updateUserByID = async (
+    entityManager: EntityManager,
+    user: Partial<User>,
+    id: string,
+  ): Promise<UpdateResult> => {
+    return await entityManager.update(User, { id }, user);
   };
 }
