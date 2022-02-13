@@ -25,8 +25,9 @@ const WelcomeMessage = {
   2) @MSOCIETYIdeas : Idea dumping ground extracted from lobby discussions
   3) @MSOCIETYSoftwareDev : Discussions on Software Dev
   4) @MSOCIETYML : DIscussions on AI/ML,
-  5) @MSOCIETYFinance : DIscussions on anything finance
-  6) @MSOCIETYgaming`,
+  5) @MSOCIETYFinance : Discussions on anything finance
+  6) @MSOCIETYgaming : Anything gaming
+  7) @MSOCIETYCyberium : DIscussions on anything information/cyber security`,
   returningMember: 'Welcome back',
 };
 
