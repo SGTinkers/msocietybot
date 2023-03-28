@@ -64,7 +64,7 @@ jobs:
         file: coverage/coverage-final.json
         fail_ci_if_error: false
     - name: Publish to Docker Hub
-      uses: elgohr/Publish-Docker-Github-Action@master
+      uses: elgohr/Publish-Docker-Github-Action@v5
       if: ${{ github.ref == 'refs/heads/master' }}
       with:
         name: msociety/msocietybot
